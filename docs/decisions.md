@@ -34,3 +34,4 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 - **Phase 4:** AMRFinderPlus vs. RGI as the annotation engine.
 - **Phase 3:** genome QC thresholds (config defaults: completeness ≥ 0.90, contamination ≤ 0.05).
 - **Phase 1/3:** minimum genomes per class to keep a drug (config default: 100).
+| 22 | 2026-07-08 | 5 | Lineage split = **StratifiedGroupKFold** (was GroupShuffleSplit). MLST via `mlst` (klebsiella scheme); untypeable → unique synthetic lineage. | Group-only split drifted class balance (test 79R/201S) because resistance is lineage-associated; StratifiedGroupKFold keeps lineages disjoint AND balances R/S (test now 184/184). Zero leakage preserved. | SWE |

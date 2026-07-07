@@ -24,7 +24,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import yaml
-from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import StratifiedGroupKFold
 
 REPO = Path(__file__).resolve().parents[2]
 ENV_BIN = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
@@ -85,9 +85,12 @@ def assign_lineages(ids: list[str], workers: int) -> dict[str, str]:
 def make_split(ids: list[str], lineage: dict[str, str], labels: dict[str, str],
                test_fraction: float, seed: int) -> None:
     groups = [lineage[g] for g in ids]
-    y = [labels[g] for g in ids]
-    gss = GroupShuffleSplit(n_splits=1, test_size=test_fraction, random_state=seed)
-    train_idx, test_idx = next(gss.split(ids, y, groups))
+    y = [1 if labels[g] == "Resistant" else 0 for g in ids]
+    # StratifiedGroupKFold keeps lineages disjoint across folds AND balances the R/S ratio
+    # (plain group split drifts class balance because resistance is lineage-associated).
+    n_splits = max(2, round(1 / test_fraction))  # e.g. test_fraction 0.25 -> 4 folds -> ~25% test
+    sgkf = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    train_idx, test_idx = next(sgkf.split(ids, y, groups))
     fold = {ids[i]: "train" for i in train_idx}
     fold.update({ids[i]: "test" for i in test_idx})
 
