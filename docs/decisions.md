@@ -10,6 +10,8 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 3 | 2026-07-07 | 0 | Both AMRFinderPlus + mlst in env; RGI commented as alternative. | Keep env ready; annotator chosen in Phase 4. | SWE |
 | 4 | 2026-07-07 | 0 | Dropped `bvbrc-cli` pip dep; use BV-BRC REST Data API via `requests`. | No maintained pip CLI package; API is sufficient and lighter. | SWE |
 | 5 | 2026-07-07 | 0 | Env built natively on osx-arm64 (no Rosetta); bio tools have arm64 builds. | Confirmed amrfinderplus 4.2.7 + mlst 2.33.1 available for osx-arm64. | SWE |
+| 6 | 2026-07-07 | 1 | Survey via BV-BRC `genome_amr`; counts by antibiotic × phenotype using facet + Content-Range. | Exact counts with no bulk download; metadata only. | SWE |
+| 7 | 2026-07-07 | 1 | Shortlist thresholds: min(R,S)≥100, balance≥0.20, total≥300. | Enough minority-class genomes for a lineage-held-out test; avoids degenerate imbalance. | SWE (⚕ review) |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).
