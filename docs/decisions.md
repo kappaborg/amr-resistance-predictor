@@ -23,6 +23,7 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 16 | 2026-07-07 | 2 | Downloader: retry 4x w/ backoff on network errors; resumable. | A single ReadTimeout aborted the run at genome 306. | SWE |
 | 17 | 2026-07-07 | 3 | **QC thresholds validated against real data (not guessed): completeness ≥95%, contamination ≤5%, contigs ≤500, length 4.8–6.5 Mbp.** Config units corrected fractions→CheckM %. | Data is 99% "Good"; moderate tier drops ~31 (2%), **class-balanced** (16R/15S → no bias). Stricter QC costs lineage diversity → hurts the phylogeny-aware split. | SWE (⚕ confirm) |
 | 18 | 2026-07-07 | 3 | Analysis-code bug fixed: `float(v or default)` turned contamination=0 into 99 (falsy-zero) → falsely dropped clean genomes. | Real per-filter drops are tiny (3/14/23/7), not ~970. | SWE |
+| 19 | 2026-07-07 | 3 | **⚕ APPROVED + literature-refined QC: completeness ≥90%, contamination ≤5% (MIMAG, Bowers 2017), contigs ≤500, length 4.5–7.5 Mbp (K. pneumoniae QC range).** Widened length cap 6.5→7.5. | Co-builder: keep thresholds but don't lose many samples + cite refs. Lit shows MDR/plasmid K. pneumoniae reach ~6.6 Mbp — a tight cap would drop real resistant strains. Now drops 28 (1.9%), recovers 3 clean genomes; contamination is the real filter. | SWE + ⚕ |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).

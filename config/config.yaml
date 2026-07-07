@@ -30,14 +30,17 @@ data:
 
 # --- Phase 3: QC & label harmonization ---
 qc:
-  # Thresholds VALIDATED against the thin-slice QC distribution (1500 genomes, 99% BV-BRC "Good").
-  # Units are CheckM PERCENTAGES (not fractions). "Moderate" tier: drops ~31 (2%), class-balanced.
-  # Deliberately NOT stricter — over-strict QC removes lineage diversity and hurts the
-  # phylogeny-aware split's generalization (accuracy lever is the split, not tighter QC). ⚕ confirm.
-  min_completeness: 95         # CheckM completeness %  (data: p5=99.7, only 3 genomes < 90)
-  max_contamination: 5         # CheckM contamination % (data: p95=1.0, 14 genomes > 5, one at 51%)
-  max_contigs: 500             # assembly fragmentation (data: p95=309, max 3848)
-  genome_length_mbp: [4.8, 6.5]  # K. pneumoniae species sanity ~5.3 Mbp (catches contamination/broken)
+  # Thresholds validated against the thin-slice QC distribution (1500 genomes, 99% BV-BRC "Good")
+  # AND aligned to published standards (⚕ co-builder approved, refined after literature check):
+  #   - completeness/contamination = MIMAG high-quality genome standard (Bowers et al. 2017, Nat Biotech).
+  #   - length window = published K. pneumoniae assembly QC range (4.5-7.5 Mbp); contamination (not a
+  #     tight length cap) is the real filter, so plasmid-rich MDR strains (up to ~6.6 Mbp) are KEPT.
+  # Units are CheckM PERCENTAGES. Result: drops 28 (1.9%), class-balanced (15R/13S → no bias).
+  # Deliberately not stricter: over-strict QC removes lineage diversity → hurts the phylogeny-aware split.
+  min_completeness: 90         # CheckM completeness %  — MIMAG high-quality (data p5=99.7)
+  max_contamination: 5         # CheckM contamination % — MIMAG high-quality; primary junk filter
+  max_contigs: 500             # assembly fragmentation (data p95=309, max 3848)
+  genome_length_mbp: [4.5, 7.5]  # published K. pneumoniae QC range; keeps large MDR/plasmid strains
 label_mapping:
   intermediate: drop           # how MIC/SIR "intermediate" is handled: drop | resistant | susceptible (⚕ decide)
 

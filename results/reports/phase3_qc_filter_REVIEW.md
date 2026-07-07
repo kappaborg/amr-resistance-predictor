@@ -31,20 +31,29 @@ The dataset is **high quality overall** — BV-BRC labels **1,485 / 1,500 (99%) 
 - Contigs: median **92**, 95th percentile **309**, worst case **3,848**.
 - Genome length: median **5.50 Mbp**; a handful inflated to 8–11 Mbp (a contamination signature).
 
-## 4. Proposed thresholds (the "moderate" tier)
-| Criterion | Threshold | Why this value |
+## 4. Proposed thresholds (literature-aligned — updated after your feedback)
+Refined per your two points: (a) don't lose many samples, (b) cite references. Values now match
+published standards; the length cap was widened so we don't drop legitimate large MDR strains.
+
+| Criterion | Threshold | Reference / why this value |
 |---|---|---|
-| Completeness | **≥ 95%** | Our genomes sit at ~100%; 95% still admits all real assemblies, cuts only broken ones |
-| Contamination | **≤ 5%** | Standard "acceptable" ceiling; our clean genomes are ~0%, so this only catches true mixtures |
-| Contigs | **≤ 500** | Removes severely fragmented assemblies (median is 92) |
-| Genome length | **4.8 – 6.5 Mbp** | Species sanity window around K. pneumoniae ~5.3 Mbp; catches contamination/breakage |
+| Completeness | **≥ 90%** | MIMAG "high-quality genome" standard (Bowers et al. 2017, *Nat. Biotechnol.*) |
+| Contamination | **≤ 5%** | MIMAG "high-quality genome" standard; this is the **primary** junk filter |
+| Contigs | **≤ 500** | Removes severely fragmented assemblies (our median is 92) |
+| Genome length | **4.5 – 7.5 Mbp** | Published K. pneumoniae assembly QC range; **keeps plasmid-rich MDR strains** (OXA-48/carbapenemase clinical isolates reach 6.1–6.6 Mbp) |
+
+**Important refinement from the literature:** MDR K. pneumoniae carrying multiple resistance plasmids
+can legitimately reach ~6.6 Mbp. A tight length cap would have dropped real *resistant* strains and
+biased the data. So we widened the window to 4.5–7.5 Mbp and let **contamination** do the real work —
+the contaminated genomes (27–51% contamination, 8–11 Mbp) are still removed.
 
 ## 5. Result of applying the filter
-- **Kept: 1,469 genomes · Dropped: 31 (2%).**
-- **The drop is class-balanced — 16 Resistant / 15 Susceptible** — so filtering does **not** bias the
-  resistant/susceptible ratio. This matters: a filter that removed mostly one class would distort results.
+- **Kept: 1,472 genomes · Dropped: 28 (1.9%).**
+- **The drop is class-balanced — 15 Resistant / 13 Susceptible** — filtering does **not** bias the R/S ratio.
+- Vs. the first draft, the literature-aligned version **recovers 3 clean genomes** (e.g. a 6.58 Mbp
+  strain at 0.7% contamination) that a tighter length cap wrongly excluded.
 - Reasons genomes were dropped (some hit more than one): contamination > 5% → 14; contigs > 500 → 23;
-  length outside window → 11; completeness < 95% → 5.
+  length outside 4.5–7.5 → 6; completeness < 90% → 3.
 
 ## 6. The genomes being dropped — please spot-check
 The worst offenders are clearly **contaminated/mixed assemblies** (high contamination *and* inflated
@@ -62,6 +71,19 @@ wrong lesson.
 | 573.14450 | 100 | 27.1 | 1367 | 7.94 | Resistant |
 
 (Look these up in BV-BRC by genome_id if you'd like to confirm they're genuinely contaminated.)
+
+## 6b. References (as requested)
+- **Bowers et al. 2017**, *Minimum information about a single amplified genome (MISAG) and a
+  metagenome-assembled genome (MIMAG)*, **Nature Biotechnology** — high-quality genome = >90%
+  completeness, <5% contamination (the CheckM thresholds we use).
+- **Parks et al. 2015**, *CheckM: assessing the quality of microbial genomes*, **Genome Research** —
+  the tool that computes completeness/contamination.
+- **Lam et al. 2021**, *Genomic surveillance framework and genotyping tool for Klebsiella pneumoniae*
+  (Kleborate), **Nature Communications** — K. pneumoniae genome QC size range ~4.5–7.5 Mbp.
+- **AMR-ML QC practice** (e.g. *Assessing computational predictions of AMR phenotypes*, Briefings in
+  Bioinformatics 2024; MIC-prediction work in K. pneumoniae): filter by completeness, contamination,
+  and contig count; high contamination can make the model attribute a contaminant's genes to the
+  phenotype — exactly what we're preventing.
 
 ## 7. Why we are NOT filtering more strictly
 A stricter filter (e.g. completeness ≥ 98%, length 5.0–6.2) would drop ~98 genomes. We deliberately
