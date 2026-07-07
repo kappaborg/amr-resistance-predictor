@@ -15,6 +15,9 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 8 | 2026-07-07 | 1 | Count **lab phenotypes only** (`evidence="Laboratory Method"`); exclude computational predictions. | Using BV-BRC computational AMR calls as labels would be circular. E.coli: 6.3M rows → 243K lab. | SWE |
 | 9 | 2026-07-07 | 1 | **Tuned thresholds from live data: min(R,S)≥150, balance≥0.30, total(R+S)≥300.** | Data abundant (median min(R,S)=191); balance is the binding quality lever (median 0.15). Yields 51 balanced drugs / 7 orgs. | SWE (⚕ review) |
 | 10 | 2026-07-07 | 1 | genome_amr has no `taxon_lineage_ids`; filter by species `taxon_id`. | Verified against live API schema. | SWE |
+| 11 | 2026-07-07 | 1 | **LOCKED: organism = _Klebsiella pneumoniae_ (taxon 573).** | Best fit to thesis: carbapenem resistance is where single-gene rules fail (porin+β-lactamase combos → catchable VMEs); strong MLST clonality makes the phylogeny-aware split bite. | SWE + ⚕ |
+| 12 | 2026-07-07 | 1 | **LOCKED: 5-drug panel** = meropenem, gentamicin, ciprofloxacin, TMP-SMX, cefoxitin. | 5 distinct determinant families → convincing per-drug SHAP; all clear thresholds. | SWE + ⚕ |
+| 13 | 2026-07-07 | 1 | **Thin-slice drug = ciprofloxacin** (meropenem = Week-2 flagship). | Chromosomal gyrA/parC point mutations: clean direct signal, lineage-spread, exercises point-mutation feature path → de-risks Week-1 go/no-go. | SWE + ⚕ |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).

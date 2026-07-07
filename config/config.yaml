@@ -8,9 +8,15 @@ project:
 
 # --- Phase 1: organism & drug selection (data-driven, microbiology sign-off) ---
 organism:
-  name: TBD                    # e.g. "Klebsiella pneumoniae"
-  taxon_id: TBD
-drugs: []                      # e.g. [ciprofloxacin, gentamicin, meropenem]
+  name: Klebsiella pneumoniae
+  taxon_id: 573
+drugs:                         # 5-drug panel, distinct determinant families (Phase 1 sign-off)
+  - meropenem                  # carbapenem — Week-2 flagship (KPC/NDM/OXA-48 + porin loss)
+  - gentamicin                 # aminoglycoside (AAC/APH/ANT, armA/rmtB)
+  - ciprofloxacin              # fluoroquinolone — Week-1 THIN-SLICE drug (gyrA/parC + qnr)
+  - trimethoprim/sulfamethoxazole  # folate pathway (sul1/2/3 + dfrA)
+  - cefoxitin                  # cephamycin / AmpC screen (blaCMY/DHA + porin loss)
+thin_slice_drug: ciprofloxacin  # clean chromosomal point-mutation signal; de-risks Week-1 gate
 
 # --- Phase 1/2: data acquisition thresholds ---
 data:
