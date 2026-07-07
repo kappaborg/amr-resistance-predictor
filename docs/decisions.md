@@ -18,6 +18,8 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 11 | 2026-07-07 | 1 | **LOCKED: organism = _Klebsiella pneumoniae_ (taxon 573).** | Best fit to thesis: carbapenem resistance is where single-gene rules fail (porin+β-lactamase combos → catchable VMEs); strong MLST clonality makes the phylogeny-aware split bite. | SWE + ⚕ |
 | 12 | 2026-07-07 | 1 | **LOCKED: 5-drug panel** = meropenem, gentamicin, ciprofloxacin, TMP-SMX, cefoxitin. | 5 distinct determinant families → convincing per-drug SHAP; all clear thresholds. | SWE + ⚕ |
 | 13 | 2026-07-07 | 1 | **Thin-slice drug = ciprofloxacin** (meropenem = Week-2 flagship). | Chromosomal gyrA/parC point mutations: clean direct signal, lineage-spread, exercises point-mutation feature path → de-risks Week-1 go/no-go. | SWE + ⚕ |
+| 14 | 2026-07-07 | 2 | **Download A (phased): thin-slice balanced 750 R / 750 S cipro; run our own AMRFinderPlus.** | Under ceiling; proves pipeline before the 12 GB pull. Reproducible determinant vocabulary. | SWE + ⚕ |
+| 15 | 2026-07-07 | 2 | **BUG CAUGHT + FIXED: genome_sequence API defaults to limit(25) → truncated assemblies (~2 Mbp of ~5.5).** Add `limit(25000)` + a <2.5 MB size guard; re-downloaded all. | Truncated genomes would drop genes on missing contigs → false-absent features → corrupted labels. Caught by the FASTA-size integrity check. | SWE |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).
