@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import os
 import subprocess
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -26,7 +27,11 @@ import yaml
 from sklearn.model_selection import GroupShuffleSplit
 
 REPO = Path(__file__).resolve().parents[2]
-MLST = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin/mlst"
+ENV_BIN = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
+MLST = f"{ENV_BIN}/mlst"
+# mlst's `#!/usr/bin/env perl` shebang must resolve to the CONDA perl (not system Homebrew perl),
+# and mlst needs blastn on PATH — both fixed by prepending the env bin dir.
+MLST_ENV = {**os.environ, "PATH": f"{ENV_BIN}:{os.environ.get('PATH', '')}"}
 GENOMES = REPO / "data/raw/genomes"
 CACHE = REPO / "data/interim/mlst"
 LABELS = REPO / "data/processed/thin_slice_cipro_labels_qc.csv"
@@ -42,13 +47,13 @@ def type_one(gid: str) -> tuple[str, str]:
     """Run mlst on one genome; return (gid, ST). Cached. ST '-' means untypeable."""
     out = CACHE / f"{gid}.tsv"
     if out.exists() and out.stat().st_size > 0:
-        st = out.read_text().split("\t")[2] if "\t" in out.read_text() else "-"
-        return gid, st
+        parts = out.read_text().split("\t")
+        return gid, parts[2] if len(parts) > 2 else "-"
     fna = CACHE / f"{gid}.fna"
     fna.write_bytes(gzip.decompress((GENOMES / f"{gid}.fna.gz").read_bytes()))
-    r = subprocess.run([MLST, str(fna)], capture_output=True, text=True)
+    r = subprocess.run([MLST, str(fna)], capture_output=True, text=True, env=MLST_ENV)
     fna.unlink(missing_ok=True)
-    if r.returncode != 0:
+    if r.returncode != 0 or "\t" not in r.stdout:
         return gid, "-"
     out.write_text(r.stdout)
     parts = r.stdout.split("\t")
