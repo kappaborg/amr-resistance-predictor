@@ -26,10 +26,18 @@
 - QC: completeness ≥ 0.90, contamination ≤ 0.05
 - split: `mlst`, 25% of *lineages* held out · model: LogReg baseline → XGBoost → isotonic calibration
 
+## Environment — BUILT & VERIFIED ✅
+- Created env `amr-resistance-predictor` (conda 24.1.2, `/opt/homebrew/anaconda3`), **native osx-arm64**
+  (no Rosetta). Python 3.11.15.
+- Verified imports: numpy 2.4.6 · pandas 3.0.3 · scikit-learn 1.9.0 · xgboost 3.2.0 · lightgbm 4.6.0 ·
+  shap 0.51.0 · matplotlib 3.11.0 · requests 2.34.2 · pytest 9.1.1.
+- Bio tools run: **AMRFinderPlus 4.2.7**, **mlst 2.33.1**. Versions pinned in `data/manifest.md`.
+- `pytest` inside the env: **2 passed, 1 skipped**.
+- Config change: dropped non-existent `bvbrc-cli` pip dep → use BV-BRC REST API via `requests`.
+
 ## Blocked / caveats
-- **conda not on PATH in this environment** → `environment.yml` is authored but not yet built/verified.
-  Build it where conda is available: `conda env create -f environment.yml`.
-- Tool/database versions in `data/manifest.md` are TBD until the env is built.
+- ⚠️ **AMRFinderPlus reference DB not downloaded yet** — run `amrfinder -u` in Phase 4 (network
+  download; record size). Not needed until feature extraction.
 
 ## Next → Phase 1 (GATE, ⚕ microbiology sign-off)
 BV-BRC organism/drug **selection**: write the query plan, run metadata-only counts, present a

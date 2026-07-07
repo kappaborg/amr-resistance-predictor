@@ -8,6 +8,8 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 1 | 2026-07-07 | 0 | Scaffold repo per CLAUDE.md §5; brief → `CLAUDE.md`, docx+diagrams → `proposal/`. | Reproducible skeleton before any science. | SWE |
 | 2 | 2026-07-07 | 0 | Fixed global seed = 42 in `config/config.yaml`. | Reproducibility mandate. | SWE |
 | 3 | 2026-07-07 | 0 | Both AMRFinderPlus + mlst in env; RGI commented as alternative. | Keep env ready; annotator chosen in Phase 4. | SWE |
+| 4 | 2026-07-07 | 0 | Dropped `bvbrc-cli` pip dep; use BV-BRC REST Data API via `requests`. | No maintained pip CLI package; API is sufficient and lighter. | SWE |
+| 5 | 2026-07-07 | 0 | Env built natively on osx-arm64 (no Rosetta); bio tools have arm64 builds. | Confirmed amrfinderplus 4.2.7 + mlst 2.33.1 available for osx-arm64. | SWE |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).

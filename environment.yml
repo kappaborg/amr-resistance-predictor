@@ -15,6 +15,7 @@ dependencies:
   - shap>=0.44
   - matplotlib>=3.7
   - pyyaml>=6.0
+  - requests>=2.31        # BV-BRC Data API access over HTTP (Phase 2)
   # --- Bioinformatics (bioconda) ---
   # AMRFinderPlus is the primary annotation engine; RGI is the CARD alternative.
   # Decide one in Phase 4 (see docs/decisions.md); both listed so the env is ready either way.
@@ -25,5 +26,5 @@ dependencies:
   - pytest>=7.4
   - jupyterlab>=4.0
   - pip>=23
-  - pip:
-      - bvbrc-cli ; python_version >= "3.11"   # BV-BRC access; pin exact version in manifest once installed
+# BV-BRC access is via its REST Data API (using `requests`); no CLI package required.
+# The optional standalone BV-BRC command-line tools install separately from https://www.bv-brc.org.

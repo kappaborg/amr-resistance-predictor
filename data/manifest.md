@@ -18,7 +18,19 @@ _(one row per pull — filled in Phase 2)_
 |---|---|---|---|---|---|
 | — | — | — | — | — | — |
 
+## Tool versions (env `amr-resistance-predictor`, built 2026-07-07, osx-arm64, conda 24.1.2)
+| Tool / lib | Version |
+|---|---|
+| python | 3.11.15 |
+| numpy / pandas / scikit-learn | 2.4.6 / 3.0.3 / 1.9.0 |
+| xgboost / lightgbm / shap | 3.2.0 / 4.6.0 / 0.51.0 |
+| matplotlib / requests / pytest | 3.11.0 / 2.34.2 / 9.1.1 |
+| ncbi-amrfinderplus | 4.2.7 |
+| mlst | 2.33.1 |
+
 ## Notes
 - Phase 1 records **counts only** (metadata queries) — no bulk download until the data plan is approved.
 - Flag any download > `data.max_download_gb` (config) before pulling.
-- Pin exact tool + database versions here once the environment is built (Phase 0/2).
+- ⚠️ **AMRFinderPlus reference database not yet downloaded.** Run `amrfinder -u` in Phase 4 before
+  annotation (network download — flag/record size when pulled). CARD data also pulled in Phase 4.
+- `mlst` bundles its PubMLST schemes with the package build.
