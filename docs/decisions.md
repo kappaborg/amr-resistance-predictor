@@ -26,12 +26,12 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 19 | 2026-07-07 | 3 | **⚕ APPROVED + literature-refined QC: completeness ≥90%, contamination ≤5% (MIMAG, Bowers 2017), contigs ≤500, length 4.5–7.5 Mbp (K. pneumoniae QC range).** Widened length cap 6.5→7.5. | Co-builder: keep thresholds but don't lose many samples + cite refs. Lit shows MDR/plasmid K. pneumoniae reach ~6.6 Mbp — a tight cap would drop real resistant strains. Now drops 28 (1.9%), recovers 3 clean genomes; contamination is the real filter. | SWE + ⚕ |
 | 20 | 2026-07-07 | 4 | Features = AMRFinderPlus `--organism Klebsiella_pneumoniae`, Type==AMR Element symbols (acquired genes + point mutations); VIRULENCE/STRESS excluded. | Enables gyrA/parC point mutations (key cipro determinants); interpretable determinant vocabulary per proposal. | SWE |
 | 21 | 2026-07-07 | 4 | Full 1472-genome annotation run overnight (~15–19h), resumable. | User chose full thin-slice over subset; ~47s/genome measured. | SWE + user |
+| 22 | 2026-07-08 | 5 | Lineage split = **StratifiedGroupKFold** (was GroupShuffleSplit). MLST via `mlst` (klebsiella scheme); untypeable → unique synthetic lineage. | Group-only split drifted class balance (test 79R/201S) because resistance is lineage-associated; StratifiedGroupKFold keeps lineages disjoint AND balances R/S (test now 184/184). Zero leakage preserved. | SWE |
 
 ## Open decisions (pending)
-- ⚕ **Phase 1:** organism + drug shortlist (data-driven).
-- ⚕ **Phase 3:** MIC/SIR → binary R/S mapping; handling of "intermediate" (config default: drop).
-- ⚕ **Phase 5:** lineage method — MLST vs. phylogenetic cluster — and granularity.
-- **Phase 4:** AMRFinderPlus vs. RGI as the annotation engine.
-- **Phase 3:** genome QC thresholds (config defaults: completeness ≥ 0.90, contamination ≤ 0.05).
-- **Phase 1/3:** minimum genomes per class to keep a drug (config default: 100).
-| 22 | 2026-07-08 | 5 | Lineage split = **StratifiedGroupKFold** (was GroupShuffleSplit). MLST via `mlst` (klebsiella scheme); untypeable → unique synthetic lineage. | Group-only split drifted class balance (test 79R/201S) because resistance is lineage-associated; StratifiedGroupKFold keeps lineages disjoint AND balances R/S (test now 184/184). Zero leakage preserved. | SWE |
+- ⚕ **Phase 3:** "Intermediate" handling — currently excluded (R/S only); ⚕ confirm for the full panel.
+- **Phase 2b:** re-validate QC thresholds on the full 5-drug panel (distribution may shift).
+- **Phase 6/7:** hyperparameter scope for XGBoost per drug.
+
+### Resolved
+- ✅ Organism + drugs (#11–13) · lab-only labels (#8) · thresholds (#9) · QC (#19) · annotator=AMRFinderPlus (#20) · lineage method=MLST (#22).
