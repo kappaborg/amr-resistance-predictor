@@ -30,8 +30,14 @@ data:
 
 # --- Phase 3: QC & label harmonization ---
 qc:
-  min_completeness: 0.90       # genome completeness threshold
-  max_contamination: 0.05      # genome contamination threshold
+  # Thresholds VALIDATED against the thin-slice QC distribution (1500 genomes, 99% BV-BRC "Good").
+  # Units are CheckM PERCENTAGES (not fractions). "Moderate" tier: drops ~31 (2%), class-balanced.
+  # Deliberately NOT stricter — over-strict QC removes lineage diversity and hurts the
+  # phylogeny-aware split's generalization (accuracy lever is the split, not tighter QC). ⚕ confirm.
+  min_completeness: 95         # CheckM completeness %  (data: p5=99.7, only 3 genomes < 90)
+  max_contamination: 5         # CheckM contamination % (data: p95=1.0, 14 genomes > 5, one at 51%)
+  max_contigs: 500             # assembly fragmentation (data: p95=309, max 3848)
+  genome_length_mbp: [4.8, 6.5]  # K. pneumoniae species sanity ~5.3 Mbp (catches contamination/broken)
 label_mapping:
   intermediate: drop           # how MIC/SIR "intermediate" is handled: drop | resistant | susceptible (⚕ decide)
 

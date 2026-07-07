@@ -20,6 +20,9 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 13 | 2026-07-07 | 1 | **Thin-slice drug = ciprofloxacin** (meropenem = Week-2 flagship). | Chromosomal gyrA/parC point mutations: clean direct signal, lineage-spread, exercises point-mutation feature path → de-risks Week-1 go/no-go. | SWE + ⚕ |
 | 14 | 2026-07-07 | 2 | **Download A (phased): thin-slice balanced 750 R / 750 S cipro; run our own AMRFinderPlus.** | Under ceiling; proves pipeline before the 12 GB pull. Reproducible determinant vocabulary. | SWE + ⚕ |
 | 15 | 2026-07-07 | 2 | **BUG CAUGHT + FIXED: genome_sequence API defaults to limit(25) → truncated assemblies (~2 Mbp of ~5.5).** Add `limit(25000)` + a <2.5 MB size guard; re-downloaded all. | Truncated genomes would drop genes on missing contigs → false-absent features → corrupted labels. Caught by the FASTA-size integrity check. | SWE |
+| 16 | 2026-07-07 | 2 | Downloader: retry 4x w/ backoff on network errors; resumable. | A single ReadTimeout aborted the run at genome 306. | SWE |
+| 17 | 2026-07-07 | 3 | **QC thresholds validated against real data (not guessed): completeness ≥95%, contamination ≤5%, contigs ≤500, length 4.8–6.5 Mbp.** Config units corrected fractions→CheckM %. | Data is 99% "Good"; moderate tier drops ~31 (2%), **class-balanced** (16R/15S → no bias). Stricter QC costs lineage diversity → hurts the phylogeny-aware split. | SWE (⚕ confirm) |
+| 18 | 2026-07-07 | 3 | Analysis-code bug fixed: `float(v or default)` turned contamination=0 into 99 (falsy-zero) → falsely dropped clean genomes. | Real per-filter drops are tiny (3/14/23/7), not ~970. | SWE |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).
