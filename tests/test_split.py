@@ -23,9 +23,15 @@ def test_shared_lineage_fails():
         assert_no_lineage_overlap(["ST11", "ST15"], ["ST15", "ST307"])
 
 
-@pytest.mark.skip(reason="Enabled in Phase 5 once the real split is produced.")
 def test_real_split_has_no_leakage():
-    # from src.split.make_split import load_split
-    # train, test = load_split()
-    # assert_no_lineage_overlap(train["lineage"], test["lineage"])
-    ...
+    """Once the phylogeny-aware split exists, assert zero shared lineage between folds."""
+    import csv
+    from pathlib import Path
+    split = Path(__file__).resolve().parents[1] / "data/processed/thin_slice_cipro_split.csv"
+    if not split.exists():
+        pytest.skip("split not built yet (run src.split.make_split in Phase 5)")
+    rows = list(csv.DictReader(split.open()))
+    train = [r["lineage"] for r in rows if r["fold"] == "train"]
+    test = [r["lineage"] for r in rows if r["fold"] == "test"]
+    assert train and test, "split has empty fold"
+    assert_no_lineage_overlap(train, test)
