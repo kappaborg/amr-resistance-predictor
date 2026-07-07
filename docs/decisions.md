@@ -11,7 +11,10 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 4 | 2026-07-07 | 0 | Dropped `bvbrc-cli` pip dep; use BV-BRC REST Data API via `requests`. | No maintained pip CLI package; API is sufficient and lighter. | SWE |
 | 5 | 2026-07-07 | 0 | Env built natively on osx-arm64 (no Rosetta); bio tools have arm64 builds. | Confirmed amrfinderplus 4.2.7 + mlst 2.33.1 available for osx-arm64. | SWE |
 | 6 | 2026-07-07 | 1 | Survey via BV-BRC `genome_amr`; counts by antibiotic × phenotype using facet + Content-Range. | Exact counts with no bulk download; metadata only. | SWE |
-| 7 | 2026-07-07 | 1 | Shortlist thresholds: min(R,S)≥100, balance≥0.20, total≥300. | Enough minority-class genomes for a lineage-held-out test; avoids degenerate imbalance. | SWE (⚕ review) |
+| 7 | 2026-07-07 | 1 | ~~min(R,S)≥100, balance≥0.20~~ → **superseded by #9**. | Initial guess before data. | SWE |
+| 8 | 2026-07-07 | 1 | Count **lab phenotypes only** (`evidence="Laboratory Method"`); exclude computational predictions. | Using BV-BRC computational AMR calls as labels would be circular. E.coli: 6.3M rows → 243K lab. | SWE |
+| 9 | 2026-07-07 | 1 | **Tuned thresholds from live data: min(R,S)≥150, balance≥0.30, total(R+S)≥300.** | Data abundant (median min(R,S)=191); balance is the binding quality lever (median 0.15). Yields 51 balanced drugs / 7 orgs. | SWE (⚕ review) |
+| 10 | 2026-07-07 | 1 | genome_amr has no `taxon_lineage_ids`; filter by species `taxon_id`. | Verified against live API schema. | SWE |
 
 ## Open decisions (pending)
 - ⚕ **Phase 1:** organism + drug shortlist (data-driven).

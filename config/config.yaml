@@ -15,7 +15,11 @@ drugs: []                      # e.g. [ciprofloxacin, gentamicin, meropenem]
 # --- Phase 1/2: data acquisition thresholds ---
 data:
   source: BV-BRC
-  min_genomes_per_class: 100   # per drug, per R/S class — else drop the drug (Phase 3)
+  # Phase 1 shortlist thresholds — tuned from the live survey distribution (221 drug-counts):
+  # data is abundant (median min(R,S)=191), so balance is the binding quality lever, not count.
+  min_genomes_per_class: 150   # per drug, per R/S class (lab phenotypes) — else drop the drug
+  min_balance: 0.30            # minority-class fraction min(R,S)/(R+S); >=0.30 = trainable, balanced
+  min_total_rs: 300            # minimum R+S lab rows per drug
   max_download_gb: 5           # hard stop-and-flag ceiling before any bulk pull
 
 # --- Phase 3: QC & label harmonization ---

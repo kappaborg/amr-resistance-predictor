@@ -1,17 +1,24 @@
 """Phase 1 — BV-BRC organism/drug survey (COUNTS ONLY, no genome downloads).
 
-Facets the `genome_amr` table per candidate organism to list antibiotics, then counts
-Resistant / Susceptible / Intermediate genomes per drug via the Content-Range header.
-Applies the shortlist criteria from docs/phase1_query_plan.md and writes:
-  - results/metrics/phase1_counts.csv   (machine-readable)
-  - results/reports/phase1_shortlist.md (the table for microbiology review)
+Verified BV-BRC Data API contract (2026-07-07):
+  - core `genome_amr`; filter organism by `taxon_id` (species-level; NO `taxon_lineage_ids` field).
+  - `evidence == "Laboratory Method"` marks real lab phenotypes; everything else is computational.
+    We count LAB ONLY — using computational predictions as labels would be circular.
+  - exact counts read from the `Content-Range` response header (GET, `Accept: application/json`).
+  - antibiotic list via facet: `...&facet((field,antibiotic),(mincount,1),(limit,-1))&json(nl,map)`
+    with `Accept: application/solr+json` (the `json(nl,map)` is required for parseable JSON).
 
-This is metadata only: responses are integer counts, not sequences. Nothing here downloads
-a genome. Organism/drug choice remains a GATE requiring microbiology sign-off.
+Two-step so thresholds can be tuned WITHOUT re-hitting the network:
+  1. survey()          -> results/metrics/phase1_counts.csv   (raw R/S/I counts, queried once)
+  2. build_shortlist() -> results/reports/phase1_shortlist.md  (applies thresholds to the CSV)
+
+Metadata only: responses are integer counts, not sequences. Organism/drug choice stays a GATE
+requiring microbiology sign-off.
 
 Usage:
-    python -m src.data.survey --config config/config.yaml
-    python -m src.data.survey --config config/config.yaml --dry-run   # print queries, no network
+    python -m src.data.survey --config config/config.yaml            # query + shortlist
+    python -m src.data.survey --config config/config.yaml --shortlist-only  # re-threshold, no network
+    python -m src.data.survey --config config/config.yaml --dry-run
 """
 from __future__ import annotations
 
@@ -25,8 +32,10 @@ import requests
 import yaml
 
 API = "https://www.bv-brc.org/api/genome_amr/"
+LAB = 'eq(evidence,%22Laboratory%20Method%22)'  # URL-encoded: evidence="Laboratory Method"
+PHENOTYPES = ["Resistant", "Susceptible", "Intermediate"]
+PAUSE_S = 0.30  # polite to the public API
 
-# Candidate organisms (taxon_id verified on first live call; see docs/phase1_query_plan.md).
 CANDIDATES = [
     ("Escherichia coli", 562),
     ("Klebsiella pneumoniae", 573),
@@ -39,146 +48,148 @@ CANDIDATES = [
     ("Streptococcus pneumoniae", 1313),
 ]
 
-# Preferred taxon filter field; falls back to taxon_id if the API rejects it.
-TAXON_FIELDS = ["taxon_lineage_ids", "taxon_id"]
-PHENOTYPES = ["Resistant", "Susceptible", "Intermediate"]
-HEADERS_JSON = {"Accept": "application/json", "Content-Type": "application/rqlquery+x-www-form-urlencoded"}
-HEADERS_SOLR = {"Accept": "application/solr+json", "Content-Type": "application/rqlquery+x-www-form-urlencoded"}
-PAUSE_S = 0.34  # be polite to the public API
+# A drug needs at least this many lab rows total before we bother counting R/S per phenotype
+# (a drug below this can never clear the shortlist; skipping saves hundreds of calls).
+PREFILTER_MIN_LAB_ROWS = 300
 
 
-def _post(query: str, headers: dict, dry_run: bool):
-    """Send an RQL query as POST body (avoids URL-length limits). Returns response or None."""
+def _get(query: str, accept: str, dry_run: bool):
     if dry_run:
-        print(f"  [dry-run] POST {API}  body={query!r}  accept={headers['Accept']}")
+        print(f"  [dry-run] GET {API}?{query}  accept={accept}")
         return None
-    resp = requests.post(API, data=query, headers=headers, timeout=60)
-    resp.raise_for_status()
+    r = requests.get(f"{API}?{query}", headers={"Accept": accept}, timeout=90)
+    r.raise_for_status()
     time.sleep(PAUSE_S)
-    return resp
+    return r
 
 
-def facet_antibiotics(taxon_field: str, taxon_id: int, dry_run: bool) -> list[str]:
-    """List antibiotics that have any phenotype data for this organism."""
-    query = (f"eq({taxon_field},{taxon_id})&limit(1)"
-             f"&facet((field,antibiotic),(mincount,1),(limit,-1))")
-    resp = _post(query, HEADERS_SOLR, dry_run)
-    if resp is None:
-        return []
-    facets = resp.json().get("facet_counts", {}).get("facet_fields", {}).get("antibiotic", [])
-    # Solr returns a flat [name, count, name, count, ...] list.
-    return [facets[i] for i in range(0, len(facets), 2)]
-
-
-def count(taxon_field: str, taxon_id: int, antibiotic: str, phenotype: str, dry_run: bool) -> int:
-    """Exact count for (organism, antibiotic, phenotype) via the Content-Range header."""
-    ab = antibiotic.replace('"', '\\"')
-    query = (f"and(eq({taxon_field},{taxon_id}),"
-             f'eq(antibiotic,"{ab}"),eq(resistant_phenotype,{phenotype}))&limit(1)')
-    resp = _post(query, HEADERS_JSON, dry_run)
-    if resp is None:
+def content_range_total(query: str, dry_run: bool) -> int:
+    r = _get(query + "&limit(1)", "application/json", dry_run)
+    if r is None:
         return -1
-    # Content-Range: "items 0-0/1234" -> total is after the slash.
-    cr = resp.headers.get("Content-Range", "")
-    return int(cr.split("/")[-1]) if "/" in cr else len(resp.json())
+    cr = r.headers.get("Content-Range", "")
+    return int(cr.split("/")[-1]) if "/" in cr else 0
 
 
-def resolve_taxon_field(taxon_id: int, dry_run: bool) -> str:
-    """Pick the first taxon filter field the API accepts (verify, don't assume)."""
-    if dry_run:
-        return TAXON_FIELDS[0]
-    for field in TAXON_FIELDS:
-        try:
-            _post(f"eq({field},{taxon_id})&limit(1)", HEADERS_JSON, dry_run)
-            return field
-        except requests.HTTPError:
-            continue
-    raise RuntimeError(f"No usable taxon field among {TAXON_FIELDS} for taxon {taxon_id}")
+def facet_antibiotics(taxon_id: int, dry_run: bool) -> dict[str, int]:
+    """Lab-only antibiotic -> total-lab-row-count for one organism."""
+    q = (f"and(eq(taxon_id,{taxon_id}),{LAB})&limit(0)"
+         f"&facet((field,antibiotic),(mincount,1),(limit,-1))&json(nl,map)")
+    r = _get(q, "application/solr+json", dry_run)
+    if r is None:
+        return {"<antibiotic>": PREFILTER_MIN_LAB_ROWS}
+    return r.json()["facet_counts"]["facet_fields"]["antibiotic"]
 
 
-def survey(cfg: dict, dry_run: bool) -> list[dict]:
-    min_per_class = cfg.get("data", {}).get("min_genomes_per_class", 100)
-    min_balance = 0.20
-    min_total = 300
+def count_phenotype(taxon_id: int, antibiotic: str, phenotype: str, dry_run: bool) -> int:
+    ab = antibiotic.replace(" ", "%20").replace("/", "%2F")
+    q = (f"and(eq(taxon_id,{taxon_id}),{LAB},"
+         f"eq(antibiotic,%22{ab}%22),eq(resistant_phenotype,{phenotype}))")
+    return content_range_total(q, dry_run)
+
+
+def survey(dry_run: bool) -> list[dict]:
     rows: list[dict] = []
-
     for name, taxon_id in CANDIDATES:
         print(f"\n## {name} (taxon {taxon_id})")
         try:
-            field = resolve_taxon_field(taxon_id, dry_run)
-            drugs = facet_antibiotics(field, taxon_id, dry_run)
+            drugs = facet_antibiotics(taxon_id, dry_run)
         except Exception as e:  # noqa: BLE001 - report and continue, never fabricate
-            print(f"  ! query failed: {e}")
+            print(f"  ! facet failed: {e}")
             continue
-        if dry_run:
-            drugs = ["<antibiotic>"]
-        for ab in drugs:
-            counts = {p: count(field, taxon_id, ab, p, dry_run) for p in PHENOTYPES}
-            r, s = counts["Resistant"], counts["Susceptible"]
+        # only spend R/S/I calls on drugs with enough lab data to possibly qualify
+        worth = {d: n for d, n in drugs.items() if dry_run or n >= PREFILTER_MIN_LAB_ROWS}
+        print(f"  {len(drugs)} lab antibiotics; {len(worth)} with >= {PREFILTER_MIN_LAB_ROWS} lab rows")
+        for ab in sorted(worth, key=lambda d: -worth[d]):
+            c = {p: count_phenotype(taxon_id, ab, p, dry_run) for p in PHENOTYPES}
+            r, s, i = c["Resistant"], c["Susceptible"], c["Intermediate"]
             total = r + s if r >= 0 and s >= 0 else -1
-            balance = (min(r, s) / total) if total > 0 else 0.0
-            qualifies = (min(r, s) >= min_per_class and balance >= min_balance
-                         and total >= min_total)
-            rows.append({
-                "organism": name, "taxon_id": taxon_id, "antibiotic": ab,
-                "n_resistant": r, "n_susceptible": s,
-                "n_intermediate": counts["Intermediate"],
-                "total_RS": total, "balance": round(balance, 3),
-                "qualifies": qualifies,
-            })
+            balance = round(min(r, s) / total, 3) if total > 0 else 0.0
+            rows.append({"organism": name, "taxon_id": taxon_id, "antibiotic": ab,
+                         "n_resistant": r, "n_susceptible": s, "n_intermediate": i,
+                         "total_RS": total, "balance": balance})
             if not dry_run:
-                flag = "  <== qualifies" if qualifies else ""
-                print(f"  {ab:24s} R={r:>5} S={s:>5} bal={balance:0.2f}{flag}")
+                print(f"    {ab:26s} R={r:>6} S={s:>6} I={i:>5} bal={balance:0.2f}")
     return rows
 
 
-def write_outputs(rows: list[dict], repo: Path) -> None:
-    csv_path = repo / "results/metrics/phase1_counts.csv"
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-    with csv_path.open("w", newline="") as f:
+def write_counts(rows: list[dict], repo: Path) -> Path:
+    p = repo / "results/metrics/phase1_counts.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
+    return p
 
-    md = ["# Phase 1 Shortlist — BV-BRC counts\n",
-          "Qualifying = min(R,S) >= threshold AND balance >= 0.20 AND total >= 300. "
-          "Intermediate excluded. Lineage diversity confirmed later (Phase 5).\n"]
+
+def build_shortlist(repo: Path, min_per_class: int, min_balance: float, min_total: int) -> Path:
+    csv_path = repo / "results/metrics/phase1_counts.csv"
+    rows = list(csv.DictReader(csv_path.open()))
+    for r in rows:
+        for k in ("n_resistant", "n_susceptible", "n_intermediate", "total_RS"):
+            r[k] = int(r[k])
+        r["balance"] = float(r["balance"])
+        r["qualifies"] = (min(r["n_resistant"], r["n_susceptible"]) >= min_per_class
+                          and r["balance"] >= min_balance and r["total_RS"] >= min_total)
+
+    md = ["# Phase 1 Shortlist — BV-BRC lab-only counts\n",
+          f"**Thresholds:** min(R,S) >= {min_per_class} · balance >= {min_balance} · "
+          f"total(R+S) >= {min_total}. Lab phenotypes only (evidence=Laboratory Method). "
+          "Intermediate excluded. Row counts (genome may appear >1x); dedup in Phase 2/3. "
+          "Lineage diversity confirmed at Phase 5.\n"]
     by_org: dict[str, list[dict]] = {}
-    for row in rows:
-        by_org.setdefault(row["organism"], []).append(row)
-    for org, items in by_org.items():
-        q = sorted([i for i in items if i["qualifies"]],
-                   key=lambda i: min(i["n_resistant"], i["n_susceptible"]), reverse=True)
-        md.append(f"\n## {org}  ({len(q)} qualifying drugs)\n")
+    for r in rows:
+        by_org.setdefault(r["organism"], []).append(r)
+    ranking = sorted(by_org.items(),
+                     key=lambda kv: sum(x["qualifies"] for x in kv[1]), reverse=True)
+    md.append("## Ranking by # qualifying drugs\n")
+    md.append("| Organism | qualifying drugs |\n|---|---|")
+    for org, items in ranking:
+        md.append(f"| {org} | {sum(x['qualifies'] for x in items)} |")
+    for org, items in ranking:
+        nq = sum(x["qualifies"] for x in items)
+        md.append(f"\n## {org}  ({nq} qualifying)\n")
         md.append("| Antibiotic | #R | #S | #Int | balance | total | qualifies |")
         md.append("|---|---|---|---|---|---|---|")
-        for i in sorted(items, key=lambda x: x["qualifies"], reverse=True):
+        for i in sorted(items, key=lambda x: (x["qualifies"], min(x["n_resistant"], x["n_susceptible"])),
+                        reverse=True):
             md.append(f"| {i['antibiotic']} | {i['n_resistant']} | {i['n_susceptible']} | "
                       f"{i['n_intermediate']} | {i['balance']} | {i['total_RS']} | "
-                      f"{'yes' if i['qualifies'] else 'no'} |")
-    report = repo / "results/reports/phase1_shortlist.md"
-    report.write_text("\n".join(md) + "\n")
-    print(f"\nWrote {csv_path}\nWrote {report}")
+                      f"{'**yes**' if i['qualifies'] else 'no'} |")
+    out = repo / "results/reports/phase1_shortlist.md"
+    out.write_text("\n".join(md) + "\n")
+    return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="BV-BRC organism/drug survey (counts only).")
     ap.add_argument("--config", default="config/config.yaml")
     ap.add_argument("--dry-run", action="store_true", help="print planned queries, no network")
+    ap.add_argument("--shortlist-only", action="store_true",
+                    help="re-apply thresholds to existing counts CSV (no network)")
     args = ap.parse_args()
 
     repo = Path(__file__).resolve().parents[2]
-    cfg = yaml.safe_load((repo / args.config).read_text()) if not args.config.startswith("/") \
-        else yaml.safe_load(Path(args.config).read_text())
+    cfg_path = Path(args.config) if args.config.startswith("/") else repo / args.config
+    cfg = yaml.safe_load(cfg_path.read_text())
+    data_cfg = cfg.get("data", {})
+    min_per_class = data_cfg.get("min_genomes_per_class", 100)
+    min_balance = data_cfg.get("min_balance", 0.20)
+    min_total = data_cfg.get("min_total_rs", 300)
 
-    rows = survey(cfg, args.dry_run)
-    if args.dry_run:
-        print("\n[dry-run] no network calls made, no outputs written.")
-        return 0
-    if not rows:
-        print("No rows collected — check API availability/field names.")
-        return 1
-    write_outputs(rows, repo)
+    if not args.shortlist_only:
+        rows = survey(args.dry_run)
+        if args.dry_run:
+            print("\n[dry-run] no network calls made, no outputs written.")
+            return 0
+        if not rows:
+            print("No rows collected — check API availability/field names.")
+            return 1
+        print(f"\nWrote {write_counts(rows, repo)}")
+
+    out = build_shortlist(repo, min_per_class, min_balance, min_total)
+    print(f"Wrote {out}")
     return 0
 
 
