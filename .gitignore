@@ -1,0 +1,30 @@
+# Raw data is git-ignored; it regenerates from the manifest (data/manifest.md).
+data/raw/
+data/interim/
+data/processed/
+
+# Trained models & large binary outputs (tracked via manifest/checksums, not git)
+results/models/
+*.pkl
+*.joblib
+*.bin
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+*.egg-info/
+.venv/
+env/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Keep directory structure for ignored dirs
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!results/models/.gitkeep

@@ -1,0 +1,48 @@
+# Reading Resistance — central run configuration.
+# Every pipeline stage reads from here; nothing is hard-coded in scripts.
+# Values marked TBD are decided in their phase and logged in docs/decisions.md.
+
+project:
+  name: reading-resistance
+  seed: 42                     # fixed everywhere for reproducibility
+
+# --- Phase 1: organism & drug selection (data-driven, microbiology sign-off) ---
+organism:
+  name: TBD                    # e.g. "Klebsiella pneumoniae"
+  taxon_id: TBD
+drugs: []                      # e.g. [ciprofloxacin, gentamicin, meropenem]
+
+# --- Phase 1/2: data acquisition thresholds ---
+data:
+  source: BV-BRC
+  min_genomes_per_class: 100   # per drug, per R/S class — else drop the drug (Phase 3)
+  max_download_gb: 5           # hard stop-and-flag ceiling before any bulk pull
+
+# --- Phase 3: QC & label harmonization ---
+qc:
+  min_completeness: 0.90       # genome completeness threshold
+  max_contamination: 0.05      # genome contamination threshold
+label_mapping:
+  intermediate: drop           # how MIC/SIR "intermediate" is handled: drop | resistant | susceptible (⚕ decide)
+
+# --- Phase 4: feature extraction ---
+features:
+  annotator: amrfinderplus     # amrfinderplus | rgi (decide in Phase 4)
+  include_point_mutations: true
+
+# --- Phase 5: phylogeny-aware split ---
+split:
+  method: mlst                 # mlst | phylo_cluster (⚕ decide in Phase 5)
+  test_fraction: 0.25          # fraction of *lineages* (not genomes) held out
+  # Invariant enforced by tests/test_split.py: no lineage appears in both train and test.
+
+# --- Phase 7/8: modeling ---
+model:
+  baseline: logistic_regression
+  primary: xgboost             # xgboost | lightgbm
+  calibration: isotonic        # isotonic | sigmoid(Platt)
+
+# --- Phase 8: evaluation ---
+evaluation:
+  metrics: [roc_auc, pr_auc, very_major_error, major_error]
+  report_clinical_errors_first: true
