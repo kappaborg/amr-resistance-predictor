@@ -1,0 +1,52 @@
+{
+  "meropenem": {
+    "roc_auc": 0.9551455709271113,
+    "pr_auc": 0.9396320144108733,
+    "very_major_error_rate": 0.05089820359281437,
+    "major_error_rate": 0.3020689655172414,
+    "vme_count": 17,
+    "me_count": 219,
+    "n_resistant": 334,
+    "n_susceptible": 725
+  },
+  "gentamicin": {
+    "roc_auc": 0.9712890219360754,
+    "pr_auc": 0.9653465730663491,
+    "very_major_error_rate": 0.057815845824411134,
+    "major_error_rate": 0.1354515050167224,
+    "vme_count": 27,
+    "me_count": 81,
+    "n_resistant": 467,
+    "n_susceptible": 598
+  },
+  "ciprofloxacin": {
+    "roc_auc": 0.9817403670709455,
+    "pr_auc": 0.9954000636822982,
+    "very_major_error_rate": 0.0743801652892562,
+    "major_error_rate": 0.05454545454545454,
+    "vme_count": 63,
+    "me_count": 12,
+    "n_resistant": 847,
+    "n_susceptible": 220
+  },
+  "trimethoprim_sulfamethoxazole": {
+    "roc_auc": 0.9755744894695966,
+    "pr_auc": 0.9866783004683788,
+    "very_major_error_rate": 0.03504043126684636,
+    "major_error_rate": 0.15593220338983052,
+    "vme_count": 26,
+    "me_count": 46,
+    "n_resistant": 742,
+    "n_susceptible": 295
+  },
+  "cefoxitin": {
+    "roc_auc": 0.9057540942943052,
+    "pr_auc": 0.9371174315142831,
+    "very_major_error_rate": 0.05399568034557235,
+    "major_error_rate": 0.6162464985994398,
+    "vme_count": 25,
+    "me_count": 220,
+    "n_resistant": 463,
+    "n_susceptible": 357
+  }
+}
