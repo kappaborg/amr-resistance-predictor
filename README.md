@@ -47,8 +47,10 @@ python -m src.app.predict --genome-id 573.12772        # instant (cached annotat
 python -m src.app.predict --genome path/to/genome.fna  # live AMRFinderPlus (~1-3 min)
 python -m src.app.report  --genome-id 573.12772        # + AI clinical narrative (needs ANTHROPIC_API_KEY)
 
-# Interactive web app
-streamlit run src/app/streamlit_app.py                 # genome -> calls + confidence + drivers + narrative
+# Interactive web app — use `python -m streamlit` from the project env
+# (a bare `streamlit` may resolve to a different/broken install on your PATH)
+python -m streamlit run src/app/streamlit_app.py       # genome -> calls + confidence + drivers + narrative
+# or: conda activate amr-resistance-predictor && python -m streamlit run src/app/streamlit_app.py
 ```
 Outputs per-drug resistant/susceptible + calibrated P(resistant) + the determinants behind each call.
 
