@@ -31,6 +31,8 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 | 25 | 2026-07-08 | 8 | **FLAG: calibrated XGBoost has high VME (0.23-0.30) at 0.5 threshold on imbalanced drugs**; logreg (balanced) better on VME. Next: VME-bounded threshold selection. | VME is the clinical metric; 0.5 threshold is not clinically optimal. Threshold artifact, not discrimination failure. | SWE |
 | 22 | 2026-07-08 | 5 | Lineage split = **StratifiedGroupKFold** (was GroupShuffleSplit). MLST via `mlst` (klebsiella scheme); untypeable → unique synthetic lineage. | Group-only split drifted class balance (test 79R/201S) because resistance is lineage-associated; StratifiedGroupKFold keeps lineages disjoint AND balances R/S (test now 184/184). Zero leakage preserved. | SWE |
 
+| 26 | 2026-07-08 | 8 | **VME≤3% operating point** (config `vme_target`): threshold picked on out-of-fold TRAIN predictions, evaluated on test. Achieved cleanly for cipro/TMP-SMX; meropenem/gentamicin partial; cefoxitin degenerate (data-limited). | User set 3% clinical target. OOF selection (not a small val slice) stabilises thresholds. Honest generalization gap reported, not hidden. | SWE + user |
+
 ## Open decisions (pending)
 - ⚕ **Phase 3:** "Intermediate" handling — currently excluded (R/S only); ⚕ confirm for the full panel.
 - **Phase 2b:** re-validate QC thresholds on the full 5-drug panel (distribution may shift).

@@ -6,6 +6,7 @@
     "test_S": 265,
     "train_lineages": 287,
     "test_lineages": 99,
+    "vme_target": 0.03,
     "rules": {
       "roc_auc": 0.9494701473248902,
       "pr_auc": 0.8718230165806562,
@@ -19,22 +20,24 @@
     "logreg": {
       "roc_auc": 0.9469630395451022,
       "pr_auc": 0.9221101532642196,
-      "very_major_error_rate": 0.0821917808219178,
-      "major_error_rate": 0.045283018867924525,
-      "vme_count": 6,
-      "me_count": 12,
+      "very_major_error_rate": 0.0547945205479452,
+      "major_error_rate": 0.10943396226415095,
+      "vme_count": 4,
+      "me_count": 29,
       "n_resistant": 73,
-      "n_susceptible": 265
+      "n_susceptible": 265,
+      "threshold": 0.11121892898494833
     },
     "xgboost_calibrated": {
       "roc_auc": 0.9505556991470665,
       "pr_auc": 0.8789429194566447,
-      "very_major_error_rate": 0.2328767123287671,
-      "major_error_rate": 0.01509433962264151,
-      "vme_count": 17,
-      "me_count": 4,
+      "very_major_error_rate": 0.0821917808219178,
+      "major_error_rate": 0.1018867924528302,
+      "vme_count": 6,
+      "me_count": 27,
       "n_resistant": 73,
       "n_susceptible": 265,
+      "threshold": 0.1666666716337204,
       "brier": 0.04977379254372616
     }
   },
@@ -45,6 +48,7 @@
     "test_S": 249,
     "train_lineages": 293,
     "test_lineages": 98,
+    "vme_target": 0.03,
     "rules": {
       "roc_auc": 0.9291282778171509,
       "pr_auc": 0.8613939165409753,
@@ -58,22 +62,24 @@
     "logreg": {
       "roc_auc": 0.9624773604220804,
       "pr_auc": 0.9096448811708102,
-      "very_major_error_rate": 0.19607843137254902,
-      "major_error_rate": 0.0321285140562249,
-      "vme_count": 20,
-      "me_count": 8,
+      "very_major_error_rate": 0.049019607843137254,
+      "major_error_rate": 0.23694779116465864,
+      "vme_count": 5,
+      "me_count": 59,
       "n_resistant": 102,
-      "n_susceptible": 249
+      "n_susceptible": 249,
+      "threshold": 0.15345423617334988
     },
     "xgboost_calibrated": {
       "roc_auc": 0.9417080085046066,
       "pr_auc": 0.8251866002554005,
-      "very_major_error_rate": 0.2647058823529412,
-      "major_error_rate": 0.08032128514056225,
-      "vme_count": 27,
-      "me_count": 20,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.285140562248996,
+      "vme_count": 0,
+      "me_count": 71,
       "n_resistant": 102,
       "n_susceptible": 249,
+      "threshold": 0.11764705926179886,
       "brier": 0.09714090993128172
     }
   },
@@ -84,6 +90,7 @@
     "test_S": 184,
     "train_lineages": 294,
     "test_lineages": 106,
+    "vme_target": 0.03,
     "rules": {
       "roc_auc": 0.8967391304347826,
       "pr_auc": 0.8337058106460788,
@@ -97,22 +104,24 @@
     "logreg": {
       "roc_auc": 0.9758831521739131,
       "pr_auc": 0.9761410340394577,
-      "very_major_error_rate": 0.04891304347826087,
-      "major_error_rate": 0.043478260869565216,
-      "vme_count": 9,
-      "me_count": 8,
+      "very_major_error_rate": 0.021739130434782608,
+      "major_error_rate": 0.14673913043478262,
+      "vme_count": 4,
+      "me_count": 27,
       "n_resistant": 184,
-      "n_susceptible": 184
+      "n_susceptible": 184,
+      "threshold": 0.20505665138519616
     },
     "xgboost_calibrated": {
       "roc_auc": 0.9748788988657845,
       "pr_auc": 0.9665658825771777,
-      "very_major_error_rate": 0.03804347826086957,
-      "major_error_rate": 0.11956521739130435,
-      "vme_count": 7,
-      "me_count": 22,
+      "very_major_error_rate": 0.016304347826086956,
+      "major_error_rate": 0.29891304347826086,
+      "vme_count": 3,
+      "me_count": 55,
       "n_resistant": 184,
       "n_susceptible": 184,
+      "threshold": 0.09090909361839294,
       "brier": 0.05864694078515548
     }
   },
@@ -123,6 +132,7 @@
     "test_S": 141,
     "train_lineages": 261,
     "test_lineages": 88,
+    "vme_target": 0.03,
     "rules": {
       "roc_auc": 0.8953405443955782,
       "pr_auc": 0.8651083827385703,
@@ -136,22 +146,24 @@
     "logreg": {
       "roc_auc": 0.9689369626371886,
       "pr_auc": 0.9625884648777936,
-      "very_major_error_rate": 0.0446927374301676,
-      "major_error_rate": 0.09219858156028368,
-      "vme_count": 8,
-      "me_count": 13,
+      "very_major_error_rate": 0.03910614525139665,
+      "major_error_rate": 0.11347517730496454,
+      "vme_count": 7,
+      "me_count": 16,
       "n_resistant": 179,
-      "n_susceptible": 141
+      "n_susceptible": 141,
+      "threshold": 0.2904183835598222
     },
     "xgboost_calibrated": {
       "roc_auc": 0.9567138159198066,
       "pr_auc": 0.9523723968655748,
-      "very_major_error_rate": 0.0446927374301676,
-      "major_error_rate": 0.12056737588652482,
-      "vme_count": 8,
-      "me_count": 17,
+      "very_major_error_rate": 0.01675977653631285,
+      "major_error_rate": 0.20567375886524822,
+      "vme_count": 3,
+      "me_count": 29,
       "n_resistant": 179,
       "n_susceptible": 141,
+      "threshold": 0.23529411852359772,
       "brier": 0.06568136859687748
     }
   },
@@ -162,6 +174,7 @@
     "test_S": 89,
     "train_lineages": 145,
     "test_lineages": 47,
+    "vme_target": 0.03,
     "rules": {
       "roc_auc": 0.5323567060162139,
       "pr_auc": 0.4996232670283303,
@@ -175,22 +188,24 @@
     "logreg": {
       "roc_auc": 0.9565495662067985,
       "pr_auc": 0.9606972730175204,
-      "very_major_error_rate": 0.11392405063291139,
-      "major_error_rate": 0.07865168539325842,
-      "vme_count": 9,
-      "me_count": 7,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 1.0,
+      "vme_count": 0,
+      "me_count": 89,
       "n_resistant": 79,
-      "n_susceptible": 89
+      "n_susceptible": 89,
+      "threshold": 0.02909817651491517
     },
     "xgboost_calibrated": {
       "roc_auc": 0.8754800170672734,
       "pr_auc": 0.8733249524313591,
-      "very_major_error_rate": 0.3037974683544304,
-      "major_error_rate": 0.1348314606741573,
-      "vme_count": 24,
-      "me_count": 12,
+      "very_major_error_rate": 0.0759493670886076,
+      "major_error_rate": 0.5842696629213483,
+      "vme_count": 6,
+      "me_count": 52,
       "n_resistant": 79,
       "n_susceptible": 89,
+      "threshold": 0.1304347813129425,
       "brier": 0.1402408424072646
     }
   }

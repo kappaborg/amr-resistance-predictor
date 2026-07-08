@@ -65,3 +65,5 @@ model:
 evaluation:
   metrics: [roc_auc, pr_auc, very_major_error, major_error]
   report_clinical_errors_first: true
+  vme_target: 0.03             # clinical operating point: cap very-major error at 3% (CLSI/FDA-style)
+                               # threshold chosen on held-out TRAIN lineages, evaluated on TEST
