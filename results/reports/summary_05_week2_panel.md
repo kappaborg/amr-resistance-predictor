@@ -12,67 +12,42 @@ VME = resistant called susceptible (dangerous miss); ME = susceptible called res
 - Lowering the threshold to cut VME **necessarily raises ME** — this is the clinical trade-off, not a defect.
 
 
-## meropenem  (test 338: 73R/265S, 99 unseen lineages)
+## meropenem  (test 881: 355R/526S, 132 unseen lineages)
 
 | Model | ROC-AUC | PR-AUC | VME | ME | Brier |
 |---|---|---|---|---|---|
-| Rules baseline | 0.949 | 0.872 | 0.082 | 0.019 | — |
-| Logistic regression | 0.947 | 0.922 | 0.055 | 0.109 | — |
-| XGBoost (calibrated) | 0.951 | 0.879 | 0.082 | 0.102 | 0.050 |
+| Rules baseline | 0.934 | 0.865 | 0.054 | 0.078 | — |
+| Logistic regression | 0.982 | 0.976 | 0.017 | 0.293 | — |
+| XGBoost (calibrated) | 0.977 | 0.962 | 0.003 | 0.760 | 0.051 |
 
-## gentamicin  (test 351: 102R/249S, 98 unseen lineages)
-
-| Model | ROC-AUC | PR-AUC | VME | ME | Brier |
-|---|---|---|---|---|---|
-| Rules baseline | 0.929 | 0.861 | 0.118 | 0.024 | — |
-| Logistic regression | 0.962 | 0.910 | 0.049 | 0.237 | — |
-| XGBoost (calibrated) | 0.942 | 0.825 | 0.000 | 0.285 | 0.097 |
-
-## ciprofloxacin  (test 368: 184R/184S, 106 unseen lineages)
+## gentamicin  (test 929: 401R/528S, 141 unseen lineages)
 
 | Model | ROC-AUC | PR-AUC | VME | ME | Brier |
 |---|---|---|---|---|---|
-| Rules baseline | 0.897 | 0.834 | 0.022 | 0.185 | — |
-| Logistic regression | 0.976 | 0.976 | 0.022 | 0.147 | — |
-| XGBoost (calibrated) | 0.975 | 0.967 | 0.016 | 0.299 | 0.059 |
+| Rules baseline | 0.967 | 0.938 | 0.030 | 0.036 | — |
+| Logistic regression | 0.968 | 0.957 | 0.032 | 0.129 | — |
+| XGBoost (calibrated) | 0.963 | 0.945 | 0.030 | 0.205 | 0.078 |
 
-## trimethoprim_sulfamethoxazole  (test 320: 179R/141S, 88 unseen lineages)
-
-| Model | ROC-AUC | PR-AUC | VME | ME | Brier |
-|---|---|---|---|---|---|
-| Rules baseline | 0.895 | 0.865 | 0.039 | 0.170 | — |
-| Logistic regression | 0.969 | 0.963 | 0.039 | 0.113 | — |
-| XGBoost (calibrated) | 0.957 | 0.952 | 0.017 | 0.206 | 0.066 |
-
-## cefoxitin  (test 168: 79R/89S, 47 unseen lineages)
+## ciprofloxacin  (test 793: 568R/225S, 139 unseen lineages)
 
 | Model | ROC-AUC | PR-AUC | VME | ME | Brier |
 |---|---|---|---|---|---|
-| Rules baseline | 0.532 | 0.500 | 0.924 | 0.011 | — |
-| Logistic regression | 0.957 | 0.961 | 0.000 | 1.000 | — |
-| XGBoost (calibrated) | 0.875 | 0.873 | 0.076 | 0.584 | 0.140 |
+| Rules baseline | 0.904 | 0.930 | 0.005 | 0.187 | — |
+| Logistic regression | 0.973 | 0.986 | 0.033 | 0.089 | — |
+| XGBoost (calibrated) | 0.970 | 0.981 | 0.056 | 0.093 | 0.051 |
 
-## Honest interpretation (VME ≤ 3% operating point)
+## trimethoprim_sulfamethoxazole  (test 738: 512R/226S, 123 unseen lineages)
 
-**Discrimination is strong across all five drugs** — ROC-AUC 0.88–0.98 on *unseen lineages*. The
-models genuinely separate resistant from susceptible; the question is only where to set the operating
-threshold.
+| Model | ROC-AUC | PR-AUC | VME | ME | Brier |
+|---|---|---|---|---|---|
+| Rules baseline | 0.875 | 0.902 | 0.029 | 0.221 | — |
+| Logistic regression | 0.970 | 0.981 | 0.039 | 0.128 | — |
+| XGBoost (calibrated) | 0.958 | 0.972 | 0.010 | 0.783 | 0.056 |
 
-**The thesis holds — cefoxitin is the proof.** The known-gene rules baseline is useless (ROC 0.53,
-misses 92% of resistant) because cefoxitin resistance is driven by **porin loss (ompK35/36)**, which
-a gene lookup can't see. ML lifts ROC to 0.96. Meropenem is the opposite: the carbapenemase rule is a
-direct, strong signal, so ML only matches it. **ML clearly adds value on 3/5 drugs (cefoxitin, TMP-SMX,
-ciprofloxacin); on meropenem/gentamicin the rules baseline is already strong.**
+## cefoxitin  (test 634: 381R/253S, 77 unseen lineages)
 
-**Operating at a strict VME ≤ 3% is achievable — with an honest trade-off, and only where data is
-adequate:**
-- **Ciprofloxacin & TMP-SMX (well-populated):** VME ~2–4% at a reasonable ME (~11–15%). Clean.
-- **Meropenem & gentamicin:** the VME target is only partly met on test (meropenem logreg VME 5.5%),
-  and the ME cost rises (gentamicin ~24%). Fewer resistant genomes → noisier operating point.
-- **Cefoxitin (smallest set: 168 test, 47 lineages):** at VME ≤ 3% the logreg operating point becomes
-  degenerate (predicts nearly all resistant, ME → high). Its discrimination is fine (ROC 0.96) but it
-  lacks the data to operate that strictly. **Flagged as a limitation, not smoothed over.**
-
-**Takeaway:** discrimination is solid everywhere; the *clinical operating point* is robust for the
-well-populated drugs and data-limited for the rest. The Phase-2b top-up (more resistant genomes for
-meropenem/gentamicin/cefoxitin) is the clear way to stabilize those operating points.
+| Model | ROC-AUC | PR-AUC | VME | ME | Brier |
+|---|---|---|---|---|---|
+| Rules baseline | 0.517 | 0.615 | 0.966 | 0.000 | — |
+| Logistic regression | 0.906 | 0.934 | 0.018 | 0.850 | — |
+| XGBoost (calibrated) | 0.923 | 0.944 | 0.010 | 0.881 | 0.127 |

@@ -1,475 +1,475 @@
 {
   "meropenem": {
-    "n_test": 338,
+    "n_test": 881,
     "top": [
       {
-        "feature": "parC_S80I",
-        "mean_abs_shap": 1.7250524759292603,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
         "feature": "blaKPC-2",
-        "mean_abs_shap": 1.0839864015579224,
+        "mean_abs_shap": 1.641549825668335,
         "pushes_toward": "Resistant",
         "known_mechanism": "KPC carbapenemase"
       },
       {
         "feature": "blaKPC-3",
-        "mean_abs_shap": 0.5383572578430176,
+        "mean_abs_shap": 0.8403016328811646,
         "pushes_toward": "Resistant",
         "known_mechanism": "KPC carbapenemase"
       },
       {
-        "feature": "gyrA_S83I",
-        "mean_abs_shap": 0.42972636222839355,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaOXA",
-        "mean_abs_shap": 0.4280645251274109,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "dfrA14",
-        "mean_abs_shap": 0.389057457447052,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaTEM-1",
-        "mean_abs_shap": 0.3679308593273163,
+        "feature": "parC_S80I",
+        "mean_abs_shap": 0.7210596203804016,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "ble",
-        "mean_abs_shap": 0.32886555790901184,
+        "mean_abs_shap": 0.5472428202629089,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
-        "feature": "aadA2",
-        "mean_abs_shap": 0.32066550850868225,
+        "feature": "blaOXA-48",
+        "mean_abs_shap": 0.3727782368659973,
         "pushes_toward": "Resistant",
-        "known_mechanism": null
+        "known_mechanism": "OXA-48 carbapenemase"
       },
       {
-        "feature": "aac(3)-IIe",
-        "mean_abs_shap": 0.31373992562294006,
+        "feature": "ompK36_D135DGD",
+        "mean_abs_shap": 0.3717207908630371,
         "pushes_toward": "Resistant",
-        "known_mechanism": null
+        "known_mechanism": "porin loss"
       },
       {
-        "feature": "tet(A)",
-        "mean_abs_shap": 0.29219844937324524,
+        "feature": "oqxB",
+        "mean_abs_shap": 0.25630804896354675,
         "pushes_toward": "Susceptible",
         "known_mechanism": null
       },
       {
-        "feature": "aadA1",
-        "mean_abs_shap": 0.2784401476383209,
+        "feature": "aac(6')-Ib",
+        "mean_abs_shap": 0.2263031154870987,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaOXA",
+        "mean_abs_shap": 0.2057412564754486,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaTEM-1",
+        "mean_abs_shap": 0.2051801085472107,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "ompK36_T136TDT",
+        "mean_abs_shap": 0.19637636840343475,
+        "pushes_toward": "Resistant",
+        "known_mechanism": "porin loss"
+      },
+      {
+        "feature": "blaSHV-12",
+        "mean_abs_shap": 0.19049590826034546,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "sul1",
-        "mean_abs_shap": 0.24805890023708344,
+        "mean_abs_shap": 0.18599797785282135,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaCTX-M-15",
+        "mean_abs_shap": 0.17601493000984192,
         "pushes_toward": "Susceptible",
         "known_mechanism": null
       },
       {
-        "feature": "ompK36_D135DGD",
-        "mean_abs_shap": 0.23128154873847961,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "porin loss"
-      },
-      {
-        "feature": "blaSHV-11",
-        "mean_abs_shap": 0.22272635996341705,
+        "feature": "dfrA12",
+        "mean_abs_shap": 0.168085977435112,
         "pushes_toward": "Susceptible",
         "known_mechanism": null
       }
     ]
   },
   "gentamicin": {
-    "n_test": 351,
+    "n_test": 929,
     "top": [
       {
         "feature": "aac(3)-IIe",
-        "mean_abs_shap": 1.9551527500152588,
+        "mean_abs_shap": 1.867533564567566,
         "pushes_toward": "Resistant",
         "known_mechanism": "aminoglycoside acetyltransferase"
       },
       {
         "feature": "aac(3)-IId",
-        "mean_abs_shap": 0.8188202977180481,
+        "mean_abs_shap": 1.0848244428634644,
         "pushes_toward": "Resistant",
         "known_mechanism": "aminoglycoside acetyltransferase"
       },
       {
         "feature": "parC_S80I",
-        "mean_abs_shap": 0.7627120018005371,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "gyrA_D87N",
-        "mean_abs_shap": 0.6112163066864014,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "oqxB",
-        "mean_abs_shap": 0.5655519962310791,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaTEM-1",
-        "mean_abs_shap": 0.5323801636695862,
+        "mean_abs_shap": 0.7525796890258789,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "aadA1",
-        "mean_abs_shap": 0.40276673436164856,
+        "mean_abs_shap": 0.2732831537723541,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
-        "feature": "aph(3'')-Ib",
-        "mean_abs_shap": 0.3766564726829529,
-        "pushes_toward": "Resistant",
+        "feature": "blaOXA",
+        "mean_abs_shap": 0.23446418344974518,
+        "pushes_toward": "Susceptible",
         "known_mechanism": null
       },
       {
-        "feature": "mph(A)",
-        "mean_abs_shap": 0.3727501332759857,
+        "feature": "ant(2'')-Ia",
+        "mean_abs_shap": 0.23062053322792053,
+        "pushes_toward": "Resistant",
+        "known_mechanism": "nucleotidyltransferase"
+      },
+      {
+        "feature": "blaSHV-1",
+        "mean_abs_shap": 0.22835403680801392,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "floR",
+        "mean_abs_shap": 0.20072874426841736,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "sul2",
-        "mean_abs_shap": 0.36861878633499146,
+        "mean_abs_shap": 0.1977434903383255,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
-        "feature": "armA",
-        "mean_abs_shap": 0.31590622663497925,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "16S rRNA methyltransferase"
+        "feature": "aac(3)-IVa",
+        "mean_abs_shap": 0.17463551461696625,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": "aminoglycoside acetyltransferase"
       },
       {
-        "feature": "sul1",
-        "mean_abs_shap": 0.27706924080848694,
+        "feature": "qnrB1",
+        "mean_abs_shap": 0.15591195225715637,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaKPC-2",
+        "mean_abs_shap": 0.15213941037654877,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "qnrS1",
+        "mean_abs_shap": 0.14892178773880005,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "nfsB_K130QfsTer5",
+        "mean_abs_shap": 0.1450156718492508,
         "pushes_toward": "Susceptible",
         "known_mechanism": null
       },
       {
-        "feature": "tet(A)",
-        "mean_abs_shap": 0.2650856077671051,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "oqxB19",
-        "mean_abs_shap": 0.22450321912765503,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "catA1",
-        "mean_abs_shap": 0.19215576350688934,
+        "feature": "mph(A)",
+        "mean_abs_shap": 0.1398783177137375,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       }
     ]
   },
   "ciprofloxacin": {
-    "n_test": 368,
+    "n_test": 793,
     "top": [
       {
         "feature": "parC_S80I",
-        "mean_abs_shap": 2.0899057388305664,
+        "mean_abs_shap": 2.6433393955230713,
         "pushes_toward": "Resistant",
         "known_mechanism": "topoisomerase QRDR mutation"
       },
       {
         "feature": "gyrA_S83I",
-        "mean_abs_shap": 1.52665114402771,
+        "mean_abs_shap": 1.3580968379974365,
         "pushes_toward": "Resistant",
         "known_mechanism": "gyrase QRDR mutation"
       },
       {
         "feature": "qnrB1",
-        "mean_abs_shap": 0.8516227602958679,
+        "mean_abs_shap": 0.5977821350097656,
         "pushes_toward": "Resistant",
         "known_mechanism": "PMQR (Qnr)"
       },
       {
         "feature": "aac(6')-Ib-cr5",
-        "mean_abs_shap": 0.4352848529815674,
+        "mean_abs_shap": 0.5431368947029114,
         "pushes_toward": "Resistant",
         "known_mechanism": "PMQR (aac-cr)"
       },
       {
         "feature": "sul1",
-        "mean_abs_shap": 0.421888142824173,
+        "mean_abs_shap": 0.49226993322372437,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "sul2",
+        "mean_abs_shap": 0.38059234619140625,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "gyrA_S83F",
+        "mean_abs_shap": 0.33008337020874023,
+        "pushes_toward": "Resistant",
+        "known_mechanism": "gyrase QRDR mutation"
+      },
+      {
+        "feature": "dfrA14",
+        "mean_abs_shap": 0.2831917703151703,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "qnrS1",
-        "mean_abs_shap": 0.40455856919288635,
+        "mean_abs_shap": 0.28281328082084656,
         "pushes_toward": "Resistant",
         "known_mechanism": "PMQR (Qnr)"
       },
       {
-        "feature": "oqxB",
-        "mean_abs_shap": 0.3734227120876312,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": "OqxAB efflux"
-      },
-      {
-        "feature": "catA1",
-        "mean_abs_shap": 0.3575199842453003,
+        "feature": "aadA2",
+        "mean_abs_shap": 0.27779045701026917,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
-        "feature": "gyrA_S83F",
-        "mean_abs_shap": 0.3389723002910614,
+        "feature": "gyrA_D87N",
+        "mean_abs_shap": 0.2483985722064972,
         "pushes_toward": "Resistant",
         "known_mechanism": "gyrase QRDR mutation"
       },
       {
-        "feature": "aph(3')-Ia",
-        "mean_abs_shap": 0.30554038286209106,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      },
-      {
-        "feature": "oqxA",
-        "mean_abs_shap": 0.2811945974826813,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "OqxAB efflux"
-      },
-      {
-        "feature": "dfrA14",
-        "mean_abs_shap": 0.2473679631948471,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
         "feature": "blaCTX-M-15",
-        "mean_abs_shap": 0.2314949482679367,
+        "mean_abs_shap": 0.23866870999336243,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "tet(A)",
+        "mean_abs_shap": 0.21180042624473572,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
-        "feature": "oqxB19",
-        "mean_abs_shap": 0.22787141799926758,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": "OqxAB efflux"
+        "feature": "catA1",
+        "mean_abs_shap": 0.16864655911922455,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
       },
       {
-        "feature": "blaOXA-1",
-        "mean_abs_shap": 0.2247549593448639,
+        "feature": "blaTEM-1",
+        "mean_abs_shap": 0.1592794805765152,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       }
     ]
   },
   "trimethoprim_sulfamethoxazole": {
-    "n_test": 320,
+    "n_test": 738,
     "top": [
       {
-        "feature": "dfrA14",
-        "mean_abs_shap": 1.26925528049469,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "dihydrofolate reductase"
-      },
-      {
         "feature": "sul1",
-        "mean_abs_shap": 1.2287930250167847,
+        "mean_abs_shap": 1.334462285041809,
         "pushes_toward": "Resistant",
         "known_mechanism": "sulfonamide resistance"
       },
       {
-        "feature": "aadA2",
-        "mean_abs_shap": 0.8019493222236633,
+        "feature": "dfrA14",
+        "mean_abs_shap": 1.1849943399429321,
         "pushes_toward": "Resistant",
-        "known_mechanism": null
+        "known_mechanism": "dihydrofolate reductase"
+      },
+      {
+        "feature": "dfrA12",
+        "mean_abs_shap": 1.1286336183547974,
+        "pushes_toward": "Resistant",
+        "known_mechanism": "dihydrofolate reductase"
       },
       {
         "feature": "sul2",
-        "mean_abs_shap": 0.7571959495544434,
+        "mean_abs_shap": 0.8663073778152466,
         "pushes_toward": "Resistant",
         "known_mechanism": "sulfonamide"
       },
       {
         "feature": "mrx(A)",
-        "mean_abs_shap": 0.537919819355011,
+        "mean_abs_shap": 0.43930235505104065,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "aph(6)-Id",
+        "mean_abs_shap": 0.42302101850509644,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "parC_S80I",
+        "mean_abs_shap": 0.3918117582798004,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "aac(3)-IIe",
-        "mean_abs_shap": 0.49084481596946716,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "parC_S80I",
-        "mean_abs_shap": 0.2808845639228821,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaCTX-M-15",
-        "mean_abs_shap": 0.24954435229301453,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "gyrA_S83I",
-        "mean_abs_shap": 0.23134195804595947,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "dfrA1",
-        "mean_abs_shap": 0.1911630928516388,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "dihydrofolate reductase"
-      },
-      {
-        "feature": "blaSHV-28",
-        "mean_abs_shap": 0.1870194971561432,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      },
-      {
-        "feature": "dfrA12",
-        "mean_abs_shap": 0.18051829934120178,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "dihydrofolate reductase"
-      },
-      {
-        "feature": "oqxB",
-        "mean_abs_shap": 0.17044469714164734,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "catA2",
-        "mean_abs_shap": 0.16676869988441467,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "catB3",
-        "mean_abs_shap": 0.16092932224273682,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      }
-    ]
-  },
-  "cefoxitin": {
-    "n_test": 168,
-    "top": [
-      {
-        "feature": "gyrA_S83I",
-        "mean_abs_shap": 1.1636955738067627,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaKPC-2",
-        "mean_abs_shap": 0.7726678252220154,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "ompK35_E42RfsTer47",
-        "mean_abs_shap": 0.6086080074310303,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": "porin loss"
-      },
-      {
-        "feature": "ompK36_D135DGD",
-        "mean_abs_shap": 0.4842448830604553,
-        "pushes_toward": "Resistant",
-        "known_mechanism": "porin loss"
-      },
-      {
-        "feature": "blaCTX-M-15",
-        "mean_abs_shap": 0.450205534696579,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaOXA",
-        "mean_abs_shap": 0.3100924789905548,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "mph(A)",
-        "mean_abs_shap": 0.3009074032306671,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "oqxB19",
-        "mean_abs_shap": 0.2789155840873718,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      },
-      {
-        "feature": "blaKPC-3",
-        "mean_abs_shap": 0.2598578929901123,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "tet(A)",
-        "mean_abs_shap": 0.24055024981498718,
-        "pushes_toward": "Susceptible",
-        "known_mechanism": null
-      },
-      {
-        "feature": "parC_S80I",
-        "mean_abs_shap": 0.22749371826648712,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "catB3",
-        "mean_abs_shap": 0.2242790162563324,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "fosA7",
-        "mean_abs_shap": 0.2024584710597992,
-        "pushes_toward": "Resistant",
-        "known_mechanism": null
-      },
-      {
-        "feature": "qnrB1",
-        "mean_abs_shap": 0.19262130558490753,
+        "mean_abs_shap": 0.3686094284057617,
         "pushes_toward": "Resistant",
         "known_mechanism": null
       },
       {
         "feature": "blaTEM-1",
-        "mean_abs_shap": 0.1684461086988449,
+        "mean_abs_shap": 0.3494303226470947,
         "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "catA1",
+        "mean_abs_shap": 0.33358830213546753,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "oqxB19",
+        "mean_abs_shap": 0.2714618146419525,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "qnrB1",
+        "mean_abs_shap": 0.22706733644008636,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaOXA",
+        "mean_abs_shap": 0.18134520947933197,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "ompK35_G208VfsTer5",
+        "mean_abs_shap": 0.1443229764699936,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaKPC-2",
+        "mean_abs_shap": 0.1287257969379425,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      }
+    ]
+  },
+  "cefoxitin": {
+    "n_test": 634,
+    "top": [
+      {
+        "feature": "blaKPC-2",
+        "mean_abs_shap": 1.2045034170150757,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "ble",
+        "mean_abs_shap": 0.5959714651107788,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "ompK36_D135DGD",
+        "mean_abs_shap": 0.45166313648223877,
+        "pushes_toward": "Resistant",
+        "known_mechanism": "porin loss"
+      },
+      {
+        "feature": "parC_S80I",
+        "mean_abs_shap": 0.40798380970954895,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaKPC-3",
+        "mean_abs_shap": 0.2537928819656372,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "ramR_A19V",
+        "mean_abs_shap": 0.24544532597064972,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "gyrA_S83F",
+        "mean_abs_shap": 0.233790785074234,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaCTX-M-15",
+        "mean_abs_shap": 0.2141226828098297,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "mph(A)",
+        "mean_abs_shap": 0.2015969604253769,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "dfrA12",
+        "mean_abs_shap": 0.16998900473117828,
+        "pushes_toward": "Susceptible",
+        "known_mechanism": null
+      },
+      {
+        "feature": "qnrB1",
+        "mean_abs_shap": 0.1607717126607895,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaNDM-1",
+        "mean_abs_shap": 0.15313562750816345,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaOXA",
+        "mean_abs_shap": 0.14787250757217407,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "blaOXA-48",
+        "mean_abs_shap": 0.13941605389118195,
+        "pushes_toward": "Resistant",
+        "known_mechanism": null
+      },
+      {
+        "feature": "sul2",
+        "mean_abs_shap": 0.13293388485908508,
+        "pushes_toward": "Resistant",
         "known_mechanism": null
       }
     ]

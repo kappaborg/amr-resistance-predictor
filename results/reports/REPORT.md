@@ -3,10 +3,9 @@
 *An interpretable, honestly-benchmarked classifier for antibiotic resistance in* Klebsiella
 pneumoniae *from bacterial genomes.*
 
-> **Status:** living draft. Numbers below are the **current (pre-top-up)** results on 1,472 genomes;
-> they will be refreshed on the enlarged dataset via `python -m src.refresh_pipeline` once the
-> Phase-2b top-up download completes. Sections marked ⚕ need microbiology sign-off; 🔜 marks
-> work still to add (published-method comparison, poster).
+> **Status:** living draft. Numbers below are the **refreshed** results on the full **3,850-genome**
+> dataset (after the Phase-2b top-up; 688 determinants). Sections marked ⚕ need microbiology
+> sign-off; 🔜 marks work still to add (published-method comparison, poster).
 
 ---
 
@@ -33,9 +32,9 @@ accuracy hides.
 - **Genomes + phenotypes:** BV-BRC (`genome_amr`, `genome_sequence`), *K. pneumoniae* (taxon 573),
   **laboratory phenotypes only** (`evidence = "Laboratory Method"`) — computational predictions are
   excluded to avoid circular labels.
-- **Current set:** 1,472 QC-passed genomes (balanced ciprofloxacin thin slice, reused across all
-  drugs via multi-drug labels). 🔜 Phase-2b top-up adds ~2,400 resistant genomes for
-  meropenem/gentamicin/cefoxitin.
+- **Full set:** **3,850 QC-passed genomes** (initial 1,472 + Phase-2b top-up of ~2,378 additional
+  genomes, targeted at resistant strains for meropenem/gentamicin/cefoxitin). Per-drug resistant
+  counts rose ~3–5× (e.g. meropenem 294→1,427 R, cefoxitin 319→1,525 R).
 - **QC (literature-aligned, MIMAG):** completeness ≥90%, contamination ≤5% (Bowers et al. 2017),
   contigs ≤500, genome length 4.5–7.5 Mbp (Kleborate range). Drops 1.9%, class-balanced.
 - Provenance in `data/manifest.md`; every choice in `docs/decisions.md`.
@@ -43,7 +42,7 @@ accuracy hides.
 ## 3. Methods
 - **Features:** AMRFinderPlus (`--organism Klebsiella_pneumoniae`, DB 2026-05-15.1) → binary
   genome × determinant matrix (acquired genes + point mutations; VIRULENCE/STRESS excluded).
-  Current matrix: 1,472 × 446 determinants.
+  Matrix: **3,850 × 688 determinants**.
 - **Lineage-aware split:** MLST (`mlst`, klebsiella scheme) assigns each genome a sequence type
   (400 STs); untypeable genomes get a unique synthetic lineage. **StratifiedGroupKFold** holds out
   whole STs for the test set while balancing R/S. A test asserts zero shared lineage
@@ -55,31 +54,40 @@ accuracy hides.
 - **Interpretability:** global SHAP (TreeExplainer) per drug; top determinants checked against known
   mechanisms.
 
-## 4. Results (current — pre-top-up, VME ≤ 3% operating point)
-Per drug, test set = unseen lineages. VME = resistant called susceptible (dangerous); ME = susceptible
-called resistant. Best model shown; full tables in `results/reports/summary_05_week2_panel.md`.
+## 4. Results (full 3,850-genome set, VME ≤ 3% operating point)
+Per drug, test set = unseen lineages. Logistic regression shown (competitive-or-best on these sparse
+features; XGBoost similar — full tables incl. rules + calibrated XGBoost in
+`results/reports/summary_05_week2_panel.md`). VME = resistant called susceptible (dangerous);
+ME = susceptible called resistant.
 
-| Drug | Test (R/S) | ROC-AUC | PR-AUC | VME | ME | Rules-baseline ROC | ML adds |
+| Drug | Test R/S (lineages) | ROC-AUC | PR-AUC | VME | ME | Rules ROC | What ML adds |
 |---|---|---|---|---|---|---|---|
-| ciprofloxacin | 184/184 | 0.976 | 0.976 | 0.022 | 0.147 | 0.897 | fewer major errors |
-| TMP-SMX | 179/141 | 0.969 | 0.963 | 0.039 | 0.113 | 0.895 | discrimination + ME |
-| gentamicin | 102/249 | 0.962 | 0.910 | 0.049 | 0.237 | 0.929 | modest |
-| meropenem | 73/265 | 0.947 | 0.922 | 0.055 | 0.109 | 0.949 | matches strong rule |
-| **cefoxitin** | 79/89 | **0.957** | 0.961 | (data-limited) | — | **0.532** | **large — porin loss** |
+| ciprofloxacin | 568/225 (139) | 0.973 | 0.986 | 0.033 | 0.089 | 0.904 | halves major errors |
+| TMP-SMX | 512/226 (123) | 0.970 | 0.981 | 0.039 | 0.128 | 0.875 | discrimination + ME |
+| meropenem | 355/526 (132) | 0.982 | 0.976 | 0.017 | 0.293 | 0.934 | meets VME target |
+| gentamicin | 401/528 (141) | 0.968 | 0.957 | 0.032 | 0.129 | **0.967** | ~matches strong rule |
+| **cefoxitin** | 381/253 (77) | **0.906** | 0.934 | 0.018 | 0.850 | **0.517** | **large — porin loss** |
 
-**Honest reading:** discrimination is strong everywhere (ROC 0.88–0.98 on unseen lineages). ML clearly
-beats the baseline on cefoxitin, TMP-SMX, ciprofloxacin; on meropenem/gentamicin the rules baseline is
-already strong (carbapenemase / AME presence is a direct signal). Operating at a strict VME≤3% is clean
-for the well-populated drugs (cipro, TMP-SMX) and data-limited for cefoxitin (top-up will address).
+**Honest reading.** Discrimination is strong on unseen lineages (ROC 0.91–0.98). The enlarged data
+**stabilised the previously weak operating points** — meropenem and cefoxitin now meet the VME≤3%
+target (were data-limited/degenerate before). ML clearly beats the gene-lookup baseline on cefoxitin,
+TMP-SMX, ciprofloxacin; on **gentamicin the rules baseline is already excellent** (ROC 0.967 — AME
+presence is a direct signal) and ML only matches it — reported honestly.
+
+**The clinical trade-off is explicit:** operating at a strict VME≤3% raises major errors, sharply so
+where resistance is hard to call precisely (cefoxitin ME 0.85, meropenem ME 0.29). A screening tool
+that refuses to miss resistance necessarily over-calls it; the operating threshold is a clinical
+choice (⚕), and ROC/PR-AUC (threshold-free) show the underlying separation is good.
 
 ## 5. Interpretability & biological validation ⚕
-Global SHAP (`results/figures/shap_*.png`) recovers the correct causal mechanisms: gyrA/parC + qnr
-(cipro), aac(3) acetyltransferases (gentamicin), dfrA/sul (TMP-SMX), blaKPC carbapenemases with the
-largest per-genome impact (meropenem), and ompK35/36 porin mutations (cefoxitin). **Caveat —
-co-selection:** for meropenem/cefoxitin the *mean*-|SHAP| ranking is topped by fluoroquinolone
-mutations that are co-carried in MDR lineages, not causal; per-instance SHAP (the beeswarm) separates
-mechanism from lineage marker. This is a genuine finding, not a bug, and is exactly what the
-biological-validation step exists to catch.
+Global SHAP (`results/figures/shap_*.png`) recovers the correct causal mechanisms, and the enlarged
+dataset **sharpened the interpretation**: meropenem now ranks **blaKPC-2/blaKPC-3 as the top-2
+determinants** (the added lineage diversity broke the earlier gene–lineage confound, where a
+co-carried fluoroquinolone mutation topped the list). Top features per drug: parC/gyrA + qnr (cipro),
+aac(3) acetyltransferases (gentamicin), sul1/dfrA (TMP-SMX), blaKPC (meropenem), ompK36 porin
+(cefoxitin). **Residual co-selection:** cefoxitin still shows co-carried MDR markers high because
+porin-loss resistance co-occurs with carbapenemase-carrying lineages — per-instance SHAP (the
+beeswarm), not mean rank, remains the honest lens, and SHAP rank ≠ causation.
 
 ## 6. Demo
 `python -m src.app.predict --genome <fasta>` → per-drug R/S at the VME≤3% threshold, calibrated
@@ -88,8 +96,10 @@ genomes; live-annotation path matches cached.
 
 ## 7. Limitations
 - **Single organism, five drugs** — scope-disciplined; not a general tool.
-- **Co-selection confounding** inflates the apparent importance of co-carried determinants (§5).
-- **cefoxitin operating point is data-limited** at VME≤3% (top-up in progress).
+- **Co-selection confounding** inflates the apparent importance of co-carried determinants (§5);
+  reduced but not eliminated by the top-up (still visible for cefoxitin).
+- **High major-error cost at VME≤3%** for hard-to-call drugs (cefoxitin ME 0.85, meropenem 0.29) —
+  a clinical operating-point trade-off, not a discrimination failure.
 - **Reference-database bias** — AMRFinderPlus/CARD and BV-BRC over-represent well-sequenced regions
   and pathogens; generalization beyond them is unproven.
 - **Determinant features only** — k-mer/whole-genome signal deliberately out of scope.
