@@ -1,0 +1,197 @@
+{
+  "meropenem": {
+    "n_train": 1013,
+    "n_test": 338,
+    "test_R": 73,
+    "test_S": 265,
+    "train_lineages": 287,
+    "test_lineages": 99,
+    "rules": {
+      "roc_auc": 0.9494701473248902,
+      "pr_auc": 0.8718230165806562,
+      "very_major_error_rate": 0.0821917808219178,
+      "major_error_rate": 0.018867924528301886,
+      "vme_count": 6,
+      "me_count": 5,
+      "n_resistant": 73,
+      "n_susceptible": 265
+    },
+    "logreg": {
+      "roc_auc": 0.9469630395451022,
+      "pr_auc": 0.9221101532642196,
+      "very_major_error_rate": 0.0821917808219178,
+      "major_error_rate": 0.045283018867924525,
+      "vme_count": 6,
+      "me_count": 12,
+      "n_resistant": 73,
+      "n_susceptible": 265
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9505556991470665,
+      "pr_auc": 0.8789429194566447,
+      "very_major_error_rate": 0.2328767123287671,
+      "major_error_rate": 0.01509433962264151,
+      "vme_count": 17,
+      "me_count": 4,
+      "n_resistant": 73,
+      "n_susceptible": 265,
+      "brier": 0.04977379254372616
+    }
+  },
+  "gentamicin": {
+    "n_train": 1055,
+    "n_test": 351,
+    "test_R": 102,
+    "test_S": 249,
+    "train_lineages": 293,
+    "test_lineages": 98,
+    "rules": {
+      "roc_auc": 0.9291282778171509,
+      "pr_auc": 0.8613939165409753,
+      "very_major_error_rate": 0.11764705882352941,
+      "major_error_rate": 0.024096385542168676,
+      "vme_count": 12,
+      "me_count": 6,
+      "n_resistant": 102,
+      "n_susceptible": 249
+    },
+    "logreg": {
+      "roc_auc": 0.9624773604220804,
+      "pr_auc": 0.9096448811708102,
+      "very_major_error_rate": 0.19607843137254902,
+      "major_error_rate": 0.0321285140562249,
+      "vme_count": 20,
+      "me_count": 8,
+      "n_resistant": 102,
+      "n_susceptible": 249
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9417080085046066,
+      "pr_auc": 0.8251866002554005,
+      "very_major_error_rate": 0.2647058823529412,
+      "major_error_rate": 0.08032128514056225,
+      "vme_count": 27,
+      "me_count": 20,
+      "n_resistant": 102,
+      "n_susceptible": 249,
+      "brier": 0.09714090993128172
+    }
+  },
+  "ciprofloxacin": {
+    "n_train": 1104,
+    "n_test": 368,
+    "test_R": 184,
+    "test_S": 184,
+    "train_lineages": 294,
+    "test_lineages": 106,
+    "rules": {
+      "roc_auc": 0.8967391304347826,
+      "pr_auc": 0.8337058106460788,
+      "very_major_error_rate": 0.021739130434782608,
+      "major_error_rate": 0.18478260869565216,
+      "vme_count": 4,
+      "me_count": 34,
+      "n_resistant": 184,
+      "n_susceptible": 184
+    },
+    "logreg": {
+      "roc_auc": 0.9758831521739131,
+      "pr_auc": 0.9761410340394577,
+      "very_major_error_rate": 0.04891304347826087,
+      "major_error_rate": 0.043478260869565216,
+      "vme_count": 9,
+      "me_count": 8,
+      "n_resistant": 184,
+      "n_susceptible": 184
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9748788988657845,
+      "pr_auc": 0.9665658825771777,
+      "very_major_error_rate": 0.03804347826086957,
+      "major_error_rate": 0.11956521739130435,
+      "vme_count": 7,
+      "me_count": 22,
+      "n_resistant": 184,
+      "n_susceptible": 184,
+      "brier": 0.05864694078515548
+    }
+  },
+  "trimethoprim_sulfamethoxazole": {
+    "n_train": 972,
+    "n_test": 320,
+    "test_R": 179,
+    "test_S": 141,
+    "train_lineages": 261,
+    "test_lineages": 88,
+    "rules": {
+      "roc_auc": 0.8953405443955782,
+      "pr_auc": 0.8651083827385703,
+      "very_major_error_rate": 0.03910614525139665,
+      "major_error_rate": 0.1702127659574468,
+      "vme_count": 7,
+      "me_count": 24,
+      "n_resistant": 179,
+      "n_susceptible": 141
+    },
+    "logreg": {
+      "roc_auc": 0.9689369626371886,
+      "pr_auc": 0.9625884648777936,
+      "very_major_error_rate": 0.0446927374301676,
+      "major_error_rate": 0.09219858156028368,
+      "vme_count": 8,
+      "me_count": 13,
+      "n_resistant": 179,
+      "n_susceptible": 141
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9567138159198066,
+      "pr_auc": 0.9523723968655748,
+      "very_major_error_rate": 0.0446927374301676,
+      "major_error_rate": 0.12056737588652482,
+      "vme_count": 8,
+      "me_count": 17,
+      "n_resistant": 179,
+      "n_susceptible": 141,
+      "brier": 0.06568136859687748
+    }
+  },
+  "cefoxitin": {
+    "n_train": 509,
+    "n_test": 168,
+    "test_R": 79,
+    "test_S": 89,
+    "train_lineages": 145,
+    "test_lineages": 47,
+    "rules": {
+      "roc_auc": 0.5323567060162139,
+      "pr_auc": 0.4996232670283303,
+      "very_major_error_rate": 0.9240506329113924,
+      "major_error_rate": 0.011235955056179775,
+      "vme_count": 73,
+      "me_count": 1,
+      "n_resistant": 79,
+      "n_susceptible": 89
+    },
+    "logreg": {
+      "roc_auc": 0.9565495662067985,
+      "pr_auc": 0.9606972730175204,
+      "very_major_error_rate": 0.11392405063291139,
+      "major_error_rate": 0.07865168539325842,
+      "vme_count": 9,
+      "me_count": 7,
+      "n_resistant": 79,
+      "n_susceptible": 89
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.8754800170672734,
+      "pr_auc": 0.8733249524313591,
+      "very_major_error_rate": 0.3037974683544304,
+      "major_error_rate": 0.1348314606741573,
+      "vme_count": 24,
+      "me_count": 12,
+      "n_resistant": 79,
+      "n_susceptible": 89,
+      "brier": 0.1402408424072646
+    }
+  }
+}
