@@ -1,0 +1,57 @@
+{
+  "meropenem": {
+    "alpha": 0.05,
+    "n_test": 881,
+    "coverage_R": 0.9971830985915493,
+    "coverage_S": 0.9847908745247148,
+    "confident_rate": 0.5437003405221339,
+    "defer_rate": 0.45629965947786605,
+    "n_confident": 479,
+    "vme_confident": 0.0031847133757961785,
+    "me_confident": 0.048484848484848485
+  },
+  "gentamicin": {
+    "alpha": 0.05,
+    "n_test": 929,
+    "coverage_R": 0.9351620947630923,
+    "coverage_S": 0.9393939393939394,
+    "confident_rate": 0.7298170075349839,
+    "defer_rate": 0.27018299246501615,
+    "n_confident": 678,
+    "vme_confident": 0.07738095238095238,
+    "me_confident": 0.0935672514619883
+  },
+  "ciprofloxacin": {
+    "alpha": 0.05,
+    "n_test": 793,
+    "coverage_R": 0.9577464788732394,
+    "coverage_S": 0.9333333333333333,
+    "confident_rate": 0.9558638083228247,
+    "defer_rate": 0.044136191677175286,
+    "n_confident": 758,
+    "vme_confident": 0.04460966542750929,
+    "me_confident": 0.06818181818181818
+  },
+  "trimethoprim_sulfamethoxazole": {
+    "alpha": 0.05,
+    "n_test": 738,
+    "coverage_R": 0.962890625,
+    "coverage_S": 0.9292035398230089,
+    "confident_rate": 0.943089430894309,
+    "defer_rate": 0.056910569105691054,
+    "n_confident": 696,
+    "vme_confident": 0.038461538461538464,
+    "me_confident": 0.07920792079207921
+  },
+  "cefoxitin": {
+    "alpha": 0.05,
+    "n_test": 634,
+    "coverage_R": 0.994750656167979,
+    "coverage_S": 0.8735177865612648,
+    "confident_rate": 0.580441640378549,
+    "defer_rate": 0.4195583596214511,
+    "n_confident": 368,
+    "vme_confident": 0.00625,
+    "me_confident": 0.6666666666666666
+  }
+}

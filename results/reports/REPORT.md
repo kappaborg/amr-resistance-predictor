@@ -106,6 +106,16 @@ aac(3) acetyltransferases (gentamicin), sul1/dfrA (TMP-SMX), blaKPC (meropenem),
 porin-loss resistance co-occurs with carbapenemase-carrying lineages — per-instance SHAP (the
 beeswarm), not mean rank, remains the honest lens, and SHAP rank ≠ causation.
 
+## 5.5 Uncertainty & clinical abstention (conformal prediction)
+Class-conditional (Mondrian) conformal prediction gives each call a **per-class coverage guarantee**
+and an explicit **abstain → defer to phenotypic testing** option (`src/models/conformal.py`,
+`results/figures/conformal.png`). At α=0.05 the model confidently classifies ~95% of strains for
+well-powered drugs (cipro, TMP-SMX) and, for hard drugs (meropenem, cefoxitin), makes confident calls
+on ~55–58% with **near-zero very-major error (0.3–0.6%)** while deferring the rest. Because we test on
+*unseen lineages* (breaking the exchangeability conformal assumes), coverage is **empirically
+validated** under distribution shift — stricter than standard random-split conformal, and it holds
+(≥0.93–1.00) for most drug/class pairs.
+
 ## 6. Demo
 `python -m src.app.predict --genome <fasta>` → per-drug R/S at the VME≤3% threshold, calibrated
 P(resistant), and the SHAP-ranked determinants behind each call. Verified on resistant and susceptible
