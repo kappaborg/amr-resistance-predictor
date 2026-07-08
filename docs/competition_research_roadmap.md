@@ -78,3 +78,51 @@ strongest possible "it generalizes" evidence. BV-BRC has collection date/country
 near-free Tier-2 bonus. This adds: proof of generalization, statistically-guaranteed clinical safety,
 and a genuine AI-assisted interface, without leaving the determinant-feature + honest-evaluation
 philosophy that is already the project's strength.
+
+**Status:** conformal ✅, LLM layer ✅, cross-resistance ✅, E. coli 🔄 (downloading).
+
+---
+
+# Round 2 — deeper search (what still moves the needle)
+
+Grounded in judging-criteria and AMR-ML literature (2024–2026). Judges reward, in order:
+**novelty · validation rigor on data the method wasn't built for · real-world impact with real
+metrics · reproducibility · clear communication · owning your limitations.** Ranked by boost/effort.
+
+## TIER 1 — highest ROI (strongly recommended)
+
+### A. Temporal (prospective-style) validation — *the single biggest rigor differentiator*
+**Why:** literature says only ~2/10 AMR-ML studies do prospective validation, and those show 15–30%
+lower performance — reviewers explicitly look for "tested on data it wasn't designed for" and
+*temporal* generalizability (evolving resistance). We already have the hardest split (lineage); adding
+a **train-on-past / test-on-future** split (BV-BRC has `collection_date`) is the definitive
+"it generalizes forward in time" evidence, and honestly reporting any drop is a rigor win, not a loss.
+**Effort:** ~1 day. **Impact:** very high.
+
+### B. Clinical-impact quantification — *what separates finalist from winner*
+**Why:** "impact with real metrics, calculated or cited" is the finalist→winner line. Genomic
+prediction returns a call in **minutes from sequence vs ~48–72 h for phenotypic AST** (cite: mNGS
+models cut turnaround ~70 h). Translate our VME/ME into **stewardship terms** (a very-major error =
+a missed resistant infection → wrong empiric therapy), and frame the panel against **WHO priority
+pathogens** (K. pneumoniae carbapenem-R is #1 critical). **Effort:** ~half day (framing + a small
+turnaround calc). **Impact:** very high, near-free.
+
+### C. Interactive web demo (Streamlit) — *communication is a judged criterion*
+**Why:** a poster/defense lands far better with a clickable app than a CLI: upload/select a genome →
+per-drug R/S, calibrated confidence, **conformal "defer to lab" flag**, SHAP drivers, and the **Claude
+narrative** — all on one screen. **Effort:** ~1 day. **Impact:** high (demo wow + clarity).
+
+## TIER 2 — strong if time allows
+- **Geographic cross-site validation** — country/region holdout (BV-BRC `geographic_location`);
+  a second real distribution-shift test beyond lineage. ~1 day.
+- **Benchmark vs an established tool (ResFinder)** — the standard external comparison in the field;
+  strengthens the honest benchmark beyond our hand-rolled rules baseline. ~1–2 days.
+- **Model card + dataset datasheet** — cheap, directly hits the reproducibility criterion. ~half day.
+- **Active-learning / surveillance prioritization** — use conformal abstention to rank *which*
+  uncertain isolates to send for phenotypic AST (a real lab-workflow use case). ~1 day.
+- **MIC regression** — predict MIC values, not just R/S (gold-standard, richer). ~2–3 days.
+
+## Recommended next package
+**A (temporal validation) + B (clinical-impact quantification) + C (Streamlit demo)** — rigor,
+impact, and communication, the exact three axes judges score. A and B are near-free given our
+infrastructure; C is the presentation multiplier.
