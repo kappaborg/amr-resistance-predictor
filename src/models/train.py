@@ -31,8 +31,13 @@ FEATURES = REPO / "data/processed/thin_slice_cipro_features.csv"
 SPLIT = REPO / "data/processed/thin_slice_cipro_split.csv"
 OUT = REPO / "results/metrics/thin_slice_cipro_metrics.json"
 
-# Known ciprofloxacin resistance determinants (substring match on AMRFinderPlus element symbols).
-CIPRO_RULES = ["gyrA_", "parC_", "gyrB_", "parE_", "qnr", "aac(6')-Ib-cr", "oqxA", "oqxB", "qepA"]
+# Expert known-gene rules baseline for ciprofloxacin resistance. AMRFinderPlus (with --organism)
+# only reports resistance-ASSOCIATED gyrA/parC/gyrB/parE mutations, so any such symbol is a real
+# QRDR hit. Acquired PMQR (qnr, aac(6')-Ib-cr, qepA) included.
+# DELIBERATELY EXCLUDES oqxAB: it is INTRINSIC/chromosomal in K. pneumoniae (present in ~88% of all
+# genomes incl. susceptible), so it is not a valid resistance rule — including it makes the baseline
+# call nearly everything resistant. This is exactly the "database-lookup is not enough" point.
+CIPRO_RULES = ["gyrA_", "parC_", "gyrB_", "parE_", "qnr", "aac(6')-Ib-cr", "qepA"]
 
 
 def rules_predict(feature_cols: list[str], X: np.ndarray) -> np.ndarray:

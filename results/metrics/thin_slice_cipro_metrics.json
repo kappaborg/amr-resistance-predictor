@@ -1,0 +1,32 @@
+{
+  "rules_baseline": {
+    "roc_auc": 0.8967391304347826,
+    "pr_auc": 0.8337058106460788,
+    "very_major_error_rate": 0.021739130434782608,
+    "major_error_rate": 0.18478260869565216,
+    "vme_count": 4,
+    "me_count": 34,
+    "n_resistant": 184,
+    "n_susceptible": 184
+  },
+  "logreg": {
+    "roc_auc": 0.9758831521739131,
+    "pr_auc": 0.9761410340394577,
+    "very_major_error_rate": 0.04891304347826087,
+    "major_error_rate": 0.043478260869565216,
+    "vme_count": 9,
+    "me_count": 8,
+    "n_resistant": 184,
+    "n_susceptible": 184
+  },
+  "xgboost": {
+    "roc_auc": 0.9760899102079394,
+    "pr_auc": 0.9764823305933408,
+    "very_major_error_rate": 0.043478260869565216,
+    "major_error_rate": 0.09239130434782608,
+    "vme_count": 8,
+    "me_count": 17,
+    "n_resistant": 184,
+    "n_susceptible": 184
+  }
+}
