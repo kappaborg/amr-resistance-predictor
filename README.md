@@ -40,7 +40,17 @@ make test          # run the test suite (incl. the leakage test)
 ```
 Pipeline: `make data → features → split → train → eval → figures` (or `make all`).
 
-## Status
-**Phase 0 complete** — scaffold, environment, config, decision log in place.
-Next: **Phase 1** — BV-BRC organism/drug selection (needs data plan + microbiology sign-off; no
-downloads until approved).
+## Demo
+```bash
+python -m src.app.predict --genome-id 573.12772        # instant (cached annotation)
+python -m src.app.predict --genome path/to/genome.fna  # live AMRFinderPlus (~1-3 min)
+```
+Outputs per-drug resistant/susceptible + calibrated P(resistant) + the determinants behind each call.
+
+## Status (Klebsiella pneumoniae, 5-drug panel)
+- **Weeks 1–3 done:** end-to-end pipeline, per-drug models (VME≤3% operating point), SHAP +
+  biological validation, working demo. See `results/reports/summary_0*.md`.
+- Discrimination ROC-AUC 0.88–0.98 on **unseen lineages**; cefoxitin shows ML >> gene-lookup
+  (porin loss). Full benchmark in `results/reports/`.
+- **In progress:** Phase-2b top-up (more resistant genomes for meropenem/gentamicin/cefoxitin) to
+  firm up their operating points, then Week-4 write-up/poster/reproducibility pack.
