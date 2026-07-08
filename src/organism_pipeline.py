@@ -54,7 +54,7 @@ RULES = {
 }
 
 ORGANISMS = {
-    "ecoli": {"taxon": 562, "amrfinder": "Escherichia_coli", "ids": "data/raw/ecoli_ids.txt",
+    "ecoli": {"taxon": 562, "amrfinder": "Escherichia", "ids": "data/raw/ecoli_ids.txt",
               "len": (4.0, 6.0),
               "drugs": {"ciprofloxacin": "ciprofloxacin", "gentamicin": "gentamicin",
                         "trimethoprim_sulfamethoxazole": "trimethoprim%2Fsulfamethoxazole",
