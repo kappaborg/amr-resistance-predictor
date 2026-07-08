@@ -29,5 +29,6 @@ dependencies:
   - pip>=23
   - pip:
       - anthropic>=0.40   # AI explanation layer (clinical narrative from model output)
+      - streamlit>=1.30   # interactive web demo (src/app/streamlit_app.py)
 # BV-BRC access is via its REST Data API (using `requests`); no CLI package required.
 # The optional standalone BV-BRC command-line tools install separately from https://www.bv-brc.org.

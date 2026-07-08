@@ -42,8 +42,13 @@ Pipeline: `make data → features → split → train → eval → figures` (or 
 
 ## Demo
 ```bash
+# CLI
 python -m src.app.predict --genome-id 573.12772        # instant (cached annotation)
 python -m src.app.predict --genome path/to/genome.fna  # live AMRFinderPlus (~1-3 min)
+python -m src.app.report  --genome-id 573.12772        # + AI clinical narrative (needs ANTHROPIC_API_KEY)
+
+# Interactive web app
+streamlit run src/app/streamlit_app.py                 # genome -> calls + confidence + drivers + narrative
 ```
 Outputs per-drug resistant/susceptible + calibrated P(resistant) + the determinants behind each call.
 
