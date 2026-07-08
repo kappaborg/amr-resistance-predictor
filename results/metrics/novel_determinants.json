@@ -1,0 +1,48 @@
+{
+  "meropenem": [
+    "ble",
+    "aac(6')-Ib",
+    "blaOXA",
+    "blaTEM-1",
+    "blaSHV-12",
+    "aadA1",
+    "aph(3'')-Ib"
+  ],
+  "gentamicin": [
+    "aadA1",
+    "floR",
+    "mph(A)",
+    "mrx(A)",
+    "msr(E)",
+    "arr-2",
+    "tet(D)",
+    "aac(6')-Ib'"
+  ],
+  "ciprofloxacin": [
+    "aadA2",
+    "tet(A)",
+    "catA1",
+    "blaTEM-1",
+    "blaOXA",
+    "catB3"
+  ],
+  "trimethoprim_sulfamethoxazole": [
+    "mrx(A)",
+    "aph(6)-Id",
+    "catA1",
+    "blaSHV-11",
+    "blaSHV-12",
+    "aadA1",
+    "aadA2"
+  ],
+  "cefoxitin": [
+    "ble",
+    "mph(A)",
+    "blaOXA",
+    "blaSHV_C-112A",
+    "tet(D)",
+    "fosA7",
+    "arr-3",
+    "aac(6')-Ib"
+  ]
+}

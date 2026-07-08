@@ -106,6 +106,13 @@ aac(3) acetyltransferases (gentamicin), sul1/dfrA (TMP-SMX), blaKPC (meropenem),
 porin-loss resistance co-occurs with carbapenemase-carrying lineages — per-instance SHAP (the
 beeswarm), not mean rank, remains the honest lens, and SHAP rank ≠ causation.
 
+**Cross-resistance / linked-determinant scan** (`src/interpret/novel_determinants.py`,
+`summary_11`): high-SHAP determinants that are not a drug's causal mechanism are, on inspection, known
+AMR genes for *other* classes co-carried on the same MDR plasmids (e.g. meropenem resistance travels
+with aac(6')-Ib, blaOXA, blaTEM, ble). This maps the isolate population's linked-resistance structure.
+**Honest limit:** because features are AMRFinderPlus *catalogued* determinants, none is a novel gene —
+genuine novel-gene discovery would require pan-genome/k-mer features (out of scope, see §7).
+
 ## 5.5 Uncertainty & clinical abstention (conformal prediction)
 Class-conditional (Mondrian) conformal prediction gives each call a **per-class coverage guarantee**
 and an explicit **abstain → defer to phenotypic testing** option (`src/models/conformal.py`,
