@@ -11,13 +11,15 @@ import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-LABELS = REPO / "data/processed/thin_slice_cipro_labels_qc.csv"
+MASTER = REPO / "data/processed/panel_genomes.csv"          # full set (after top-up refresh)
+LABELS = REPO / "data/processed/thin_slice_cipro_labels_qc.csv"  # original 1472
 AMR = REPO / "data/interim/amrfinder"
 MLST = REPO / "data/interim/mlst"
 
 
 def total() -> int:
-    return sum(1 for _ in csv.DictReader(LABELS.open()))
+    src = MASTER if MASTER.exists() else LABELS
+    return sum(1 for _ in csv.DictReader(src.open()))
 
 
 def bar(done: int, tot: int, width: int = 40) -> str:
