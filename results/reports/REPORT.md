@@ -79,6 +79,23 @@ where resistance is hard to call precisely (cefoxitin ME 0.85, meropenem ME 0.29
 that refuses to miss resistance necessarily over-calls it; the operating threshold is a clinical
 choice (⚕), and ROC/PR-AUC (threshold-free) show the underlying separation is good.
 
+### 4.1 Comparison to published methods
+Published genome-based AMR-ML for *K. pneumoniae* reports strong numbers — meropenem ROC-AUC ≈ 0.93,
+gentamicin accuracy ≈ 0.91, ciprofloxacin accuracy ≈ 0.96, and large multi-drug studies AUC > 0.9
+with ~96% agreement (Nguyen-style pipelines; recent PLOS One / bioRxiv 2024). **But most use random
+train/test splits**, which leak population structure and inflate metrics. Our ROC-AUC (0.91–0.98) sits
+in or above that published band **while measured under a stricter phylogeny-aware split** — i.e.,
+comparable discrimination on a harder, honest evaluation, plus interpretability and clinical-error
+reporting that most studies omit. The claim is not "state of the art"; it is "honestly measured, here
+is what the model adds over a gene lookup." See `results/figures/benchmark_summary.png` (published band
+shown in gold).
+
+### 4.2 Figures
+- `benchmark_summary.png` — ROC-AUC per drug (ML vs rules vs published band) + VME/ME at the operating point.
+- `roc_curves.png` — per-drug ROC (rules / logreg / XGBoost).
+- `calibration.png` — reliability curves (isotonic XGBoost).
+- `shap_<drug>.png` — global SHAP beeswarm per drug.
+
 ## 5. Interpretability & biological validation ⚕
 Global SHAP (`results/figures/shap_*.png`) recovers the correct causal mechanisms, and the enlarged
 dataset **sharpened the interpretation**: meropenem now ranks **blaKPC-2/blaKPC-3 as the top-2
