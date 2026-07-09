@@ -90,13 +90,21 @@ reporting that most studies omit. The claim is not "state of the art"; it is "ho
 is what the model adds over a gene lookup." See `results/figures/benchmark_summary.png` (published band
 shown in gold).
 
-### 4.3 Generalization to a second organism (E. coli)
-The identical pipeline was run on *E. coli* (organism-agnostic runner; only taxon / AMRFinderPlus
-organism / MLST scheme change). On the three drugs shared with K. pneumoniae, ROC-AUC on unseen
-lineages is comparable on both organisms — ciprofloxacin 0.973 → 0.989, gentamicin 0.968 → 0.989,
-TMP-SMX 0.970 → 0.948 — demonstrating a transferable *method*, not a single-organism fit
-(`summary_15`). Carbapenems were excluded from the E. coli panel (resistance too rare — 69 genomes),
-reflecting each organism's real epidemiology.
+### 4.3 Generalization across four organisms
+The identical pipeline runs on **four WHO-priority pathogens** spanning the Gram divide (organism-
+agnostic runner; only taxon / AMRFinderPlus organism / MLST scheme change): *K. pneumoniae* and
+*E. coli* (Gram-negative Enterobacterales, critical), *A. baumannii* (Gram-negative non-
+Enterobacterales, critical), and *S. aureus* (**Gram-positive**, high). Every organism × drug reaches
+ROC-AUC **0.84–0.99** on unseen lineages (`summary_18`). ML clearly beats the gene-lookup where
+resistance is combinatorial (e.g. S. aureus cefoxitin 0.93 vs 0.80; A. baumannii amikacin 0.90 vs
+0.54) and matches it on direct single-gene calls (mecA, carbapenemases). Honest limit: A. baumannii
+carbapenems are degenerate at VME≤3% (overwhelmingly resistant population).
+
+**Cross-species transfer (the headline, §5.6 / `cipro_transfer_matrix.png`).** Ciprofloxacin is
+modelled in all four; trained on one organism and tested zero-shot on another, ROC-AUC transfers
+across the three Gram-negatives (0.74–0.98 — homologous gyrA/parC) but collapses to Gram-positive
+S. aureus (0.46–0.69) because it uses *grlA* and different gyrA numbering — a mechanistically-expected
+boundary that shows the model learned real biology, not lineage artifacts.
 
 ### 4.2 Figures
 - `benchmark_summary.png` — ROC-AUC per drug (ML vs rules vs published band) + VME/ME at the operating point.
