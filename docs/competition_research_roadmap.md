@@ -126,3 +126,47 @@ narrative** — all on one screen. **Effort:** ~1 day. **Impact:** high (demo wo
 **A (temporal validation) + B (clinical-impact quantification) + C (Streamlit demo)** — rigor,
 impact, and communication, the exact three axes judges score. A and B are near-free given our
 infrastructure; C is the presentation multiplier.
+
+**Status:** A ✅, B ✅, C ✅, E. coli generalization ✅.
+
+---
+
+# Round 3 — deeper search (organisms + method upgrades to shine)
+
+Grounded in the **WHO Bacterial Priority Pathogens List 2024** (24 pathogens, 15 families) and the
+2025–2026 AMR-ML frontier (multi-species transfer; graph neural nets, e.g. AMR-GNN, *Nat. Commun.*
+2026).
+
+## Add organisms (ranked by "shine")
+Our two organisms (K. pneumoniae, E. coli) are both **WHO critical-tier Enterobacterales**. Breadth
+across families/tiers/Gram-type is the strongest generalization statement.
+
+1. **Staphylococcus aureus — Gram-POSITIVE.** The boldest jump: Gram-negative → Gram-positive is a
+   *categorical* change (cell wall, resistance biology). MRSA (mecA → oxacillin/cefoxitin) is iconic
+   and WHO high-priority. Proves the method isn't Gram-negative-specific. **Highest shine.**
+2. **Acinetobacter baumannii — WHO CRITICAL, non-Enterobacterales Gram-neg.** Completes the
+   critical-carbapenem-resistant trio with K. pneumoniae; MDR nosocomial. High clinical relevance.
+3. **Pseudomonas aeruginosa — complex intrinsic+acquired resistance;** the exact organism the SOTA
+   AMR-GNN (2026) used → a direct positioning point.
+4. **M. tuberculosis — mutation-only, no HGT;** a strong *contrast* (different phylogenetic structure)
+   but a weaker "ML adds over rules" story (WHO mutation catalogue is strong).
+
+**Recommendation:** add **S. aureus** (Gram-positive jump) and **A. baumannii** (critical trio) →
+a 4-organism panel spanning Gram-neg Enterobacterales + Gram-neg non-Enterobacterales + Gram-positive,
+across WHO critical & high tiers. Each is ~a few h download (throttled) + ~a few h annotation; the
+organism-general runner already supports them (add one `ORGANISMS` entry + the right AMRFinderPlus
+organism name, e.g. `Staphylococcus_aureus`, `Acinetobacter_baumannii`).
+
+## Method upgrades (mostly free with existing data)
+1. **Cross-species zero-shot transfer** (`src/evaluation/cross_species_transfer.py`, coded): train on
+   one organism, test on another over shared determinants. A striking multi-species result — the exact
+   frontier the literature flags — computed from data we already have. (Pending BV-BRC uptime.)
+2. **Position vs SOTA (AMR-GNN / foundation models):** cite as related work; our edge is
+   interpretability + honest phylogeny-aware + temporal evaluation + calibration + conformal
+   uncertainty — clinical trustworthiness over raw leaderboard AUC.
+3. **Acknowledge XGBoost-SHAP interpretation limits** (*J. Infection* 2025): we independently found
+   the mean-|SHAP| co-selection confound and use per-instance SHAP — turn a known field pitfall into a
+   demonstrated strength.
+
+**Next package:** S. aureus + A. baumannii (breadth) + cross-species transfer (novel result) +
+SOTA positioning (framing). Then poster.
