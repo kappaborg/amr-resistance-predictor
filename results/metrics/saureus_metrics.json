@@ -1,0 +1,127 @@
+{
+  "oxacillin": {
+    "logreg": {
+      "roc_auc": 0.9729064756580479,
+      "pr_auc": 0.9767526110237025,
+      "very_major_error_rate": 0.006172839506172839,
+      "major_error_rate": 0.8066037735849056,
+      "vme_count": 1,
+      "me_count": 171,
+      "n_resistant": 162,
+      "n_susceptible": 212
+    },
+    "rules": {
+      "roc_auc": 0.9620603307710225,
+      "pr_auc": 0.9468494772732596,
+      "very_major_error_rate": 0.06172839506172839,
+      "major_error_rate": 0.014150943396226415,
+      "vme_count": 10,
+      "me_count": 3,
+      "n_resistant": 162,
+      "n_susceptible": 212
+    },
+    "n_test": 374,
+    "test_R": 162,
+    "test_lineages": 38
+  },
+  "cefoxitin": {
+    "logreg": {
+      "roc_auc": 0.9292622271345676,
+      "pr_auc": 0.9584119789382619,
+      "very_major_error_rate": 0.005194805194805195,
+      "major_error_rate": 0.48404255319148937,
+      "vme_count": 2,
+      "me_count": 91,
+      "n_resistant": 385,
+      "n_susceptible": 188
+    },
+    "rules": {
+      "roc_auc": 0.7952749378281293,
+      "pr_auc": 0.8335783961900377,
+      "very_major_error_rate": 0.005194805194805195,
+      "major_error_rate": 0.40425531914893614,
+      "vme_count": 2,
+      "me_count": 76,
+      "n_resistant": 385,
+      "n_susceptible": 188
+    },
+    "n_test": 573,
+    "test_R": 385,
+    "test_lineages": 38
+  },
+  "ciprofloxacin": {
+    "logreg": {
+      "roc_auc": 0.989485274699062,
+      "pr_auc": 0.9913914722169263,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.9266503667481663,
+      "vme_count": 0,
+      "me_count": 379,
+      "n_resistant": 574,
+      "n_susceptible": 409
+    },
+    "rules": {
+      "roc_auc": 0.9797521787652386,
+      "pr_auc": 0.9742334700018006,
+      "very_major_error_rate": 0.008710801393728223,
+      "major_error_rate": 0.03178484107579462,
+      "vme_count": 5,
+      "me_count": 13,
+      "n_resistant": 574,
+      "n_susceptible": 409
+    },
+    "n_test": 983,
+    "test_R": 574,
+    "test_lineages": 68
+  },
+  "erythromycin": {
+    "logreg": {
+      "roc_auc": 0.9367654655818157,
+      "pr_auc": 0.9483177138278738,
+      "very_major_error_rate": 0.05898876404494382,
+      "major_error_rate": 0.3839080459770115,
+      "vme_count": 21,
+      "me_count": 167,
+      "n_resistant": 356,
+      "n_susceptible": 435
+    },
+    "rules": {
+      "roc_auc": 0.9418991347023119,
+      "pr_auc": 0.908402194993624,
+      "very_major_error_rate": 0.0702247191011236,
+      "major_error_rate": 0.04597701149425287,
+      "vme_count": 25,
+      "me_count": 20,
+      "n_resistant": 356,
+      "n_susceptible": 435
+    },
+    "n_test": 791,
+    "test_R": 356,
+    "test_lineages": 90
+  },
+  "clindamycin": {
+    "logreg": {
+      "roc_auc": 0.9563312258517738,
+      "pr_auc": 0.9664926231702167,
+      "very_major_error_rate": 0.0273972602739726,
+      "major_error_rate": 0.7230769230769231,
+      "vme_count": 6,
+      "me_count": 188,
+      "n_resistant": 219,
+      "n_susceptible": 260
+    },
+    "rules": {
+      "roc_auc": 0.9236828240252896,
+      "pr_auc": 0.8613408721408936,
+      "very_major_error_rate": 0.0410958904109589,
+      "major_error_rate": 0.11153846153846154,
+      "vme_count": 9,
+      "me_count": 29,
+      "n_resistant": 219,
+      "n_susceptible": 260
+    },
+    "n_test": 479,
+    "test_R": 219,
+    "test_lineages": 55
+  }
+}
