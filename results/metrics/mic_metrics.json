@@ -1,0 +1,30 @@
+{
+  "meropenem": {
+    "n": 2526,
+    "n_test": 620,
+    "essential_agreement": 0.5935483870967742,
+    "rmse_dilutions": 1.38067810849433,
+    "pearson_r": 0.810591817985725
+  },
+  "gentamicin": {
+    "n": 2503,
+    "n_test": 718,
+    "essential_agreement": 0.8161559888579387,
+    "rmse_dilutions": 0.98459133584708,
+    "pearson_r": 0.7527997348247937
+  },
+  "ciprofloxacin": {
+    "n": 2498,
+    "n_test": 623,
+    "essential_agreement": 0.8892455858747994,
+    "rmse_dilutions": 0.6317985409985138,
+    "pearson_r": 0.8468855148544318
+  },
+  "cefoxitin": {
+    "n": 2252,
+    "n_test": 562,
+    "essential_agreement": 0.8362989323843416,
+    "rmse_dilutions": 0.760242912789124,
+    "pearson_r": 0.8224603616434621
+  }
+}

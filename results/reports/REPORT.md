@@ -129,6 +129,16 @@ with aac(6')-Ib, blaOXA, blaTEM, ble). This maps the isolate population's linked
 **Honest limit:** because features are AMRFinderPlus *catalogued* determinants, none is a novel gene —
 genuine novel-gene discovery would require pan-genome/k-mer features (out of scope, see §7).
 
+## 5.4 MIC regression — predicting the resistance *level* (gold-standard output)
+Beyond binary R/S, the model predicts continuous **MIC** (minimum inhibitory concentration — the
+clinical gold standard) per drug from the same determinant features, under the phylogeny-aware split
+(`src/models/mic_regression.py`, `summary_19`). Evaluated by **Essential Agreement (EA)** — the
+CLSI/FDA criterion of prediction within ±1 two-fold dilution: **ciprofloxacin 88.9% EA** (at the ~90%
+clinical expectation), cefoxitin 83.6%, gentamicin 81.6%, meropenem 59.4% (harder — wide MIC range and
+panel censoring; reported honestly). Pearson r 0.75–0.85. This is a richer, quantitative output scored
+by the metric regulators actually use — the model predicts not just *whether* but *how strongly* a
+strain resists.
+
 ## 5.5 Uncertainty & clinical abstention (conformal prediction)
 Class-conditional (Mondrian) conformal prediction gives each call a **per-class coverage guarantee**
 and an explicit **abstain → defer to phenotypic testing** option (`src/models/conformal.py`,
