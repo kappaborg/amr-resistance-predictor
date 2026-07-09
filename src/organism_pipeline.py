@@ -44,13 +44,24 @@ GENOMES = REPO / "data/raw/genomes"
 AMR_CACHE = REPO / "data/interim/amrfinder"
 MLST_CACHE = REPO / "data/interim/mlst"
 
-# Drug-specific known-gene rules (organism-independent mechanisms; shared with K. pneumoniae where applicable)
+# Drug-specific known-gene rules (organism-independent mechanisms; grlA_ = S. aureus parC homolog).
 RULES = {
-    "ciprofloxacin": ["gyrA_", "parC_", "gyrB_", "parE_", "qnr", "aac(6')-Ib-cr", "qepA"],
+    "ciprofloxacin": ["gyrA_", "parC_", "grlA_", "gyrB_", "parE_", "qnr", "aac(6')-Ib-cr", "qepA"],
     "gentamicin": ["aac(3)", "ant(2'')-Ia", "armA", "rmt"],
-    "trimethoprim_sulfamethoxazole": ["sul1", "sul2", "sul3", "dfrA", "dfrB"],
+    "trimethoprim_sulfamethoxazole": ["sul1", "sul2", "sul3", "dfrA", "dfrB", "dfrG"],
     "ampicillin": ["blaTEM", "blaSHV", "blaOXA-1", "blaCARB", "blaPSE", "blaCTX-M", "blaCMY", "blaDHA"],
     "ceftriaxone": ["blaCTX-M", "blaCMY", "blaDHA", "blaSHV-12", "blaSHV-2", "blaOXA-48", "blaKPC", "blaNDM"],
+    # S. aureus panel
+    "oxacillin": ["mecA", "mecC", "mecB"],                       # MRSA — PBP2a
+    "cefoxitin": ["mecA", "mecC"],                               # S. aureus: mecA screen (not AmpC)
+    "erythromycin": ["erm", "msr(A)", "mph(C)", "mef", "lsa"],   # macrolide (MLSb + efflux)
+    "clindamycin": ["erm", "lnu", "vga", "sal(A)", "lsa"],       # lincosamide (MLSb)
+    # A. baumannii panel (carbapenemases incl. OXA-23/24/58/51-like)
+    "meropenem": ["blaKPC", "blaNDM", "blaVIM", "blaIMP", "blaOXA-23", "blaOXA-24", "blaOXA-58",
+                  "blaOXA-51", "blaOXA-40", "blaOXA-48"],
+    "imipenem": ["blaKPC", "blaNDM", "blaVIM", "blaIMP", "blaOXA-23", "blaOXA-24", "blaOXA-58",
+                 "blaOXA-51", "blaOXA-40", "blaOXA-48"],
+    "amikacin": ["aac(6')-I", "armA", "rmt", "aph(3')"],
 }
 
 ORGANISMS = {
@@ -59,6 +70,17 @@ ORGANISMS = {
               "drugs": {"ciprofloxacin": "ciprofloxacin", "gentamicin": "gentamicin",
                         "trimethoprim_sulfamethoxazole": "trimethoprim%2Fsulfamethoxazole",
                         "ampicillin": "ampicillin", "ceftriaxone": "ceftriaxone"}},
+    "saureus": {"taxon": 1280, "amrfinder": "Staphylococcus_aureus", "ids": "data/raw/saureus_ids.txt",
+                "len": (2.5, 3.3),  # S. aureus ~2.8 Mbp
+                "drugs": {"oxacillin": "oxacillin", "cefoxitin": "cefoxitin",
+                          "ciprofloxacin": "ciprofloxacin", "erythromycin": "erythromycin",
+                          "clindamycin": "clindamycin"}},
+    "abaumannii": {"taxon": 470, "amrfinder": "Acinetobacter_baumannii",
+                   "ids": "data/raw/abaumannii_ids.txt",
+                   "len": (3.4, 4.6),  # A. baumannii ~3.9 Mbp
+                   "drugs": {"meropenem": "meropenem", "imipenem": "imipenem",
+                             "ciprofloxacin": "ciprofloxacin", "gentamicin": "gentamicin",
+                             "amikacin": "amikacin"}},
 }
 
 
