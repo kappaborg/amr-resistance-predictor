@@ -39,11 +39,26 @@ LINEAGES = REPO / "data/processed/thin_slice_cipro_lineages.csv"
 OUT = REPO / "results/reports/summary_19_mic_regression.md"
 
 
-def fetch_mic(drug_enc: str) -> dict[str, float]:
-    """genome_id -> log2(MIC in mg/L). Parses censored values (<=, >, =); keeps median per genome."""
+def _parse_mic(m) -> tuple[float, str] | None:
+    """(log2 MIC, censor) from a BV-BRC measurement string. censor: 'right' (>, MIC is a lower bound),
+    'left' (<, MIC is an upper bound), or 'exact'."""
+    s = str(m).strip()
+    censor = "right" if s.startswith(">") else ("left" if s.startswith("<") else "exact")
+    try:
+        v = float(re.sub(r"[<>=]", "", s).strip())
+    except ValueError:
+        return None
+    return (np.log2(v), censor) if v > 0 else None
+
+
+def fetch_mic_with_censor(drug_enc: str) -> dict[str, tuple[float, str]]:
+    """genome_id -> (median log2(MIC mg/L), censor). Censor = the sign shared by a majority of the
+    genome's measurements ('exact' if mixed), so right/left-censored (off-scale) MICs are flagged and
+    can be scored honestly instead of collapsed onto the boundary dilution."""
     q = (f"and(eq(taxon_id,573),{LAB},eq(antibiotic,%22{drug_enc}%22))"
          f"&select(genome_id,measurement,measurement_unit)&limit(25000)")
-    for attempt in range(4):
+    r = None
+    for _ in range(4):
         r = requests.get(f"{AMR}?{q}", headers={"Accept": "application/json"}, timeout=180)
         if r.status_code == 200 and isinstance(r.json(), list):
             break
@@ -52,14 +67,35 @@ def fetch_mic(drug_enc: str) -> dict[str, float]:
         m, unit = x.get("measurement"), x.get("measurement_unit")
         if not m or unit != "mg/L":
             continue
-        num = re.sub(r"[<>=]", "", str(m)).strip()   # strip censor signs
-        try:
-            v = float(num)
-        except ValueError:
-            continue
-        if v > 0:
-            byg[x["genome_id"]].append(np.log2(v))
-    return {g: float(np.median(vs)) for g, vs in byg.items() if vs}
+        p = _parse_mic(m)
+        if p:
+            byg[x["genome_id"]].append(p)
+    out = {}
+    for g, vs in byg.items():
+        vals = [v for v, _ in vs]
+        cens = [c for _, c in vs]
+        maj = max(set(cens), key=cens.count)
+        censor = maj if cens.count(maj) > len(cens) / 2 else "exact"
+        out[g] = (float(np.median(vals)), censor)
+    return out
+
+
+def fetch_mic(drug_enc: str) -> dict[str, float]:
+    """genome_id -> median log2(MIC mg/L) (value only; used for training and by esm2_mic)."""
+    return {g: v for g, (v, _) in fetch_mic_with_censor(drug_enc).items()}
+
+
+def essential_agreement(pred, true, censor) -> float:
+    """CLSI/FDA Essential Agreement, CENSOR-AWARE. exact: within ±1 doubling dilution. right-censored
+    (true ≥ V): a prediction ≥ V-1 is consistent with some true value within ±1, so it agrees.
+    left-censored (true ≤ V): agrees if pred ≤ V+1."""
+    pred, true = np.asarray(pred), np.asarray(true)
+    agree = np.abs(pred - true) <= 1.0
+    right = np.array([c == "right" for c in censor])
+    left = np.array([c == "left" for c in censor])
+    agree = np.where(right, pred >= true - 1.0, agree)
+    agree = np.where(left, pred <= true + 1.0, agree)
+    return float(np.mean(agree))
 
 
 def main() -> int:
@@ -73,36 +109,39 @@ def main() -> int:
     lineage = {r["genome_id"]: r["lineage"] for r in csv.DictReader(LINEAGES.open())}
 
     md = ["# Summary #19 — MIC Regression (predicting the resistance *level*)\n",
-          "Per-drug regression of continuous **log2(MIC, mg/L)** from determinant features, under the "
-          "phylogeny-aware split. **Essential Agreement (EA)** = predictions within ±1 two-fold "
-          "dilution (the CLSI/FDA metric for genotype-based MIC prediction); higher is better. RMSE "
-          "in doubling dilutions; Pearson r.\n",
-          "| Drug | n (MIC) | test | EA (±1 dilution) | RMSE (dilutions) | Pearson r |",
-          "|---|---|---|---|---|---|"]
+          "Per-drug regression of continuous **log2(MIC, mg/L)** from determinant features, under a full "
+          "5-fold **phylogeny-aware** CV (pooled held-out predictions). **Essential Agreement (EA)** = "
+          "predictions within ±1 two-fold dilution (CLSI/FDA), scored **censor-aware**: right-/left-"
+          "censored (off-scale `>`/`<`) MICs are treated as bounds, not collapsed onto the boundary "
+          "dilution, so EA is not inflated. RMSE in doubling dilutions; Pearson r.\n",
+          "| Drug | n (censored) | EA (±1 dilution) | RMSE (dilutions) | Pearson r |",
+          "|---|---|---|---|---|"]
     results = {}
     print(f"{'drug':30s}{'n':>6}{'EA':>8}{'RMSE':>8}{'r':>7}")
     for drug, enc in DRUG_ENC.items():
-        mic = fetch_mic(enc)
+        mic = fetch_mic_with_censor(enc)
         g = [x for x in feats.index if x in mic]
         if len(g) < 100:
             print(f"{drug:30s} too few MIC values ({len(g)})")
             continue
         X = feats.loc[g].values.astype(int)
-        y = np.array([mic[x] for x in g])
+        y = np.array([mic[x][0] for x in g])
+        censor = np.array([mic[x][1] for x in g])
         groups = np.array([lineage[x] for x in g])
-        # stratify the group split on binarised MIC (median) just to balance folds
+        n_cens = int((censor != "exact").sum())
+        # full 5-fold lineage-grouped CV; pool held-out predictions (stable EA, not a single fold)
         ybin = (y >= np.median(y)).astype(int)
-        tr, te = next(StratifiedGroupKFold(max(2, round(1 / test_frac)), shuffle=True,
-                                           random_state=seed).split(X, ybin, groups))
-        model = XGBRegressor(n_estimators=400, max_depth=4, learning_rate=0.08, subsample=0.9,
-                             colsample_bytree=0.8, random_state=seed, n_jobs=4).fit(X[tr], y[tr])
-        pred = model.predict(X[te])
-        ea = float(np.mean(np.abs(pred - y[te]) <= 1.0))          # within ±1 doubling dilution
-        rmse = float(np.sqrt(np.mean((pred - y[te]) ** 2)))
-        r = float(pearsonr(pred, y[te])[0]) if len(set(y[te])) > 1 else float("nan")
-        results[drug] = {"n": len(g), "n_test": int(len(te)), "essential_agreement": ea,
+        P = np.full(len(y), np.nan)
+        for tr, te in StratifiedGroupKFold(5, shuffle=True, random_state=seed).split(X, ybin, groups):
+            model = XGBRegressor(n_estimators=400, max_depth=4, learning_rate=0.08, subsample=0.9,
+                                 colsample_bytree=0.8, random_state=seed, n_jobs=4).fit(X[tr], y[tr])
+            P[te] = model.predict(X[te])
+        ea = essential_agreement(P, y, censor)                    # censor-aware EA
+        rmse = float(np.sqrt(np.mean((P - y) ** 2)))
+        r = float(pearsonr(P, y)[0]) if len(set(y)) > 1 else float("nan")
+        results[drug] = {"n": len(g), "n_censored": n_cens, "essential_agreement": ea,
                          "rmse_dilutions": rmse, "pearson_r": r}
-        md.append(f"| {drug} | {len(g)} | {len(te)} | **{ea:.1%}** | {rmse:.2f} | {r:.3f} |")
+        md.append(f"| {drug} | {len(g)} ({n_cens} cens) | {ea:.1%} | {rmse:.2f} | {r:.3f} |")
         print(f"{drug:30s}{len(g):>6}{ea:>8.1%}{rmse:>8.2f}{r:>7.3f}")
 
     md.append("\n**Reading:** EA is the clinical gold-standard for MIC prediction — an EA around or "

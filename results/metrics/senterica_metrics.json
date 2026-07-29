@@ -1,0 +1,182 @@
+{
+  "ampicillin": {
+    "logreg": {
+      "roc_auc": 0.9474317562860219,
+      "pr_auc": 0.931177569325319,
+      "very_major_error_rate": 0.02527075812274368,
+      "major_error_rate": 0.8315789473684211,
+      "vme_count": 7,
+      "me_count": 237,
+      "n_resistant": 277,
+      "n_susceptible": 285
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9447463423902717,
+      "pr_auc": 0.9335741138881474,
+      "very_major_error_rate": 0.021660649819494584,
+      "major_error_rate": 0.8947368421052632,
+      "vme_count": 6,
+      "me_count": 255,
+      "n_resistant": 277,
+      "n_susceptible": 285,
+      "brier": 0.048157431185245514
+    },
+    "rules": {
+      "roc_auc": 0.9518208879599721,
+      "pr_auc": 0.93260279399862,
+      "very_major_error_rate": 0.05776173285198556,
+      "major_error_rate": 0.03859649122807018,
+      "vme_count": 16,
+      "me_count": 11,
+      "n_resistant": 277,
+      "n_susceptible": 285
+    },
+    "n_test": 562,
+    "test_R": 277,
+    "test_lineages": 61
+  },
+  "ceftriaxone": {
+    "logreg": {
+      "roc_auc": 0.9963954056695992,
+      "pr_auc": 0.9525100746250531,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.04435483870967742,
+      "vme_count": 0,
+      "me_count": 11,
+      "n_resistant": 33,
+      "n_susceptible": 248
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9976783968719453,
+      "pr_auc": 0.966540404040404,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.012096774193548387,
+      "vme_count": 0,
+      "me_count": 3,
+      "n_resistant": 33,
+      "n_susceptible": 248,
+      "brier": 0.010043369606137276
+    },
+    "rules": {
+      "roc_auc": 0.9828323558162267,
+      "pr_auc": 0.9438709319006958,
+      "very_major_error_rate": 0.030303030303030304,
+      "major_error_rate": 0.004032258064516129,
+      "vme_count": 1,
+      "me_count": 1,
+      "n_resistant": 33,
+      "n_susceptible": 248
+    },
+    "n_test": 281,
+    "test_R": 33,
+    "test_lineages": 28
+  },
+  "ciprofloxacin": {
+    "logreg": {
+      "roc_auc": 0.9781105169340464,
+      "pr_auc": 0.9625356688874003,
+      "very_major_error_rate": 0.030303030303030304,
+      "major_error_rate": 0.4823529411764706,
+      "vme_count": 1,
+      "me_count": 205,
+      "n_resistant": 33,
+      "n_susceptible": 425
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9522994652406418,
+      "pr_auc": 0.6792050478939655,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.9952941176470588,
+      "vme_count": 0,
+      "me_count": 423,
+      "n_resistant": 33,
+      "n_susceptible": 425,
+      "brier": 0.04455016180872917
+    },
+    "rules": {
+      "roc_auc": 0.9754367201426025,
+      "pr_auc": 0.7779409818711129,
+      "very_major_error_rate": 0.030303030303030304,
+      "major_error_rate": 0.018823529411764704,
+      "vme_count": 1,
+      "me_count": 8,
+      "n_resistant": 33,
+      "n_susceptible": 425
+    },
+    "n_test": 458,
+    "test_R": 33,
+    "test_lineages": 20
+  },
+  "chloramphenicol": {
+    "logreg": {
+      "roc_auc": 0.8802819293478261,
+      "pr_auc": 0.6323215520278374,
+      "very_major_error_rate": 0.109375,
+      "major_error_rate": 0.5369565217391304,
+      "vme_count": 7,
+      "me_count": 247,
+      "n_resistant": 64,
+      "n_susceptible": 460
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.8955502717391304,
+      "pr_auc": 0.7581592893161755,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 1.0,
+      "vme_count": 0,
+      "me_count": 460,
+      "n_resistant": 64,
+      "n_susceptible": 460,
+      "brier": 0.04058002680540085
+    },
+    "rules": {
+      "roc_auc": 0.9177309782608696,
+      "pr_auc": 0.7333214058524173,
+      "very_major_error_rate": 0.140625,
+      "major_error_rate": 0.02391304347826087,
+      "vme_count": 9,
+      "me_count": 11,
+      "n_resistant": 64,
+      "n_susceptible": 460
+    },
+    "n_test": 524,
+    "test_R": 64,
+    "test_lineages": 33
+  },
+  "trimethoprim_sulfamethoxazole": {
+    "logreg": {
+      "roc_auc": 0.8322811447811448,
+      "pr_auc": 0.4411207837090951,
+      "very_major_error_rate": 0.037037037037037035,
+      "major_error_rate": 0.7215909090909091,
+      "vme_count": 1,
+      "me_count": 254,
+      "n_resistant": 27,
+      "n_susceptible": 352
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9059869528619527,
+      "pr_auc": 0.5118674307205041,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.9744318181818182,
+      "vme_count": 0,
+      "me_count": 343,
+      "n_resistant": 27,
+      "n_susceptible": 352,
+      "brier": 0.043761126697063446
+    },
+    "rules": {
+      "roc_auc": 0.5651304713804715,
+      "pr_auc": 0.0812854709104578,
+      "very_major_error_rate": 0.14814814814814814,
+      "major_error_rate": 0.7215909090909091,
+      "vme_count": 4,
+      "me_count": 254,
+      "n_resistant": 27,
+      "n_susceptible": 352
+    },
+    "n_test": 379,
+    "test_R": 27,
+    "test_lineages": 33
+  }
+}

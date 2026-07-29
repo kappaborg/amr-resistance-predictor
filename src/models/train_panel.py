@@ -107,21 +107,20 @@ def run_drug(drug, feats, lineage, labels, seed, test_frac, vme_target):
         evaluate on test. Optionally isotonic-calibrate (for Brier)."""
         oof = cross_val_predict(model, Xtr, ytr, groups=gtr, cv=inner,
                                 method="predict_proba")[:, 1]
-        thr = pick_threshold(ytr, oof, vme_target)
+        thr = pick_threshold(ytr, oof, vme_target)   # honest out-of-fold threshold (no in-sample re-pick)
         model.fit(Xtr, ytr)
+        scores = model.predict_proba(Xte)[:, 1]      # raw scores: R/S decision + AUC (calibration is monotonic)
         extra = None
         if calibrate:
+            # isotonic calibrator on a held-out slice -> ONLY the Brier score (probability quality).
+            # The operating point stays on the OOF threshold; isotonic is monotone so the R/S rank
+            # ordering (hence VME/ME at the threshold) is unchanged — avoids in-sample threshold optimism.
             fit_idx, cal_idx = next(GroupShuffleSplit(n_splits=1, test_size=0.25,
                                                       random_state=seed).split(Xtr, ytr, gtr))
             base = model.__class__(**model.get_params()).fit(Xtr[fit_idx], ytr[fit_idx])
             calm = CalibratedClassifierCV(FrozenEstimator(base), method="isotonic").fit(
                 Xtr[cal_idx], ytr[cal_idx])
-            scores = calm.predict_proba(Xte)[:, 1]
-            # threshold from OOF is on the raw scale; re-pick on calibrated OOF-equivalent (val) for consistency
-            thr = pick_threshold(ytr[cal_idx], calm.predict_proba(Xtr[cal_idx])[:, 1], vme_target)
-            extra = {"brier": float(brier_score_loss(yte, scores))}
-        else:
-            scores = model.predict_proba(Xte)[:, 1]
+            extra = {"brier": float(brier_score_loss(yte, calm.predict_proba(Xte)[:, 1]))}
         return report_at(yte.tolist(), scores, thr, extra)
 
     # 1. rules baseline (fixed rule, no threshold)

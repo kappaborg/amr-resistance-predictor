@@ -20,6 +20,7 @@ from pathlib import Path
 import requests
 
 from src.data.acquire import download_genome
+from src.organism_pipeline import ORGANISMS  # for organism-specific genome-size truncation floor
 
 REPO = Path(__file__).resolve().parents[2]
 AMR = "https://www.bv-brc.org/api/genome_amr/"
@@ -33,6 +34,22 @@ ORG_ACQ = {
                 "panel": ["oxacillin", "cefoxitin", "ciprofloxacin", "erythromycin", "clindamycin"]},
     "abaumannii": {"taxon": 470, "primary": "ciprofloxacin",
                    "panel": ["meropenem", "imipenem", "ciprofloxacin", "gentamicin", "amikacin"]},
+    # --- Round-4 expansion candidates (panels PROVISIONAL — validate R/S balance vs BV-BRC before training) ---
+    "paeruginosa": {"taxon": 287, "primary": "ciprofloxacin",   # amikacin dropped (126R/21% — imbalanced)
+                    "panel": ["meropenem", "ceftazidime", "ciprofloxacin", "tobramycin"]},
+    "senterica": {"taxon": 28901, "primary": "ampicillin",   # best-balanced/highest-count base slice
+                  "panel": ["ampicillin", "ceftriaxone", "ciprofloxacin", "chloramphenicol",
+                            "trimethoprim%2Fsulfamethoxazole"]},
+    "efaecium": {"taxon": 1352, "primary": "vancomycin",   # cipro (n=27) & erythromycin (100 S) dropped
+                 "panel": ["vancomycin", "ampicillin", "tetracycline"]},
+    "ecloacae": {"taxon": 550, "primary": "ciprofloxacin",
+                 "panel": ["meropenem", "ceftazidime", "ciprofloxacin", "gentamicin",
+                           "trimethoprim%2Fsulfamethoxazole"]},
+    "spneumoniae": {"taxon": 1313, "primary": "trimethoprim%2Fsulfamethoxazole",  # 48% R, best-balanced base
+                    "panel": ["penicillin", "erythromycin", "tetracycline",
+                              "trimethoprim%2Fsulfamethoxazole"]},   # fluoroquinolones dropped (FQ-R rare)
+    "cjejuni": {"taxon": 197, "primary": "ciprofloxacin",
+                "panel": ["ciprofloxacin", "tetracycline", "erythromycin", "gentamicin"]},
 }
 
 
@@ -89,15 +106,20 @@ def main() -> int:
         print(f"    {d:16s} R={R:5d} S={S:5d}")
 
     GENOMES.mkdir(parents=True, exist_ok=True)
+    # truncation floor scaled to THIS organism's genome size (~55% of the min expected length),
+    # so small-genome species (S. pneumoniae ~2.1 Mbp, C. jejuni ~1.7 Mbp) aren't falsely rejected.
+    min_mbp = ORGANISMS[args.organism]["len"][0] if args.organism in ORGANISMS else 2.5
+    min_bytes = int(min_mbp * 0.55 * 1_000_000)
     todo = [g for g in ids if not (GENOMES / f"{g}.fna.gz").exists()]
-    print(f"\ndownloading {len(todo)} (parallel)...")
+    print(f"\ndownloading {len(todo)} (parallel)... truncation floor {min_bytes/1e6:.2f} MB "
+          f"(organism ~{min_mbp}+ Mbp)")
     ck = REPO / f"data/raw/{tag}_checksums.csv"
     ok = fail = done = 0
     total = 0
     with ck.open("w", newline="") as f, ThreadPoolExecutor(max_workers=6) as ex:
         w = csv.writer(f)
         w.writerow(["genome_id", "bytes_gzipped", "sha256"])
-        futs = {ex.submit(download_genome, g, GENOMES / f"{g}.fna.gz"): g for g in todo}
+        futs = {ex.submit(download_genome, g, GENOMES / f"{g}.fna.gz", min_bytes): g for g in todo}
         for fut in as_completed(futs):
             success, nbytes, sha = fut.result()
             done += 1

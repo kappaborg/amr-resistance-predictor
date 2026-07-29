@@ -40,24 +40,47 @@ make test          # run the test suite (incl. the leakage test)
 ```
 Pipeline: `make data → features → split → train → eval → figures` (or `make all`).
 
-## Demo
+## Demo — eight organisms
 ```bash
-# CLI
-python -m src.app.predict --genome-id 573.12772        # instant (cached annotation)
-python -m src.app.predict --genome path/to/genome.fna  # live AMRFinderPlus (~1-3 min)
-python -m src.app.report  --genome-id 573.12772        # + AI clinical narrative (needs ANTHROPIC_API_KEY)
+# CLI (--organism: kpneu | ecoli | abaumannii | saureus | paeruginosa | senterica | efaecium | spneumoniae)
+python -m src.app.predict --organism saureus --genome-id 1280.10000        # instant (cached)
+python -m src.app.predict --organism kpneu   --genome path/to/genome.fna   # live AMRFinderPlus (~1-3 min)
+python -m src.app.report  --organism abaumannii --genome-id 470.11118      # + AI clinical narrative
 
 # Interactive web app — use `python -m streamlit` from the project env
 # (a bare `streamlit` may resolve to a different/broken install on your PATH)
-python -m streamlit run src/app/streamlit_app.py       # genome -> calls + confidence + drivers + narrative
-# or: conda activate amr-resistance-predictor && python -m streamlit run src/app/streamlit_app.py
+python -m streamlit run src/app/streamlit_app.py       # pick organism -> calls + confidence + drivers + narrative
 ```
 Outputs per-drug resistant/susceptible + calibrated P(resistant) + the determinants behind each call.
 
-## Status (Klebsiella pneumoniae, 5-drug panel)
-- **Weeks 1–3 done:** end-to-end pipeline, per-drug models (VME≤3% operating point), SHAP +
-  biological validation, working demo. See `results/reports/summary_0*.md`.
-- Discrimination ROC-AUC 0.88–0.98 on **unseen lineages**; cefoxitin shows ML >> gene-lookup
-  (porin loss). Full benchmark in `results/reports/`.
-- **In progress:** Phase-2b top-up (more resistant genomes for meropenem/gentamicin/cefoxitin) to
-  firm up their operating points, then Week-4 write-up/poster/reproducibility pack.
+**Genome upload** (web app): assembled nucleotide FASTA — `.fna`, `.fasta`, `.fa`, or gzipped `.gz` —
+**or a protein FASTA `.faa`** (predicted proteins). Molecule type is auto-detected by content (nucleotide
+→ AMRFinderPlus `-n`, protein → `-p`), and gzip is detected by magic bytes, so a mis-named file still
+works. One or many contigs; typical size 2–6 MB. A non-FASTA upload gets a clear error. AMRFinderPlus
+runs locally — nothing leaves the machine.
+
+**AI narrative (optional).** The clinical narrative is an *explanation layer only* — it never changes
+the model's calls — so the provider is interchangeable. Set **one** key (preference order
+Claude → DeepSeek → Gemini; force one with `AMR_LLM_PROVIDER`). **Easiest: use a `.env` file** — the
+app loads it automatically from the project root, so you don't have to `export` in every terminal:
+```bash
+cp .env.example .env        # then edit .env and paste ONE key, e.g. DEEPSEEK_API_KEY=sk-...
+```
+`.env` is git-ignored. A real shell `export` still takes precedence over `.env` if you prefer that.
+Keys: `ANTHROPIC_API_KEY` (claude-opus-4-8) · `DEEPSEEK_API_KEY` (deepseek-chat) · `GEMINI_API_KEY`
+(gemini-flash-latest, free tier at aistudio.google.com/apikey; override models with `DEEPSEEK_MODEL` /
+`GEMINI_MODEL`). Gemini uses Google's native API; DeepSeek uses its OpenAI-compatible endpoint.
+With **no key set the demo still works fully** — it prints a deterministic templated report instead.
+
+## Status — 8 WHO-priority pathogens
+- **Delivered:** end-to-end pipeline across **8 organisms** (K. pneumoniae, E. coli, A. baumannii,
+  S. aureus, P. aeruginosa, Salmonella enterica, E. faecium, S. pneumoniae), per-drug calibrated
+  models (VME≤3% operating point), SHAP + biological validation, interactive demo, ESM-2 allele MIC
+  extension, honest GNN rejection. See `results/reports/REPORT.md` and `summary_*.md`.
+- Discrimination ROC-AUC **0.84–0.998** on **unseen lineages**; ML beats the gene-lookup where
+  resistance is combinatorial/regulatory (cefoxitin porin loss, P. aeruginosa ceftazidime, E. faecium
+  pbp5, S. pneumoniae pbp mosaics) and matches it on direct single-gene calls (mecA, van, carbapenemases).
+- Regulator-grade evaluation (VME/ME/CA + Brier calibration + lineage-clustered CIs + DeLong vs an
+  **organism-aware** rules baseline) for all 8 in `results/reports/summary_24_clinical_rigor.md`.
+- E. cloacae and C. jejuni evaluated and **excluded** for insufficient public lab data (honest
+  data-driven selection). Full audit trail in `docs/decisions.md`.

@@ -10,6 +10,17 @@
       "n_resistant": 162,
       "n_susceptible": 212
     },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9520440251572327,
+      "pr_auc": 0.9278793364081611,
+      "very_major_error_rate": 0.006172839506172839,
+      "major_error_rate": 0.6745283018867925,
+      "vme_count": 1,
+      "me_count": 143,
+      "n_resistant": 162,
+      "n_susceptible": 212,
+      "brier": 0.06446995586156845
+    },
     "rules": {
       "roc_auc": 0.9620603307710225,
       "pr_auc": 0.9468494772732596,
@@ -34,6 +45,17 @@
       "me_count": 91,
       "n_resistant": 385,
       "n_susceptible": 188
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.8988601823708205,
+      "pr_auc": 0.9124980547418398,
+      "very_major_error_rate": 0.0025974025974025974,
+      "major_error_rate": 0.7340425531914894,
+      "vme_count": 1,
+      "me_count": 138,
+      "n_resistant": 385,
+      "n_susceptible": 188,
+      "brier": 0.12426359951496124
     },
     "rules": {
       "roc_auc": 0.7952749378281293,
@@ -60,6 +82,17 @@
       "n_resistant": 574,
       "n_susceptible": 409
     },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9905011798982817,
+      "pr_auc": 0.989419989021497,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 1.0,
+      "vme_count": 0,
+      "me_count": 409,
+      "n_resistant": 574,
+      "n_susceptible": 409,
+      "brier": 0.014722771942615509
+    },
     "rules": {
       "roc_auc": 0.9797521787652386,
       "pr_auc": 0.9742334700018006,
@@ -85,6 +118,17 @@
       "n_resistant": 356,
       "n_susceptible": 435
     },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9309892806405786,
+      "pr_auc": 0.9228416116720717,
+      "very_major_error_rate": 0.056179775280898875,
+      "major_error_rate": 0.5172413793103449,
+      "vme_count": 20,
+      "me_count": 225,
+      "n_resistant": 356,
+      "n_susceptible": 435,
+      "brier": 0.08599764853715897
+    },
     "rules": {
       "roc_auc": 0.9418991347023119,
       "pr_auc": 0.908402194993624,
@@ -109,6 +153,17 @@
       "me_count": 188,
       "n_resistant": 219,
       "n_susceptible": 260
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9516596417281349,
+      "pr_auc": 0.9538229587115804,
+      "very_major_error_rate": 0.0273972602739726,
+      "major_error_rate": 0.6730769230769231,
+      "vme_count": 6,
+      "me_count": 175,
+      "n_resistant": 219,
+      "n_susceptible": 260,
+      "brier": 0.1097150593996048
     },
     "rules": {
       "roc_auc": 0.9236828240252896,

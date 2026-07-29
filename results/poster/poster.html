@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reading Resistance — poster</title>
+<style>
+  :root{
+    --navy:#12314f; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --ink:#1a2229; --muted:#5a6b78; --line:#c9d6de; --bg:#f4f7f9; --card:#ffffff; --good:#1f8a4c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe6ea;font-family:"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink)}
+  /* A0 landscape canvas (1189 x 841 mm). Print at A0; browser preview scales down. */
+  .poster{width:1189mm;height:841mm;background:var(--bg);padding:14mm 16mm;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;gap:10mm;border-bottom:4mm solid var(--teal);padding-bottom:6mm}
+  header .dna{font-size:34mm;line-height:1}
+  header h1{font-size:23mm;margin:0;color:var(--navy);letter-spacing:-0.5mm}
+  header .sub{font-size:8.2mm;margin:2mm 0 0;color:var(--teal);font-weight:600}
+  header .meta{font-size:5.4mm;margin:2mm 0 0;color:var(--muted)}
+  header .tag{margin-left:auto;text-align:right;font-size:5.4mm;color:var(--muted);line-height:1.5}
+  header .tag b{color:var(--navy)}
+  .cols{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8mm;margin-top:8mm}
+  .col{display:flex;flex-direction:column;gap:7mm}
+  .card{background:var(--card);border:0.4mm solid var(--line);border-radius:3mm;padding:6mm 7mm;
+        box-shadow:0 1mm 3mm rgba(18,49,79,.06)}
+  h2{font-size:8.2mm;margin:0 0 4mm;color:var(--navy);border-left:3mm solid var(--teal);padding-left:4mm}
+  h3{font-size:6.2mm;margin:4mm 0 2mm;color:var(--teal)}
+  p,li{font-size:5.3mm;line-height:1.42;margin:0 0 3mm}
+  ul{margin:0 0 3mm;padding-left:6mm}
+  li{margin-bottom:2mm}
+  b.k{color:var(--navy)}
+  .pill{display:inline-block;background:var(--teal-l);color:var(--teal);border-radius:2mm;
+        padding:0.6mm 2.2mm;font-weight:600;font-size:4.8mm}
+  table{width:100%;border-collapse:collapse;font-size:4.7mm}
+  th,td{padding:1.8mm 2mm;text-align:center;border-bottom:0.3mm solid var(--line)}
+  th{background:var(--navy);color:#fff;font-weight:600}
+  td.l,th.l{text-align:left}
+  tr:nth-child(even) td{background:#f7fafb}
+  .good{color:var(--good);font-weight:700}
+  .bad{color:#b4472e;font-weight:700}
+  figure{margin:0}
+  figure img{width:100%;border:0.3mm solid var(--line);border-radius:2mm;background:#fff}
+  figcaption{font-size:4.4mm;color:var(--muted);margin-top:1.5mm;text-align:center}
+  .big{background:var(--navy);color:#fff}
+  .big h2{color:#fff;border-left-color:var(--gold)}
+  .big p{color:#e7eef4}
+  .big .num{font-size:15mm;font-weight:800;color:#fff;line-height:1}
+  .big .num small{font-size:6mm;font-weight:600;color:var(--gold)}
+  .foot{margin-top:7mm;border-top:0.6mm solid var(--line);padding-top:4mm;display:flex;gap:8mm;
+        font-size:4.3mm;color:var(--muted)}
+  .foot b{color:var(--navy)}
+  .hl{background:linear-gradient(transparent 62%, #ffe9b8 62%)}
+  @media print{ body{background:#fff} .poster{margin:0} @page{size:1189mm 841mm;margin:0} }
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <header>
+    <div class="dna">🧬</div>
+    <div>
+      <h1>Reading Resistance</h1>
+      <div class="sub">Interpretable, honestly-benchmarked antibiotic-resistance prediction from bacterial genomes</div>
+      <div class="meta">A two-person project — software engineering &amp; machine learning · microbiology domain lead ⚕ · fully computational, public data (BV-BRC + CARD), laptop-scale</div>
+    </div>
+    <div class="tag">
+      <b>8 WHO-priority pathogens</b><br>K. pneumoniae · E. coli · A. baumannii<br>S. aureus · P. aeruginosa · Salmonella<br>E. faecium · S. pneumoniae<br>
+      <b>36 per-drug models</b> · lineage-held-out
+    </div>
+  </header>
+
+  <div class="cols">
+
+    <!-- COLUMN 1 -->
+    <div class="col">
+      <div class="card">
+        <h2>The problem</h2>
+        <p>Predicting resistance from a genome is fast, but two pitfalls separate a credible result from a naive one — and both are central here:</p>
+        <ul>
+          <li><b class="k">Population-structure leakage.</b> Bacteria are clonal, so a <b>random</b> train/test split lets the same lineage sit in both — the model memorizes ancestry and every metric inflates.</li>
+          <li><b class="k">The database-lookup trap.</b> If a model just detects a known resistance gene, it is a lookup, not a contribution. The real question is <span class="hl">what ML adds over a gene lookup.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Approach</h2>
+        <ul>
+          <li><b class="k">Phylogeny-aware split.</b> MLST sequence types held out whole — train and test share <b>no lineage</b> (enforced by a unit test).</li>
+          <li><b class="k">Honest rules baseline.</b> Every model is measured against a transparent known-gene classifier.</li>
+          <li><b class="k">Clinical errors first.</b> Very-Major Error (resistant→susceptible, dangerous) and Major Error lead every table, not accuracy.</li>
+          <li><b class="k">One model per antibiotic</b>, calibrated, with abstention.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Data &amp; methods</h2>
+        <p><b class="k">Data:</b> BV-BRC assembled genomes + <b>laboratory</b> phenotypes only (no computational labels). 3,850 QC-passed <i>K. pneumoniae</i> genomes (+7 more organisms, ~19k genomes total).</p>
+        <p><b class="k">Features:</b> AMRFinderPlus determinants — known genes + point mutations (interpretable, mechanism-level). Matrix 3,850 × 688.</p>
+        <p><b class="k">Models:</b> rules baseline · logistic regression · XGBoost + isotonic calibration. Threshold tuned to cap <b>VME ≤ 3%</b> on out-of-fold train data.</p>
+        <p><b class="k">Stack:</b> Python, scikit-learn, XGBoost, SHAP; bio-tools via bioconda; pinned env, fixed seed, 13 passing tests, one-command Make targets.</p>
+      </div>
+    </div>
+
+    <!-- COLUMN 2 -->
+    <div class="col">
+      <div class="card">
+        <h2>Results — unseen lineages, VME ≤ 3%</h2>
+        <table>
+          <tr><th class="l">Drug</th><th>ROC-AUC</th><th>VME</th><th>Rules AUC</th><th>DeLong p</th></tr>
+          <tr><td class="l">ciprofloxacin</td><td>0.979</td><td>2.3%</td><td>0.911</td><td>9×10⁻³³</td></tr>
+          <tr><td class="l">TMP-SMX</td><td>0.977</td><td>2.3%</td><td>0.885</td><td>5×10⁻⁵⁰</td></tr>
+          <tr><td class="l">meropenem</td><td>0.967</td><td>1.3%</td><td>0.945</td><td>2×10⁻¹⁴</td></tr>
+          <tr><td class="l">gentamicin</td><td>0.979</td><td>1.6%</td><td>0.948</td><td>6×10⁻²⁶</td></tr>
+          <tr><td class="l"><b>cefoxitin</b></td><td><b>0.899</b></td><td>0.7%</td><td class="bad">0.518</td><td>≈0</td></tr>
+        </table>
+        <p style="margin-top:3mm"><span class="pill">DeLong paired test</span> The model beats the gene-lookup baseline on <b>every drug</b> — significant, not just numerically larger.</p>
+      </div>
+      <div class="card big">
+        <h2>The headline: cefoxitin</h2>
+        <p>Resistance is driven by <b>porin loss</b> a gene-lookup cannot see. The baseline is near-useless — it misses ~92% of resistant strains:</p>
+        <p style="text-align:center;margin:4mm 0"><span class="num">0.52 <small>→</small> 0.90</span></p>
+        <p style="text-align:center">rules ROC-AUC → model ROC-AUC. This is <b>what machine learning adds over a database query</b>, made concrete.</p>
+      </div>
+      <div class="card">
+        <figure>
+          <img src="../figures/benchmark_summary.png" alt="benchmark summary">
+          <figcaption>Per-drug ROC-AUC: model vs rules baseline vs published band (gold), with VME/ME at the operating point.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- COLUMN 3 -->
+    <div class="col">
+      <div class="card">
+        <h2>Statistical rigor</h2>
+        <h3>Leakage, quantified (random vs lineage split)</h3>
+        <table>
+          <tr><th class="l">Drug</th><th>Random</th><th>Lineage</th><th>ΔAUC</th></tr>
+          <tr><td class="l">cefoxitin</td><td>0.935</td><td>0.903</td><td>+0.032</td></tr>
+          <tr><td class="l">meropenem</td><td>0.978</td><td>0.968</td><td>+0.010</td></tr>
+          <tr><td class="l">ciprofloxacin</td><td>0.989</td><td>0.983</td><td>+0.006</td></tr>
+        </table>
+        <p style="margin-top:3mm">Random splits inflate AUC on every drug. The inflation is <b>small because determinant features encode mechanism, not ancestry</b> — unlike k-mer models that lose 0.1–0.2 AUC. The small gap is itself evidence the model learned biology.</p>
+        <p><span class="pill">FDA/CLSI</span> Bootstrap 95% CIs on VME/ME; benchmarked to VME ≤ 1.5%, ME ≤ 3%, CA ≥ 90%, EA ≥ 90%.</p>
+      </div>
+      <div class="card">
+        <h2>Foundation models, honestly tested</h2>
+        <p><b class="k good">ESM-2 protein LM — adopted.</b> Embedding the <i>actual allele</i> of each resistance protein recovers signal presence/absence discards. On the hardest carbapenems, MIC Essential Agreement rises significantly:</p>
+        <ul>
+          <li>K. pneumoniae meropenem <b>68→73%</b> (p=0.0004)</li>
+          <li>A. baumannii imipenem <b>54→61%</b> (p=0.0001)</li>
+        </ul>
+        <p><b class="k bad">GNN — tested &amp; rejected.</b> An isolate-similarity graph (AMR-GNN style) gave <b>no gain</b> over a plain MLP on curated-determinant features — the mechanistic signal is already saturated. An honest negative we can explain.</p>
+      </div>
+      <div class="card">
+        <figure>
+          <img src="../figures/cipro_transfer_matrix.png" alt="cross-species transfer">
+          <figcaption>Zero-shot cross-species transfer (ciprofloxacin). Transfers among Gram-negatives (shared gyrA/parC); collapses to Gram-positive S. aureus (grlA) — a mechanistically-expected boundary.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- COLUMN 4 -->
+    <div class="col">
+      <div class="card">
+        <h2>Interpretability ⚕</h2>
+        <p>Global SHAP recovers the correct mechanisms per drug: <b>blaKPC</b> (meropenem), <b>gyrA/parC</b> (ciprofloxacin), <b>ompK36 porin</b> (cefoxitin), <b>aac(3)</b> (gentamicin), <b>sul/dfr</b> (TMP-SMX). Every prediction is auditable via its determinants.</p>
+        <figure>
+          <img src="../figures/shap_meropenem.png" alt="SHAP meropenem">
+          <figcaption>SHAP (meropenem): blaKPC-2/KPC-3 rank top-2 after lineage diversity broke the gene–clade confound.</figcaption>
+        </figure>
+      </div>
+      <div class="card">
+        <h2>Beyond binary: MIC &amp; abstention</h2>
+        <p><b class="k">MIC regression</b> predicts the resistance <i>level</i> (CLSI Essential Agreement, ±1 dilution): ciprofloxacin 88.9%, cefoxitin 83.6%.</p>
+        <p><b class="k">Conformal prediction</b> gives an <b>empirically-validated</b> per-class coverage level (measured under lineage shift, not assumed) and a <b>defer-to-lab</b> option — confident calls on hard drugs at ~0.3–0.6% VME.</p>
+      </div>
+      <div class="card">
+        <h2>Generalization &amp; demo</h2>
+        <p>The identical pipeline runs on <b>8 WHO-priority pathogens</b> across the Gram divide — ROC-AUC 0.84–0.998 on unseen lineages (mecA→oxacillin, van→vancomycin, carbapenemases, pbp mosaics), with an <b>organism-aware</b> rules baseline for a fair per-organism comparison.</p>
+        <p>An <b>8-organism web app</b>: genome in → per-drug calls + calibrated confidence + determinant drivers + a species-check guard + optional AI clinical narrative (explanation only).</p>
+      </div>
+      <div class="card">
+        <h2>Honest limits &amp; conclusion</h2>
+        <ul>
+          <li>Determinant features only (k-mer signal out of scope by design).</li>
+          <li>Strict VME target raises major errors on hard-to-call drugs — a clinical trade-off, shown not hidden.</li>
+          <li>Reference-database and sampling bias; ⚕ biological sign-off in progress.</li>
+        </ul>
+        <p><b class="k">A smaller, honestly-validated result beats a large leaky one.</b> We show what ML adds over a gene lookup — significantly — across eight pathogens, with the errors that matter clinically reported first.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <div><b>Reproducibility:</b> pinned environment.yml · fixed seed 42 · data manifest · 36-decision lab notebook · 13 passing tests (incl. zero-lineage-leakage) · Makefile one-command stages.</div>
+    <div><b>Data:</b> BV-BRC (genomes + lab phenotypes) · CARD / AMRFinderPlus (determinants) · MLST/PubMLST (lineages) · ESM-2 (allele embeddings).</div>
+    <div><b>Not a diagnostic</b> — research/decision-support only; complements phenotypic susceptibility testing.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -18,7 +18,7 @@ VME = resistant called susceptible (dangerous miss); ME = susceptible called res
 |---|---|---|---|---|---|
 | Rules baseline | 0.934 | 0.865 | 0.054 | 0.078 | — |
 | Logistic regression | 0.982 | 0.976 | 0.017 | 0.293 | — |
-| XGBoost (calibrated) | 0.977 | 0.962 | 0.003 | 0.760 | 0.051 |
+| XGBoost (calibrated) | 0.980 | 0.975 | 0.014 | 0.262 | 0.051 |
 
 ## gentamicin  (test 929: 401R/528S, 141 unseen lineages)
 
@@ -26,7 +26,7 @@ VME = resistant called susceptible (dangerous miss); ME = susceptible called res
 |---|---|---|---|---|---|
 | Rules baseline | 0.967 | 0.938 | 0.030 | 0.036 | — |
 | Logistic regression | 0.968 | 0.957 | 0.032 | 0.129 | — |
-| XGBoost (calibrated) | 0.963 | 0.945 | 0.030 | 0.205 | 0.078 |
+| XGBoost (calibrated) | 0.973 | 0.955 | 0.030 | 0.127 | 0.078 |
 
 ## ciprofloxacin  (test 793: 568R/225S, 139 unseen lineages)
 
@@ -34,7 +34,7 @@ VME = resistant called susceptible (dangerous miss); ME = susceptible called res
 |---|---|---|---|---|---|
 | Rules baseline | 0.904 | 0.930 | 0.005 | 0.187 | — |
 | Logistic regression | 0.973 | 0.986 | 0.033 | 0.089 | — |
-| XGBoost (calibrated) | 0.970 | 0.981 | 0.056 | 0.093 | 0.051 |
+| XGBoost (calibrated) | 0.971 | 0.984 | 0.033 | 0.098 | 0.051 |
 
 ## trimethoprim_sulfamethoxazole  (test 738: 512R/226S, 123 unseen lineages)
 
@@ -42,7 +42,7 @@ VME = resistant called susceptible (dangerous miss); ME = susceptible called res
 |---|---|---|---|---|---|
 | Rules baseline | 0.875 | 0.902 | 0.029 | 0.221 | — |
 | Logistic regression | 0.970 | 0.981 | 0.039 | 0.128 | — |
-| XGBoost (calibrated) | 0.958 | 0.972 | 0.010 | 0.783 | 0.056 |
+| XGBoost (calibrated) | 0.975 | 0.985 | 0.031 | 0.155 | 0.056 |
 
 ## cefoxitin  (test 634: 381R/253S, 77 unseen lineages)
 
@@ -50,4 +50,4 @@ VME = resistant called susceptible (dangerous miss); ME = susceptible called res
 |---|---|---|---|---|---|
 | Rules baseline | 0.517 | 0.615 | 0.966 | 0.000 | — |
 | Logistic regression | 0.906 | 0.934 | 0.018 | 0.850 | — |
-| XGBoost (calibrated) | 0.923 | 0.944 | 0.010 | 0.881 | 0.127 |
+| XGBoost (calibrated) | 0.935 | 0.965 | 0.013 | 0.854 | 0.127 |

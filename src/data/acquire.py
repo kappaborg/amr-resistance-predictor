@@ -64,8 +64,13 @@ def balanced_sample(labels: dict[str, str], per_class: int, seed: int) -> dict[s
     return out
 
 
-def download_genome(genome_id: str, dest: Path) -> tuple[bool, int, str]:
-    """Download one genome's contigs FASTA, gzip to dest. Returns (ok, bytes_gzipped, sha256)."""
+def download_genome(genome_id: str, dest: Path, min_bytes: int = 2_500_000) -> tuple[bool, int, str]:
+    """Download one genome's contigs FASTA, gzip to dest. Returns (ok, bytes_gzipped, sha256).
+
+    min_bytes is the truncation floor — a full assembly well below the organism's expected genome
+    size signals API truncation. Default 2.5 MB suits K. pneumoniae (~5.5 Mbp); small-genome
+    organisms (S. pneumoniae ~2.1 Mbp, C. jejuni ~1.7 Mbp) must pass a lower, organism-specific floor.
+    """
     if dest.exists():  # resumable: skip already-downloaded
         data = dest.read_bytes()
         return True, len(data), hashlib.sha256(data).hexdigest()
@@ -85,10 +90,11 @@ def download_genome(genome_id: str, dest: Path) -> tuple[bool, int, str]:
         time.sleep(2 * (attempt + 1))  # backoff: 2s, 4s, 6s
     if not content:
         return False, 0, ""
-    # sanity guard: a real K. pneumoniae assembly is ~5 Mbp; reject implausibly small pulls
+    # sanity guard: reject implausibly small pulls vs the organism's expected genome size
     # (catches API truncation before it reaches the feature matrix).
-    if len(content) < 2_500_000:
-        print(f"  ! {genome_id}: only {len(content)/1e6:.2f} MB FASTA — likely truncated, skipping")
+    if len(content) < min_bytes:
+        print(f"  ! {genome_id}: only {len(content)/1e6:.2f} MB FASTA (< {min_bytes/1e6:.1f} MB "
+              "floor) — likely truncated, skipping")
         return False, 0, ""
     gz = gzip.compress(content)
     dest.write_bytes(gz)

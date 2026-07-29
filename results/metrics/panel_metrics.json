@@ -29,15 +29,15 @@
       "threshold": 0.07417083339904929
     },
     "xgboost_calibrated": {
-      "roc_auc": 0.9774754993841376,
-      "pr_auc": 0.9615227577680574,
-      "very_major_error_rate": 0.0028169014084507044,
-      "major_error_rate": 0.7604562737642585,
-      "vme_count": 1,
-      "me_count": 400,
+      "roc_auc": 0.9803004337813956,
+      "pr_auc": 0.9751377999657515,
+      "very_major_error_rate": 0.014084507042253521,
+      "major_error_rate": 0.2623574144486692,
+      "vme_count": 5,
+      "me_count": 138,
       "n_resistant": 355,
       "n_susceptible": 526,
-      "threshold": 0.06914893537759781,
+      "threshold": 0.04097350686788559,
       "brier": 0.05114160090376997
     }
   },
@@ -71,15 +71,15 @@
       "threshold": 0.15135244461406488
     },
     "xgboost_calibrated": {
-      "roc_auc": 0.9633515642711403,
-      "pr_auc": 0.9446635505685531,
+      "roc_auc": 0.972568578553616,
+      "pr_auc": 0.9549360237705524,
       "very_major_error_rate": 0.029925187032418952,
-      "major_error_rate": 0.20454545454545456,
+      "major_error_rate": 0.1268939393939394,
       "vme_count": 12,
-      "me_count": 108,
+      "me_count": 67,
       "n_resistant": 401,
       "n_susceptible": 528,
-      "threshold": 0.06707317382097244,
+      "threshold": 0.12185550481081009,
       "brier": 0.07765801408674276
     }
   },
@@ -113,15 +113,15 @@
       "threshold": 0.39892998254156764
     },
     "xgboost_calibrated": {
-      "roc_auc": 0.9700234741784037,
-      "pr_auc": 0.9813903477183639,
-      "very_major_error_rate": 0.056338028169014086,
-      "major_error_rate": 0.09333333333333334,
-      "vme_count": 32,
-      "me_count": 21,
+      "roc_auc": 0.9712206572769952,
+      "pr_auc": 0.9844103967649873,
+      "very_major_error_rate": 0.03345070422535211,
+      "major_error_rate": 0.09777777777777778,
+      "vme_count": 19,
+      "me_count": 22,
       "n_resistant": 568,
       "n_susceptible": 225,
-      "threshold": 0.8275862336158752,
+      "threshold": 0.3752574324607849,
       "brier": 0.051004509541780776
     }
   },
@@ -155,15 +155,15 @@
       "threshold": 0.34102281626617004
     },
     "xgboost_calibrated": {
-      "roc_auc": 0.9579127488938053,
-      "pr_auc": 0.9724230280444706,
-      "very_major_error_rate": 0.009765625,
-      "major_error_rate": 0.7831858407079646,
-      "vme_count": 5,
-      "me_count": 177,
+      "roc_auc": 0.975270499170354,
+      "pr_auc": 0.9848607169300924,
+      "very_major_error_rate": 0.03125,
+      "major_error_rate": 0.15486725663716813,
+      "vme_count": 16,
+      "me_count": 35,
       "n_resistant": 512,
       "n_susceptible": 226,
-      "threshold": 0.08620689809322357,
+      "threshold": 0.23524877429008484,
       "brier": 0.0560436387269772
     }
   },
@@ -197,15 +197,15 @@
       "threshold": 0.06727265290613534
     },
     "xgboost_calibrated": {
-      "roc_auc": 0.9232101916114241,
-      "pr_auc": 0.9439454788258259,
-      "very_major_error_rate": 0.010498687664041995,
-      "major_error_rate": 0.8814229249011858,
-      "vme_count": 4,
-      "me_count": 223,
+      "roc_auc": 0.9351093959104915,
+      "pr_auc": 0.9645677277416971,
+      "very_major_error_rate": 0.013123359580052493,
+      "major_error_rate": 0.8537549407114624,
+      "vme_count": 5,
+      "me_count": 216,
       "n_resistant": 381,
       "n_susceptible": 253,
-      "threshold": 0.22580644488334656,
+      "threshold": 0.07174220681190491,
       "brier": 0.12653097488942003
     }
   }

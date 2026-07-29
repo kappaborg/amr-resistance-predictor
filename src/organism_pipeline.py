@@ -24,6 +24,7 @@ import requests
 from sklearn.frozen import FrozenEstimator
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.isotonic import IsotonicRegression
+from sklearn.metrics import brier_score_loss
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedGroupKFold, cross_val_predict
 from xgboost import XGBClassifier
@@ -62,7 +63,37 @@ RULES = {
     "imipenem": ["blaKPC", "blaNDM", "blaVIM", "blaIMP", "blaOXA-23", "blaOXA-24", "blaOXA-58",
                  "blaOXA-51", "blaOXA-40", "blaOXA-48"],
     "amikacin": ["aac(6')-I", "armA", "rmt", "aph(3')"],
+    # --- Round-4 expansion drugs (known-gene baselines; ⚕ review before use) ---
+    # ACQUIRED ESBL/carbapenemase only — blaPDC excluded: it is the INTRINSIC P. aeruginosa AmpC
+    # (present in ~100% of genomes), so it cannot discriminate R from S; resistance is via its
+    # derepression/overexpression, which a determinant-presence baseline cannot see (⚕).
+    "ceftazidime": ["blaCTX-M", "blaSHV-12", "blaSHV-2", "blaPER", "blaVEB", "blaGES", "blaKPC",
+                    "blaVIM", "blaNDM", "blaIMP", "blaOXA-10"],
+    # aph(3') excluded — matches the intrinsic P. aeruginosa aph(3')-IIb (~99%), which does not confer
+    # tobramycin resistance; tobramycin resistance = AAC(6')/ANT(2'')/ANT(4') + 16S methyltransferases.
+    "tobramycin": ["aac(6')", "ant(2'')-Ia", "ant(4')", "armA", "rmt"],
+    "chloramphenicol": ["cat", "catA", "catB", "cmlA", "cml", "floR"],
+    "tetracycline": ["tet(A)", "tet(B)", "tet(C)", "tet(D)", "tet(G)", "tet(K)", "tet(L)", "tet(M)",
+                     "tet(O)", "tet(W)", "tet(X)"],
+    "vancomycin": ["vanA", "vanB", "vanC", "vanD", "vanM", "vanN"],
+    "penicillin": ["pbp1a", "pbp2b", "pbp2x", "blaZ", "mecA"],   # S. pneumoniae PBP mosaics (hard); ⚕
 }
+
+# Organism-specific rule-gene OVERRIDES — the honest known-gene baseline differs by organism for some
+# drugs, so a single shared list is unfair. Keyed by (organism_key, drug); falls back to RULES[drug].
+#   - Enterococcus ampicillin resistance = PBP5 mutations, NOT beta-lactamases (blaTEM/SHV absent in
+#     Enterococcus), so the generic beta-lactamase baseline scores ~chance; PBP5 is the fair baseline.
+#   - S. pneumoniae penicillin = PBP1a/2b/2x mosaics only (drop the staph blaZ/mecA noise).
+ORG_RULES = {
+    ("efaecium", "ampicillin"): ["pbp5"],
+    ("spneumoniae", "penicillin"): ["pbp1a", "pbp2b", "pbp2x"],
+}
+
+
+def rules_for(organism: str, drug: str) -> list[str]:
+    """The known-gene rule tokens for this organism+drug (organism override, else the shared default)."""
+    return ORG_RULES.get((organism, drug)) or RULES.get(drug, [])
+
 
 ORGANISMS = {
     "ecoli": {"taxon": 562, "amrfinder": "Escherichia", "ids": "data/raw/ecoli_ids.txt",
@@ -81,6 +112,40 @@ ORGANISMS = {
                    "drugs": {"meropenem": "meropenem", "imipenem": "imipenem",
                              "ciprofloxacin": "ciprofloxacin", "gentamicin": "gentamicin",
                              "amikacin": "amikacin"}},
+    # --- Round-4 expansion candidates (scaffolded; acquire+train per-organism when BV-BRC is up) ---
+    "paeruginosa": {"taxon": 287, "amrfinder": "Pseudomonas_aeruginosa",
+                    "ids": "data/raw/paeruginosa_ids.txt",
+                    "len": (5.5, 7.5),  # P. aeruginosa ~6.3 Mbp
+                    "drugs": {"meropenem": "meropenem", "ceftazidime": "ceftazidime",
+                              "ciprofloxacin": "ciprofloxacin", "tobramycin": "tobramycin"}},
+    "senterica": {"taxon": 28901, "amrfinder": "Salmonella",
+                  "ids": "data/raw/senterica_ids.txt",
+                  "len": (4.4, 5.4),  # S. enterica ~4.8 Mbp
+                  "drugs": {"ampicillin": "ampicillin", "ceftriaxone": "ceftriaxone",
+                            "ciprofloxacin": "ciprofloxacin", "chloramphenicol": "chloramphenicol",
+                            "trimethoprim_sulfamethoxazole": "trimethoprim%2Fsulfamethoxazole"}},
+    "efaecium": {"taxon": 1352, "amrfinder": "Enterococcus_faecium",
+                 "ids": "data/raw/efaecium_ids.txt",
+                 "len": (2.4, 3.4),  # E. faecium ~2.9 Mbp
+                 "drugs": {"vancomycin": "vancomycin", "ampicillin": "ampicillin",
+                           "tetracycline": "tetracycline"}},   # cipro/erythromycin dropped (too few)
+    "ecloacae": {"taxon": 550, "amrfinder": "Enterobacter_cloacae",
+                 "ids": "data/raw/ecloacae_ids.txt",
+                 "len": (4.6, 6.0),  # E. cloacae ~5.2 Mbp
+                 "drugs": {"meropenem": "meropenem", "ceftazidime": "ceftazidime",
+                           "ciprofloxacin": "ciprofloxacin", "gentamicin": "gentamicin",
+                           "trimethoprim_sulfamethoxazole": "trimethoprim%2Fsulfamethoxazole"}},
+    "spneumoniae": {"taxon": 1313, "amrfinder": "Streptococcus_pneumoniae",
+                    "ids": "data/raw/spneumoniae_ids.txt",
+                    "len": (1.9, 2.4),  # S. pneumoniae ~2.1 Mbp
+                    "drugs": {"penicillin": "penicillin", "erythromycin": "erythromycin",
+                              "tetracycline": "tetracycline",
+                              "trimethoprim_sulfamethoxazole": "trimethoprim%2Fsulfamethoxazole"}},  # FQ dropped
+    "cjejuni": {"taxon": 197, "amrfinder": "Campylobacter",
+                "ids": "data/raw/cjejuni_ids.txt",
+                "len": (1.5, 2.0),  # C. jejuni ~1.7 Mbp
+                "drugs": {"ciprofloxacin": "ciprofloxacin", "tetracycline": "tetracycline",
+                          "erythromycin": "erythromycin", "gentamicin": "gentamicin"}},
 }
 
 
@@ -179,8 +244,11 @@ def run(tag: str, cfg: dict, models_only: bool, workers: int = 8) -> int:
 
     # per-drug models
     results = {}
+    # persist the lineage split (train/test STs) so the zero-leakage test can assert it per organism
+    split_rows = []
+
     print(f"\n[{tag}] per-drug models (VME<=3% operating point, unseen-lineage test)")
-    print(f"{'drug':30s}{'ROC':>7}{'PR':>7}{'VME':>7}{'ME':>7}{'rulesROC':>9}")
+    print(f"{'drug':30s}{'ROC':>7}{'PR':>7}{'VME':>7}{'ME':>7}{'rulesROC':>9}{'Brier':>8}")
     for col in cfg["drugs"]:
         g = [x for x in feats.index if labs[col].get(x) in ("Resistant", "Susceptible")]
         X = feats.loc[g].values.astype(int)
@@ -191,7 +259,10 @@ def run(tag: str, cfg: dict, models_only: bool, workers: int = 8) -> int:
             continue
         sgkf = StratifiedGroupKFold(n_splits=4, shuffle=True, random_state=42)
         tr, te = next(sgkf.split(X, y, groups))
-        idx = [i for i, c in enumerate(cols) if any(t in c for t in RULES[col])]
+        if not split_rows:   # one representative lineage split, for the zero-leakage test
+            split_rows = [(g[i], groups[i], "train") for i in tr] + \
+                         [(g[i], groups[i], "test") for i in te]
+        idx = [i for i, c in enumerate(cols) if any(t in c for t in rules_for(tag, col))]
         rule_s = (X[te][:, idx].sum(1) > 0).astype(float) if idx else np.zeros(len(te))
         lr = LogisticRegression(max_iter=2000, class_weight="balanced", random_state=42).fit(X[tr], y[tr])
         oof = cross_val_predict(LogisticRegression(max_iter=2000, class_weight="balanced", random_state=42),
@@ -202,14 +273,36 @@ def run(tag: str, cfg: dict, models_only: bool, workers: int = 8) -> int:
         lr_s = lr.predict_proba(X[te])[:, 1]
         rep = full_report(y[te].tolist(), (lr_s >= thr).astype(int).tolist(), lr_s.tolist())
         rep_rule = full_report(y[te].tolist(), rule_s.astype(int).tolist(), rule_s.tolist())
-        results[col] = {"logreg": rep, "rules": rep_rule, "n_test": len(te),
-                        "test_R": int(y[te].sum()), "test_lineages": len(set(groups[te]))}
+        # calibrated XGBoost + Brier (non-negotiable #7: always calibrate + report calibration)
+        spw = (y[tr] == 0).sum() / max((y[tr] == 1).sum(), 1)
+        xgb = XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.1, subsample=0.9,
+                            colsample_bytree=0.8, eval_metric="logloss", scale_pos_weight=spw,
+                            random_state=42, n_jobs=4)
+        xoof = cross_val_predict(xgb, X[tr], y[tr], groups=groups[tr],
+                                 cv=StratifiedGroupKFold(4, shuffle=True, random_state=42),
+                                 method="predict_proba")[:, 1]
+        iso = IsotonicRegression(out_of_bounds="clip").fit(xoof, y[tr])
+        xthr = pick_threshold(y[tr], iso.transform(xoof), 0.03)
+        xgb.fit(X[tr], y[tr])
+        xs = iso.transform(xgb.predict_proba(X[te])[:, 1])
+        rep_cal = full_report(y[te].tolist(), (xs >= xthr).astype(int).tolist(), xs.tolist())
+        rep_cal["brier"] = float(brier_score_loss(y[te], xs))
+        results[col] = {"logreg": rep, "xgboost_calibrated": rep_cal, "rules": rep_rule,
+                        "n_test": len(te), "test_R": int(y[te].sum()),
+                        "test_lineages": len(set(groups[te]))}
         print(f"{col:30s}{rep['roc_auc']:7.3f}{rep['pr_auc']:7.3f}"
-              f"{rep['very_major_error_rate']:7.3f}{rep['major_error_rate']:7.3f}{rep_rule['roc_auc']:9.3f}")
+              f"{rep['very_major_error_rate']:7.3f}{rep['major_error_rate']:7.3f}"
+              f"{rep_rule['roc_auc']:9.3f}{rep_cal['brier']:8.3f}")
 
     import json
     (REPO / f"results/metrics/{tag}_metrics.json").write_text(json.dumps(results, indent=2))
-    print(f"\nwrote data/processed/{tag}_features.csv, results/metrics/{tag}_metrics.json")
+    if split_rows:
+        with (REPO / f"data/processed/{tag}_split.csv").open("w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["genome_id", "lineage", "fold"])
+            w.writerows(split_rows)
+    print(f"\nwrote data/processed/{tag}_features.csv, results/metrics/{tag}_metrics.json, "
+          f"data/processed/{tag}_split.csv")
     return 0
 
 

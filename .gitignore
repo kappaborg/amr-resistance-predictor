@@ -28,3 +28,6 @@ env/
 !data/interim/.gitkeep
 !data/processed/.gitkeep
 !results/models/.gitkeep
+
+# local secrets — API keys for the AI narrative layer
+.env

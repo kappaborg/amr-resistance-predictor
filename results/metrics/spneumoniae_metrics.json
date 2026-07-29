@@ -1,0 +1,146 @@
+{
+  "penicillin": {
+    "logreg": {
+      "roc_auc": 0.9613030373290053,
+      "pr_auc": 0.9229657114573702,
+      "very_major_error_rate": 0.06607929515418502,
+      "major_error_rate": 0.05789473684210526,
+      "vme_count": 15,
+      "me_count": 22,
+      "n_resistant": 227,
+      "n_susceptible": 380
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9630593554370508,
+      "pr_auc": 0.9258973729347195,
+      "very_major_error_rate": 0.039647577092511016,
+      "major_error_rate": 0.10526315789473684,
+      "vme_count": 9,
+      "me_count": 40,
+      "n_resistant": 227,
+      "n_susceptible": 380,
+      "brier": 0.06039220094680786
+    },
+    "rules": {
+      "roc_auc": 0.8595814977973568,
+      "pr_auc": 0.6884078681609689,
+      "very_major_error_rate": 0.030837004405286344,
+      "major_error_rate": 0.25,
+      "vme_count": 7,
+      "me_count": 95,
+      "n_resistant": 227,
+      "n_susceptible": 380
+    },
+    "n_test": 607,
+    "test_R": 227,
+    "test_lineages": 164
+  },
+  "erythromycin": {
+    "logreg": {
+      "roc_auc": 0.9831879441008475,
+      "pr_auc": 0.983140616620971,
+      "very_major_error_rate": 0.04294478527607362,
+      "major_error_rate": 0.0,
+      "vme_count": 14,
+      "me_count": 0,
+      "n_resistant": 326,
+      "n_susceptible": 493
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9785276073619632,
+      "pr_auc": 0.9741492318179434,
+      "very_major_error_rate": 0.04294478527607362,
+      "major_error_rate": 0.0,
+      "vme_count": 14,
+      "me_count": 0,
+      "n_resistant": 326,
+      "n_susceptible": 493,
+      "brier": 0.01669355481863022
+    },
+    "rules": {
+      "roc_auc": 0.9785276073619632,
+      "pr_auc": 0.9741492318179434,
+      "very_major_error_rate": 0.04294478527607362,
+      "major_error_rate": 0.0,
+      "vme_count": 14,
+      "me_count": 0,
+      "n_resistant": 326,
+      "n_susceptible": 493
+    },
+    "n_test": 819,
+    "test_R": 326,
+    "test_lineages": 206
+  },
+  "tetracycline": {
+    "logreg": {
+      "roc_auc": 0.9686409249563699,
+      "pr_auc": 0.9617369181828664,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.887434554973822,
+      "vme_count": 0,
+      "me_count": 339,
+      "n_resistant": 312,
+      "n_susceptible": 382
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9711328701839173,
+      "pr_auc": 0.9570561491261828,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.7905759162303665,
+      "vme_count": 0,
+      "me_count": 302,
+      "n_resistant": 312,
+      "n_susceptible": 382,
+      "brier": 0.04049301519989967
+    },
+    "rules": {
+      "roc_auc": 0.947727882937307,
+      "pr_auc": 0.9213084797728277,
+      "very_major_error_rate": 0.07051282051282051,
+      "major_error_rate": 0.034031413612565446,
+      "vme_count": 22,
+      "me_count": 13,
+      "n_resistant": 312,
+      "n_susceptible": 382
+    },
+    "n_test": 694,
+    "test_R": 312,
+    "test_lineages": 180
+  },
+  "trimethoprim_sulfamethoxazole": {
+    "logreg": {
+      "roc_auc": 0.8580770543897892,
+      "pr_auc": 0.8430959256897115,
+      "very_major_error_rate": 0.06683168316831684,
+      "major_error_rate": 0.40318302387267907,
+      "vme_count": 27,
+      "me_count": 152,
+      "n_resistant": 404,
+      "n_susceptible": 377
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.8422177429944586,
+      "pr_auc": 0.7950372276722806,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 1.0,
+      "vme_count": 0,
+      "me_count": 377,
+      "n_resistant": 404,
+      "n_susceptible": 377,
+      "brier": 0.14848947525024414
+    },
+    "rules": {
+      "roc_auc": 0.5,
+      "pr_auc": 0.5172855313700384,
+      "very_major_error_rate": 1.0,
+      "major_error_rate": 0.0,
+      "vme_count": 404,
+      "me_count": 0,
+      "n_resistant": 404,
+      "n_susceptible": 377
+    },
+    "n_test": 781,
+    "test_R": 404,
+    "test_lineages": 180
+  }
+}

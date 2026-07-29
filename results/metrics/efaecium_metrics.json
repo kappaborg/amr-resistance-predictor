@@ -1,0 +1,110 @@
+{
+  "vancomycin": {
+    "logreg": {
+      "roc_auc": 0.9981941747572816,
+      "pr_auc": 0.997305351518136,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.004,
+      "vme_count": 0,
+      "me_count": 1,
+      "n_resistant": 206,
+      "n_susceptible": 250
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9979223300970874,
+      "pr_auc": 0.9950562268621506,
+      "very_major_error_rate": 0.0048543689320388345,
+      "major_error_rate": 0.008,
+      "vme_count": 1,
+      "me_count": 2,
+      "n_resistant": 206,
+      "n_susceptible": 250,
+      "brier": 0.004286762326955795
+    },
+    "rules": {
+      "roc_auc": 0.996,
+      "pr_auc": 0.9903846153846154,
+      "very_major_error_rate": 0.0,
+      "major_error_rate": 0.008,
+      "vme_count": 0,
+      "me_count": 2,
+      "n_resistant": 206,
+      "n_susceptible": 250
+    },
+    "n_test": 456,
+    "test_R": 206,
+    "test_lineages": 76
+  },
+  "ampicillin": {
+    "logreg": {
+      "roc_auc": 0.9921146953405018,
+      "pr_auc": 0.9970925952161208,
+      "very_major_error_rate": 0.003703703703703704,
+      "major_error_rate": 0.010752688172043012,
+      "vme_count": 1,
+      "me_count": 1,
+      "n_resistant": 270,
+      "n_susceptible": 93
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9914177618478694,
+      "pr_auc": 0.9951151971859042,
+      "very_major_error_rate": 0.003703703703703704,
+      "major_error_rate": 0.010752688172043012,
+      "vme_count": 1,
+      "me_count": 1,
+      "n_resistant": 270,
+      "n_susceptible": 93,
+      "brier": 0.005915563087910414
+    },
+    "rules": {
+      "roc_auc": 0.6379330943847072,
+      "pr_auc": 0.8003848914833763,
+      "very_major_error_rate": 0.003703703703703704,
+      "major_error_rate": 0.7204301075268817,
+      "vme_count": 1,
+      "me_count": 67,
+      "n_resistant": 270,
+      "n_susceptible": 93
+    },
+    "n_test": 363,
+    "test_R": 270,
+    "test_lineages": 60
+  },
+  "tetracycline": {
+    "logreg": {
+      "roc_auc": 0.910508594719121,
+      "pr_auc": 0.971023437279787,
+      "very_major_error_rate": 0.004784688995215311,
+      "major_error_rate": 0.2037037037037037,
+      "vme_count": 1,
+      "me_count": 11,
+      "n_resistant": 209,
+      "n_susceptible": 54
+    },
+    "xgboost_calibrated": {
+      "roc_auc": 0.9011607301080985,
+      "pr_auc": 0.9615216117419344,
+      "very_major_error_rate": 0.03349282296650718,
+      "major_error_rate": 0.2037037037037037,
+      "vme_count": 7,
+      "me_count": 11,
+      "n_resistant": 209,
+      "n_susceptible": 54,
+      "brier": 0.06521903723478317
+    },
+    "rules": {
+      "roc_auc": 0.8024543682438419,
+      "pr_auc": 0.9112884902658767,
+      "very_major_error_rate": 0.19138755980861244,
+      "major_error_rate": 0.2037037037037037,
+      "vme_count": 40,
+      "me_count": 11,
+      "n_resistant": 209,
+      "n_susceptible": 54
+    },
+    "n_test": 263,
+    "test_R": 209,
+    "test_lineages": 24
+  }
+}

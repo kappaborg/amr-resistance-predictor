@@ -2,7 +2,7 @@
 # Processed artifacts regenerate from raw + code; data/raw is never a build target.
 # Each target maps to a pipeline phase. Stubs raise until the phase is implemented.
 
-.PHONY: all data features split train eval figures test clean help
+.PHONY: all data features split train eval rigor figures leakage dca riskcov organisms models test clean help
 .DEFAULT_GOAL := help
 
 CONFIG := config/config.yaml
@@ -24,16 +24,33 @@ split:  ## Phase 5: assign lineages + phylogeny-aware train/test split
 train:  ## Phase 6/7: train per-drug models (baseline + gradient boosting)
 	$(PY) -m src.models.train --config $(CONFIG)
 
-eval:  ## Phase 8/9: metrics, calibration, honest benchmark
-	$(PY) -m src.evaluation.evaluate --config $(CONFIG)
+eval:  ## Phase 8/9: regulator-grade metrics (VME/ME/CA), calibration+Brier, CIs, DeLong — all 8 orgs
+	$(PY) -m src.evaluation.clinical_rigor --config $(CONFIG)
 
-figures:  ## Phase 8/10: reliability curves, SHAP plots, benchmark table
+rigor: eval  ## Alias for eval (regulator-grade evaluation)
+
+figures:  ## Phase 8/10: reliability curves, SHAP plots, benchmark table, 8-organism heatmap
 	$(PY) -m src.evaluation.figures --config $(CONFIG)
 
-test:  ## Run the test suite (data joins, feature builder, LEAKAGE test)
+leakage:  ## Quantify population-structure leakage: random vs lineage vs temporal AUC
+	$(PY) -m src.evaluation.leakage_delta --config $(CONFIG)
+
+dca:  ## Decision-curve analysis (clinical net benefit) — needs eval first (pooled_predictions.pkl)
+	$(PY) -m src.evaluation.decision_curve
+
+riskcov:  ## Risk-coverage curves + AURC for the defer-to-lab abstention — needs eval first
+	$(PY) -m src.evaluation.risk_coverage
+
+organisms:  ## Annotate + MLST + train one organism (ORG=paeruginosa|senterica|efaecium|...)
+	$(PY) -m src.organism_pipeline --organism $(ORG)
+
+models:  ## Fit + save deployable per-drug models for all eight organisms (demo)
+	$(PY) -m src.models.save_models --config $(CONFIG)
+
+test:  ## Run the test suite (data joins, feature builder, per-organism LEAKAGE test)
 	pytest -q
 
-all: data features split train eval figures  ## Full pipeline end-to-end
+all: data features split train eval figures  ## Full pipeline end-to-end (K. pneumoniae panel)
 
 clean:  ## Remove regenerable artifacts (keeps data/raw and results/reports)
 	rm -rf data/interim/* data/processed/* results/figures/* results/metrics/* results/models/*

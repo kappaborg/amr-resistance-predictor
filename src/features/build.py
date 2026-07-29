@@ -88,27 +88,37 @@ def parse_determinants(tsv: Path) -> set[str]:
     return dets
 
 
+def encode_matrix(per_genome: dict[str, set[str]],
+                  ids: list[str]) -> tuple[list[str], list[tuple[str, list[int]]]]:
+    """Pure, testable core: build the binary genome x determinant matrix.
+
+    Columns = sorted union of all determinants seen. Returns (cols, [(genome_id, row_of_0/1), ...])
+    for every id present in `per_genome`, in `ids` order. No file I/O.
+    """
+    all_dets: set[str] = set()
+    for d in per_genome.values():
+        all_dets |= d
+    cols = sorted(all_dets)
+    rows = [(g, [1 if c in per_genome[g] else 0 for c in cols]) for g in ids if g in per_genome]
+    return cols, rows
+
+
 def build_matrix(ids: list[str]) -> None:
     per_genome: dict[str, set[str]] = {}
-    all_dets: set[str] = set()
     missing = 0
     for g in ids:
         tsv = CACHE / f"{g}.tsv"
         if not tsv.exists():
             missing += 1
             continue
-        d = parse_determinants(tsv)
-        per_genome[g] = d
-        all_dets |= d
-    cols = sorted(all_dets)
+        per_genome[g] = parse_determinants(tsv)
+    cols, rows = encode_matrix(per_genome, ids)
     with MATRIX.open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["genome_id"] + cols)
-        for g in ids:
-            if g in per_genome:
-                row = per_genome[g]
-                w.writerow([g] + [1 if c in row else 0 for c in cols])
-    print(f"\nmatrix: {len(per_genome)} genomes x {len(cols)} determinants "
+        for g, row in rows:
+            w.writerow([g] + row)
+    print(f"\nmatrix: {len(rows)} genomes x {len(cols)} determinants "
           f"({missing} genomes missing TSV) -> {MATRIX}")
     # quick view of the most common determinants
     freq = {c: sum(1 for d in per_genome.values() if c in d) for c in cols}

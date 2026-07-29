@@ -1,11 +1,16 @@
-"""Conformal prediction — statistically-guaranteed uncertainty + a clinical abstain ("defer to
-phenotypic testing") option, per drug.
+"""Conformal prediction — distribution-free uncertainty + a clinical abstain ("defer to phenotypic
+testing") option, per drug.
 
 Method: class-conditional (Mondrian) inductive conformal prediction. For each class c we take the
 (1-alpha) quantile of the nonconformity scores (1 - calibrated P(true class)) on a lineage-disjoint
 CALIBRATION set, then a test point's prediction set includes label c iff its nonconformity <= q_c.
-This gives a per-class coverage guarantee: P(Y in set | Y = c) >= 1 - alpha. Setting a small alpha
-for the RESISTANT class bounds the very-major error rate WITH A STATISTICAL GUARANTEE.
+Under EXCHANGEABILITY this gives a per-class coverage guarantee P(Y in set | Y = c) >= 1 - alpha.
+
+HONEST CAVEAT: we evaluate on UNSEEN LINEAGES, which deliberately breaks exchangeability between
+calibration and test (a covariate shift). So the guarantee is not strictly held — instead we
+EMPIRICALLY VALIDATE per-class coverage (~1 - alpha) UNDER LINEAGE SHIFT, a stricter and more honest
+test than standard random-split conformal. Setting a small alpha for the RESISTANT class targets a
+low very-major error rate; we report the coverage actually achieved rather than assume it.
 
 Prediction sets: {R} or {S} = a confident call; {R,S} or {} = uncertain -> defer to lab testing.
 
