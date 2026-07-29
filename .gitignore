@@ -3,11 +3,12 @@ data/raw/
 data/interim/
 data/processed/
 
-# Trained models & large binary outputs (tracked via manifest/checksums, not git)
-results/models/
+# Large binary outputs (tracked via manifest/checksums, not git)
 *.pkl
 *.joblib
 *.bin
+# ...but DO ship the trained per-drug models so the demo runs on a fresh clone (~13 MB)
+!results/models/**
 
 # Python
 __pycache__/
