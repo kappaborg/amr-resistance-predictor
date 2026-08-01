@@ -93,14 +93,17 @@
   .notes h4{margin:.1rem 0 .5rem;color:var(--gold);font-size:1rem;letter-spacing:.1em;text-transform:uppercase}
   body.notes-on .slide{padding-bottom:40vh}
 
-  /* PRINT: all slides stacked, notes shown */
+  /* PRINT / PDF: one clean landscape slide per page (16:9), no notes/chrome */
   @media print{
-    body{overflow:visible;background:#fff}
+    @page{ size:13.333in 7.5in; margin:0 }
+    html,body{overflow:visible;background:#fff}
     .deck{position:static}
-    .slide{position:relative;display:flex!important;min-height:100vh;page-break-after:always;
+    .slide{position:relative;display:flex!important;width:13.333in;height:7.5in;min-height:0;
+      padding:0.5in 0.7in;overflow:hidden;page-break-after:always;break-after:page;
       box-shadow:none;animation:none}
-    .bar,.counter,.hint{display:none}
-    figure img{max-height:60vh}
+    body.notes-on .slide{padding:0.5in 0.7in}   /* never add note padding in the PDF */
+    .bar,.counter,.hint,.notes{display:none!important}
+    figure img{max-height:4.7in}
   }
 </style>
 </head>
@@ -307,7 +310,7 @@ python -m src.app.predict --organism saureus --genome-id 1280.10000</pre>
     <div class="card" style="border-left:5px solid var(--good)"><h3>Kept ✓</h3><p><b>evidence = "Laboratory Method"</b> — actual measured susceptibility.</p></div>
     <div class="card" style="border-left:5px solid var(--bad)"><h3>Excluded ✗</h3><p><b>Computational</b> AMR predictions — training on them = predicting another model's output (circular).</p></div>
   </div>
-  <p class="lead" style="margin-top:1.4rem">MIC / SIR → binary <b>R/S</b>; the ambiguous <b>"Intermediate"</b> class is <b class="k">dropped, not guessed</b> (⚕ sign-off).</p>
+  <p class="lead" style="margin-top:1.4rem">MIC / SIR → binary <b>R/S</b>; the ambiguous <b>"Intermediate"</b> class is <b class="k">dropped, not guessed</b> (⚕ needs sign-off).</p>
   <div class="notes"><h4>Say</h4>Critical subtlety: BV-BRC mixes lab and computational phenotypes. We kept only lab-measured — otherwise we'd be predicting predictions. Intermediate is dropped rather than guessed.</div>
 </section>
 

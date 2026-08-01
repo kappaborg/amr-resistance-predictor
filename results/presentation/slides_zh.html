@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>解读耐药 — 演示文稿</title>
+<style>
+  :root{
+    --navy:#12314f; --navy-d:#0c2136; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --ink:#1a2229; --muted:#5a6b78; --line:#c9d6de; --bg:#f4f7f9; --card:#ffffff;
+    --good:#1f8a4c; --bad:#b4472e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;
+    font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;color:var(--ink)}
+  body{background:#0b1622;overflow:hidden}
+
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:5.5vh 7vw;background:var(--bg);animation:fade .35s ease}
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .kicker{font-size:1.05rem;font-weight:700;letter-spacing:.14em;color:var(--teal);margin:0 0 .6rem}
+  h1{font-size:4.2rem;line-height:1.08;margin:0;color:var(--navy);letter-spacing:0}
+  h2{font-size:2.9rem;line-height:1.18;margin:0 0 1.4rem;color:var(--navy);
+     border-left:.5rem solid var(--teal);padding-left:1rem}
+  h3{font-size:1.5rem;margin:1.2rem 0 .5rem;color:var(--teal)}
+  p,li{font-size:1.5rem;line-height:1.6;color:var(--ink)}
+  ul{margin:.4rem 0;padding-left:1.6rem} li{margin:.5rem 0}
+  .lead{font-size:1.9rem;color:var(--muted);max-width:44ch}
+  .muted{color:var(--muted)} .good{color:var(--good);font-weight:700} .bad{color:var(--bad);font-weight:700}
+  b.k{color:var(--navy)}
+  .hl{background:linear-gradient(transparent 60%, #ffe9b8 60%);padding:0 .15em}
+  .center{align-items:center;text-align:center}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:center}
+  .two.wide-r{grid-template-columns:1fr 1.25fr}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.6rem;
+        box-shadow:0 6px 22px rgba(18,49,79,.07)}
+  .card h3{margin-top:0}
+  .pill{display:inline-block;background:var(--teal-l);color:var(--teal);border-radius:999px;
+        padding:.15em .8em;font-weight:700;font-size:1.05rem;margin:.15rem .2rem}
+  .pill.gold{background:#f6e7c8;color:#8a5c15}
+  .pill.navy{background:#dbe6f0;color:var(--navy)}
+
+  table{width:100%;border-collapse:collapse;font-size:1.25rem;margin-top:.4rem}
+  th,td{padding:.55rem .7rem;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--navy);color:#fff;font-weight:600}
+  td.l,th.l{text-align:left}
+  tr:nth-child(even) td{background:#f0f5f7}
+
+  figure{margin:0;text-align:center}
+  figure img{max-width:100%;max-height:66vh;border:1px solid var(--line);border-radius:10px;background:#fff}
+  figcaption{font-size:1.05rem;color:var(--muted);margin-top:.5rem}
+
+  .stat{font-size:5.5rem;font-weight:800;color:var(--navy);line-height:1}
+  .stat small{display:block;font-size:1.3rem;font-weight:600;color:var(--muted);margin-top:.3rem}
+  .arrow{font-size:3rem;color:var(--gold);font-weight:800}
+
+  code,.mono{font-family:"SF Mono",Menlo,Consolas,"PingFang SC",monospace}
+  pre{background:#0e2033;color:#e7eef4;border-radius:12px;padding:1.3rem 1.5rem;font-size:1.2rem;
+      line-height:1.6;overflow:auto;border:1px solid #1c3550;
+      font-family:"SF Mono",Menlo,Consolas,"PingFang SC",monospace}
+  pre .c{color:#7fa9c9} pre .g{color:#8fd4a0}
+
+  .title-slide{background:linear-gradient(135deg,#12314f 0%,#0e7c86 140%);color:#fff;text-align:center}
+  .title-slide h1{color:#fff;font-size:5rem}
+  .title-slide .sub{font-size:2.1rem;color:#cfe6e8;margin:1.2rem 0 .4rem;font-weight:600}
+  .title-slide .meta{font-size:1.3rem;color:#9fc3d4;margin-top:2rem}
+  .title-slide .dna{font-size:5rem}
+
+  .divider{background:var(--navy);color:#fff;justify-content:center}
+  .divider h1{color:#fff} .divider .kicker{color:var(--gold)}
+  .divider .lead{color:#cfe0ee}
+
+  .bar{position:fixed;left:0;bottom:0;height:5px;background:var(--gold);z-index:20;transition:width .3s}
+  .counter{position:fixed;right:16px;bottom:14px;font-size:.95rem;color:var(--muted);z-index:20;
+    background:rgba(255,255,255,.8);padding:.15rem .6rem;border-radius:999px}
+  .hint{position:fixed;left:16px;bottom:12px;font-size:.85rem;color:var(--muted);z-index:20;
+    background:rgba(255,255,255,.8);padding:.15rem .6rem;border-radius:999px}
+
+  .notes{position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;
+    background:#0e2033;color:#e7eef4;border-top:3px solid var(--gold);padding:1rem 1.4rem 1.4rem;
+    font-size:1.15rem;line-height:1.6;z-index:30;display:none}
+  .notes.show{display:block}
+  .notes h4{margin:.1rem 0 .5rem;color:var(--gold);font-size:1rem;letter-spacing:.06em}
+  body.notes-on .slide{padding-bottom:40vh}
+
+  /* PRINT / PDF: one clean landscape slide per page (16:9), no notes/chrome */
+  @media print{
+    @page{ size:13.333in 7.5in; margin:0 }
+    html,body{overflow:visible;background:#fff}
+    .deck{position:static}
+    .slide{position:relative;display:flex!important;width:13.333in;height:7.5in;min-height:0;
+      padding:0.5in 0.7in;overflow:hidden;page-break-after:always;break-after:page;
+      box-shadow:none;animation:none}
+    body.notes-on .slide{padding:0.5in 0.7in}
+    .bar,.counter,.hint,.notes{display:none!important}
+    figure img{max-height:4.7in}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1 标题 -->
+<section class="slide active title-slide center">
+  <div class="dna">🧬</div>
+  <h1>解读耐药</h1>
+  <div class="sub">一个可解释、经诚实基准检验的机器学习分类器<br>从细菌基因组预测抗生素耐药性</div>
+  <p style="font-size:1.5rem;color:#bcdbe0;max-width:46ch;margin:1.4rem auto 0">
+    按药物逐一预测「耐药 vs 敏感」——在从未见过的谱系上验证、与透明的「基因查找」基线对比、
+    并解释每一次判定背后的基因。</p>
+  <div class="meta">8 种 WHO 重点病原体 · 36 个模型 · 全程计算 · 仅用公共数据 · 两人团队</div>
+  <div class="notes"><h4>开场</h4>抗生素耐药性预计将成为全球主要死因之一。判断一个菌株是否耐药，通常需要<b>数天</b>的实验室培养——但基因组本身已携带答案。本项目直接从序列中读出它，并且做得<b>诚实</b>，而这恰恰是最难、也是最关键的部分。</div>
+</section>
+
+<!-- 2 团队 -->
+<section class="slide">
+  <p class="kicker">团队</p>
+  <h2>两人协作，能力互补</h2>
+  <div class="two">
+    <div class="card"><h3>软件 / 机器学习工程师</h3><ul>
+      <li>数据流程与特征提取</li><li>系统发育感知的划分</li>
+      <li>建模、概率校准、SHAP 工具</li><li>交互式演示程序</li></ul></div>
+    <div class="card"><h3>微生物学硕士 ⚕</h3><ul>
+      <li>菌种与药物的选择</li><li>表型标签的质量控制</li>
+      <li>耐药决定因子的生物学验证</li><li>临床误差权衡与局限性</li></ul></div>
+  </div>
+  <p class="lead" style="margin-top:1.6rem;max-width:60ch">工程负责严谨性；微生物学掌管每一个生物学决策，并证明模型学到的是<b class="k">真实机制</b>，而非噪声。</p>
+  <div class="notes"><h4>讲</h4>刻意采用两人协作。一个泄漏的流程即使生物学完美也毫无价值；完美的代码若预测的是无意义的基因同样毫无价值。两者缺一不可。</div>
+</section>
+
+<!-- 3 一分钟故事 -->
+<section class="slide center">
+  <p class="kicker">一口气讲完整个系统</p>
+  <div class="two" style="width:100%;margin:1rem 0 2rem">
+    <div class="card center"><div style="font-size:2.6rem">🧬 → 🧩</div><h3>基因组输入 → 决定因子特征</h3><p class="muted">这个菌株携带哪些已知的耐药基因与突变？</p></div>
+    <div class="card center"><div style="font-size:2.6rem">📊 → 💬</div><h3>逐药「耐药/敏感」+ 依据</h3><p class="muted">校准后的概率，以及驱动该判定的基因。</p></div>
+  </div>
+  <p class="lead center" style="max-width:64ch">头条结果：对于<b class="hl">头孢西丁</b>，基因查找会漏掉约 <b class="bad">92%</b> 的耐药株——
+    因为其耐药来自<b>孔蛋白缺失</b>，而非获得某个基因。我们的模型把 AUC 从 <b>0.50 提升到 0.90</b>。<b class="k">这个差距就是贡献所在。</b></p>
+  <div class="notes"><h4>讲</h4>基因组输入 → 注释它携带的基因 → 逐药给出判定与校准概率 → 并说明判定背后的基因。头孢西丁的差距是「机器学习相对数据库查询能带来什么」最干净的证明。</div>
+</section>
+
+<!-- 分隔：问题 -->
+<section class="slide divider">
+  <p class="kicker">第一部分</p><h1>问题及其重要性</h1>
+  <p class="lead">为什么基因组能预测耐药——以及两个让粗糙项目自欺欺人的陷阱。</p>
+</section>
+
+<!-- 4 为何重要 -->
+<section class="slide">
+  <p class="kicker">为何重要</p><h2>耐药性写在基因组里</h2>
+  <div class="two">
+    <div><ul>
+      <li>细菌耐药有两种途径：携带某个<b class="k">基因</b>（例如能分解药物的酶）……</li>
+      <li>……或药物靶点上的<b class="k">点突变</b>。</li>
+      <li>标准检测是让菌株在药物下生长——准确但<b>缓慢（数天）</b>。</li>
+      <li>临床分离株的全基因组测序已成常规 → 已存在大量公共数据库，把基因组与<b>实验室表型</b>配对。</li>
+    </ul></div>
+    <div class="card"><h3>机遇</h3><p>「从基因组预测耐药」的原材料就摆在公共数据库里。挑战不在数据——而在<b class="k">诚实的评估</b>。</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>两种机制：获得性基因，或靶点突变。测序已成常规，因此配对了实验室表型的基因组已大规模存在。</div>
+</section>
+
+<!-- 5 两个陷阱 -->
+<section class="slide">
+  <p class="kicker">我们要填补的空白 ⚕</p><h2>两个让粗糙结果虚高的陷阱</h2>
+  <div class="two">
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>1 · 克隆性群体结构</h3>
+      <p>细菌是<b>克隆繁殖</b>的——数据里满是同一谱系的近亲。<b class="bad">随机</b>划分训练/测试集，会让模型在训练里见过某个耐药株、又在测试里遇到它的近乎孪生体 → 于是它因<b>认出克隆</b>而非理解耐药而得分。所有指标都会虚高。</p></div>
+    <div class="card" style="border-top:5px solid var(--gold)"><h3>2 · 「不过是查数据库」</h3>
+      <p>若模型只是检测某个已知耐药基因，那它就是<b>数据库查询，而非科学</b>。价值在于模型在此之上<b class="k">额外</b>贡献了什么。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem;max-width:70ch">我们的整个设计正是针对这两点：<b class="k">系统发育感知的划分</b> 与 一条显式的<b class="k">规则基线</b>。</p>
+  <div class="notes"><h4>讲</h4>陷阱一是细菌版的数据泄漏——这是这类项目自欺欺人的最大方式。陷阱二：能胜过基因查找，才是唯一值得下的结论。</div>
+</section>
+
+<!-- 6 研究问题 -->
+<section class="slide">
+  <p class="kicker">研究问题与假设</p><h2>我们要证明什么</h2>
+  <div class="card" style="margin-bottom:1.2rem"><p><b class="k">问题。</b>一个可解释的模型，能否从基因组特征预测耐药、<b>泛化到从未见过的谱系</b>、并与基因查找及已发表方法进行诚实的基准对比？</p></div>
+  <div class="card"><p><b class="k">假设。</b>在系统发育感知划分下、基于决定因子特征的梯度提升模型将：
+    <span class="pill navy">a · 在未见谱系上有强区分能力</span>
+    <span class="pill navy">b · 匹配/胜过基因查找，减少危险误差</span>
+    <span class="pill navy">c · 顶层特征 = 已知机制</span></p></div>
+  <div class="notes"><h4>讲</h4>三部分假设：在未见谱系上的区分能力、在危险误差上胜过查找、以及能对应到真实生物学的特征。</div>
+</section>
+
+<!-- 7 不可协商原则 -->
+<section class="slide">
+  <p class="kicker">我们的诚实约定</p><h2>九条不可协商原则，写进代码强制执行</h2>
+  <div class="cols3">
+    <div class="card"><p>✓ 按<b>谱系</b>划分，绝不随机</p></div>
+    <div class="card"><p>✓ 始终报告<b>基因查找基线</b></p></div>
+    <div class="card"><p>✓ <b>每种抗生素一个模型</b></p></div>
+    <div class="card"><p>✓ <b>VME / ME</b> 先于准确率报告</p></div>
+    <div class="card"><p>✓ <b>仅用决定因子特征</b>（不用 k-mer）</p></div>
+    <div class="card"><p>✓ 概率始终<b>校准</b></p></div>
+    <div class="card"><p>✓ 不做<b>「全面最优」</b>的夸大</p></div>
+    <div class="card"><p>✓ <b>严守范围纪律</b></p></div>
+    <div class="card"><p>✓ <b>绝不伪造</b>基因组/标签/数字</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.2rem;max-width:70ch">在接触数据前就已写定。一旦有单个谱系跨越划分，<b class="k">构建即失败（测试报错）</b>。</p>
+  <div class="notes"><h4>讲</h4>这九条规则在动手前就固定，从未违反。每条都由代码或测试强制执行——泄漏测试会因任何重叠直接让构建失败。</div>
+</section>
+
+<!-- 分隔：搭建 -->
+<section class="slide divider">
+  <p class="kicker">第二部分</p><h1>从零搭建</h1>
+  <p class="lead">任何人如何从零重建本项目——环境、工具，以及可复现性的骨架。</p>
+</section>
+
+<!-- 8 技术栈 -->
+<section class="slide">
+  <p class="kicker">技术栈</p><h2>免费、公开、笔记本电脑可跑</h2>
+  <div class="two">
+    <div><h3>Python 数据科学</h3><p>Python 3.11 · pandas · numpy · scikit-learn · <b>XGBoost</b> / LightGBM · <b>SHAP</b> · matplotlib · scipy</p>
+      <h3>生物信息学（bioconda）</h3><p><b class="k">AMRFinderPlus</b> 4.2.7 —— 耐药基因检出工具（特征引擎）<br><b class="k">mlst</b> 2.33.1 —— 谱系分型</p></div>
+    <div class="card"><h3>可选扩展</h3><p>Streamlit —— 演示网页应用<br>PyTorch + <b>ESM-2</b>（fair-esm）—— 蛋白质语言模型的 MIC 扩展<br><span class="muted">笔记本电脑即可运行；ESM-2 在 Apple 芯片 GPU 上数分钟完成嵌入。</span></p>
+      <p style="margin-top:1rem"><span class="pill">用 conda，而非 pip</span> 生物工具经由 bioconda 分发</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>全部免费公开。我们专门用 conda，因为 AMRFinderPlus 与 mlst 来自 bioconda。其余是标准机器学习技术栈。</div>
+</section>
+
+<!-- 9 安装 -->
+<section class="slide">
+  <p class="kicker">安装</p><h2>从裸机到一次预测，只需 4 条命令</h2>
+  <pre><span class="c"># 1 · 获取代码</span>
+git clone https://github.com/kappaborg/amr-resistance-predictor
+cd amr-resistance-predictor
+
+<span class="c"># 2 · 构建精确锁定版本的环境（用 conda —— 为了生物工具）</span>
+conda env create -f environment.yml
+conda activate amr-resistance-predictor
+
+<span class="c"># 3 · 验证可用 —— 运行「零谱系泄漏」测试</span>
+make test          <span class="g"># -> 20 passed（20 项通过）</span>
+
+<span class="c"># 4 · 对缓存基因组做一次预测（即时，无需下载）</span>
+python -m src.app.predict --organism saureus --genome-id 1280.10000</pre>
+  <p class="lead" style="margin-top:1rem;max-width:70ch"><code>environment.yml</code> 锁定精确的工具与数据库版本，因此任何人都能重现<b class="k">相同的特征</b>。</p>
+  <div class="notes"><h4>讲</h4>四条命令从零到一次可用的预测。生物工具路径会自动从当前激活的环境解析，因此在她的电脑、Linux 或 Colab 上都能跑，不止原始机器。</div>
+</section>
+
+<!-- 10 可复现性 -->
+<section class="slide">
+  <p class="kicker">可复现性骨架</p><h2>科学部分绝不写死、绝不失追踪</h2>
+  <div class="cols3">
+    <div class="card"><h3>固定随机种子 42</h3><p>处处一致——划分、模型、自助抽样</p></div>
+    <div class="card"><h3>config.yaml</h3><p>菌种、药物、阈值、模型选择</p></div>
+    <div class="card"><h3>data/manifest.md</h3><p>每个来源、版本、查询、计数</p></div>
+    <div class="card"><h3>Makefile</h3><p>每个流程阶段一条命令</p></div>
+    <div class="card"><h3>decisions.md</h3><p><b>53 条决策记录</b>——即实验记录本</p></div>
+    <div class="card"><h3>data/raw/ 已被 git 忽略</h3><p>可依据清单重新生成</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>可复现性是骨架，不是一张幻灯片。53 条决策连同理由都有记录——那是我们的答辩脚本与实验记录本。</div>
+</section>
+
+<!-- 分隔：数据 -->
+<section class="slide divider">
+  <p class="kicker">第三部分</p><h1>数据</h1>
+  <p class="lead">公共资源、由数据驱动的菌种选择，以及维持诚实的标签纪律。</p>
+</section>
+
+<!-- 11 资源 -->
+<section class="slide">
+  <p class="kicker">资源</p><h2>五个公共来源，无需湿实验</h2>
+  <table>
+    <tr><th class="l">角色</th><th>来源</th><th class="l">提供什么</th></tr>
+    <tr><td class="l">基因组 + 标签</td><td><b>BV-BRC</b></td><td class="l">组装基因组 + <b>实验室</b>耐药/敏感表型</td></tr>
+    <tr><td class="l">参考决定因子</td><td><b>CARD</b></td><td class="l">已知耐药基因与突变的目录</td></tr>
+    <tr><td class="l">特征注释</td><td><b>AMRFinderPlus</b></td><td class="l">基因组 → 基因/突变的存在-缺失</td></tr>
+    <tr><td class="l">谱系分型</td><td><b>mlst</b></td><td class="l">每个基因组 → 序列型（谱系）</td></tr>
+    <tr><td class="l">验证参照</td><td><b>已发表的 AMR-ML</b></td><td class="l">诚实的外部对比</td></tr>
+  </table>
+  <div class="notes"><h4>讲</h4>BV-BRC 提供与实验室表型配对的基因组。CARD 与 AMRFinderPlus 是词表与工具。mlst 为诚实划分分配谱系。</div>
+</section>
+
+<!-- 12 菌种选择 -->
+<section class="slide">
+  <p class="kicker">第一周决策 ⚕</p><h2>菌种由数据决定，而非凭直觉</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>向 BV-BRC 查询候选病原体/药物的<b>实验室表型计数</b>。</li>
+      <li>按<b class="k">数据充足、类别均衡</b>的耐药/敏感来挑选。</li>
+      <li><b>锁定：肺炎克雷伯菌</b>（taxon 573）+ 五药组合。</li>
+    </ul></div>
+    <div class="card"><h3>为何肺炎克雷伯菌契合选题</h3>
+      <p>碳青霉烯类耐药正是单基因规则<b>失效</b>之处——孔蛋白缺失<b>加上</b>β-内酰胺酶的组合 → 存在真实、可捕捉的危险误差。</p>
+      <p>克隆结构强 → 系统发育感知的划分才真正<b>见效</b>。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1rem;max-width:74ch">五药组合 = <b>五种不同机制</b>：美罗培南 · 庆大霉素 · 环丙沙星 · 复方磺胺甲噁唑（TMP-SMX）· 头孢西丁。</p>
+  <div class="notes"><h4>讲（由你阐述）</h4>我们先查询均衡的数据。肺炎克雷伯菌在科学上胜出——碳青霉烯类耐药是组合性的，其克隆性让诚实划分有意义。五种药 = 五种不同机制 = 真正各异的解释。</div>
+</section>
+
+<!-- 13 标签 -->
+<section class="slide">
+  <p class="kicker">标签纪律</p><h2>仅用实验室表型——避免循环论证</h2>
+  <div class="two">
+    <div class="card" style="border-left:5px solid var(--good)"><h3>保留 ✓</h3><p><b>evidence = "Laboratory Method"</b> —— 实际测得的药敏结果。</p></div>
+    <div class="card" style="border-left:5px solid var(--bad)"><h3>排除 ✗</h3><p><b>计算预测</b>的 AMR 结果 —— 用它训练 = 在预测另一个模型的输出（循环论证）。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem;max-width:70ch">MIC / SIR → 二分类 <b>耐药/敏感</b>；含糊的<b>「中介（Intermediate）」</b>类别<b class="k">直接剔除，绝不臆测</b>（待 ⚕ 确认）。</p>
+  <div class="notes"><h4>讲</h4>一个微妙但关键的点：BV-BRC 混有实验室与计算表型。我们只保留实验室实测的——否则就是在预测别人的预测。中介类别予以剔除，而非臆测。</div>
+</section>
+
+<!-- 14 获取 + 缺陷 -->
+<section class="slide">
+  <p class="kicker">数据获取</p><h2>严谨体现在你抓到的缺陷上</h2>
+  <div class="two">
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>🐛 抓到：静默截断</h3><p>基因组 API 默认只返回 <b>25 条记录</b> → 组装被截断到约 5.5 Mbp 中的 2 Mbp。截断的基因组会<b>丢失基因</b> → 假阴性特征 → 标签被污染。由文件大小完整性检查抓到；已修复并重新下载全部。</p></div>
+    <div class="card" style="border-top:5px solid var(--teal)"><h3>设计上的稳健</h3><p>BV-BRC REST API —— 不做批量下载，先标示大小。下载器带<b>退避重试</b>并<b>可断点续传</b> —— 一次超时不该毁掉整夜的运行。</p></div>
+  </div>
+  <p class="muted" style="margin-top:1rem">决策记录第 #15–#16 条。</p>
+  <div class="notes"><h4>讲</h4>两个体现严谨的故事：我们抓到了会静默污染标签的截断缺陷；下载器可断点续传。两者都在决策记录里。</div>
+</section>
+
+<!-- 15 质控 -->
+<section class="slide">
+  <p class="kicker">质量控制 ⚕</p><h2>与文献一致的阈值（MIMAG）</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>完整度 ≥90%，污染度 ≤5% <span class="muted">（Bowers 2017）</span></li>
+      <li>contig ≤500 · 长度 4.5–7.5 Mbp <span class="muted">（Kleborate 范围）</span></li>
+      <li>长度上限放宽到 7.5 Mbp —— 携带 MDR 质粒的菌株合理可达约 6.6 Mbp；上限过紧会丢弃<b>真实的耐药</b>株。</li>
+      <li>仅剔除 <b>1.9%</b>，且剔除是<b class="k">类别均衡</b>的 → 不引入标签偏倚。</li>
+    </ul></div>
+    <div class="card center"><div class="stat">3,850<small>通过质控的肺炎克雷伯菌基因组</small></div>
+      <div class="stat" style="font-size:3.4rem;margin-top:1rem">688<small>决定因子特征</small></div></div>
+  </div>
+  <div class="notes"><h4>讲（你的领域）</h4>阈值遵循 MIMAG，而非拍脑袋。我们特意放宽长度上限，以免丢弃真实的 MDR 耐药株。剔除是均衡的，因此标签不偏。最终得到 3,850 个基因组。</div>
+</section>
+
+<!-- 分隔：方法 -->
+<section class="slide divider">
+  <p class="kicker">第四部分</p><h1>方法 —— 科学内核</h1>
+  <p class="lead">特征、谱系感知划分（核心亮点）、模型、校准，以及临床指标。</p>
+</section>
+
+<!-- 16 特征 -->
+<section class="slide">
+  <p class="kicker">特征提取</p><h2>基因组 → 二值决定因子矩阵</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>对每个基因组运行 AMRFinderPlus <code>--organism Klebsiella_pneumoniae</code>。</li>
+      <li>构建二值矩阵：行 = 基因组，列 = 决定因子，<b>1 = 存在</b>。</li>
+      <li>只保留真正的 <b>AMR</b> 元件——排除毒力/应激基因。</li>
+      <li>纳入<b class="k">点突变</b>（gyrA、parC……）——这是氟喹诺酮类耐药的全部关键。</li>
+    </ul>
+    <p class="lead" style="max-width:40ch">快速且<b>可解释</b>——<b class="bad">不是</b>黑箱 k-mer。</p></div>
+    <div class="card center"><div class="stat" style="font-size:3.2rem">3,850 × 688<small>基因组 × 决定因子（肺炎克雷伯菌）</small></div></div>
+  </div>
+  <div class="notes"><h4>讲</h4>每个基因组 → 它携带的已知基因与突变 → 二值矩阵。我们纳入点突变，因为那是氟喹诺酮类的关键。特意不用 k-mer。</div>
+</section>
+
+<!-- 17 划分（核心） -->
+<section class="slide" style="background:linear-gradient(180deg,#fff 0%,#eef6f7 100%)">
+  <p class="kicker">⭐ 最重要的一页</p><h2>谱系感知的划分</h2>
+  <div class="two">
+    <div><ul>
+      <li><b>mlst</b> 为每个基因组分配<b>序列型</b>（谱系）。</li>
+      <li><code>StratifiedGroupKFold</code> 将<b class="k">整个谱系</b>留作测试——模型只在<b>从未见过</b>的序列型上受测。</li>
+      <li>划分中保持耐药/敏感的类别均衡。</li>
+      <li>无法分型的基因组各自获得一个<b>唯一</b>的合成谱系——绝不会悄悄并入一个会泄漏的组。</li>
+    </ul></div>
+    <div class="card" style="border:2px solid var(--teal)"><h3>守卫</h3>
+      <p>一项<b class="k">测试断言训练与测试间零谱系重叠</b>——对<b>全部 8 种菌</b>。一旦某序列型同时出现在两侧，<b class="bad">构建即失败。</b></p>
+      <p class="muted"><code>tests/test_split.py</code> · 20 项测试通过</p></div>
+  </div>
+  <p class="lead center" style="margin-top:1rem;max-width:60ch">正是这一选择，<b>让此后每个数字都可信。</b></p>
+  <div class="notes"><h4>讲</h4>最重要的一页。我们留出整个谱系，并有测试在任何重叠时让构建失败。下游的一切之所以可信，全靠它。</div>
+</section>
+
+<!-- 18 量化泄漏 -->
+<section class="slide">
+  <p class="kicker">为何重要——已量化</p><h2>我们量化了所避免的泄漏</h2>
+  <div class="two wide-r">
+    <div><p>同一模型，在朴素<b>随机</b>划分与我们的<b>谱系</b>划分下分别评分：</p>
+      <div class="card center" style="margin:1rem 0"><div class="stat" style="font-size:3rem">+0.010<small>随机划分带来的 AUC 平均虚高（最大 +0.032，头孢西丁）</small></div></div>
+      <p class="lead" style="max-width:40ch">虚高很<b class="k">小</b>——因为我们的特征编码的是<b>机制，而非血统</b>。一个基因组耐药，是因为它携带 blaKPC，而不是因为它的进化枝。</p></div>
+    <div class="card"><h3>对照</h3><p>k-mer 模型——暗中编码谱系——在同一测试上会损失 <b class="bad">0.1–0.2 AUC</b>。</p>
+      <p>我们这么小的差距本身就是<b class="k">学到生物学</b>的证据。我们仍处处报告诚实的谱系数字。</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>一个漂亮的结果：随机划分只让我们虚高 +0.010，因为我们的特征是机制性的。k-mer 模型会损失 0.1–0.2。这小差距证明我们学到的是生物学，而非谱系。</div>
+</section>
+
+<!-- 19 模型 -->
+<section class="slide">
+  <p class="kicker">建模</p><h2>每种抗生素一个模型，三个诚实层级</h2>
+  <div class="cols3">
+    <div class="card"><h3>1 · 规则基线</h3><p>「只要存在该药已知的任一基因即判耐药。」透明的<b>标尺</b>。</p></div>
+    <div class="card"><h3>2 · 逻辑回归</h3><p>简单、线性、可解释的参照。</p></div>
+    <div class="card" style="border-top:5px solid var(--teal)"><h3>3 · XGBoost</h3><p>梯度提升——主模型。经校准并设定阈值。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem;max-width:74ch">耐药是药物特异的 → <b class="k">绝不把多种药并成一个标签</b>。三者都报告，好让「机器学习额外贡献了什么」保持诚实。</p>
+  <div class="notes"><h4>讲</h4>严格每种抗生素一个模型。三个层级——规则、逻辑回归、XGBoost——始终让相对查找的增益一目了然。</div>
+</section>
+
+<!-- 20 菌种特异规则 -->
+<section class="slide">
+  <p class="kicker">公平性 ⚕</p><h2>基因查找基线随菌种而变</h2>
+  <div class="card" style="margin-bottom:1.2rem"><p>「氨苄西林耐药」在不同细菌里<b>并非</b>同一个基因：</p>
+    <p><span class="pill navy">大肠埃希菌 → β-内酰胺酶</span> <span class="pill gold">肠球菌 → pbp5</span> <span class="pill navy">肺炎链球菌青霉素 → pbp1a/2b/2x 镶嵌型</span></p></div>
+  <p class="lead" style="max-width:74ch">单一通用规则在某些菌里会成为<b class="bad">稻草人</b>基线。<code>ORG_RULES</code> 按(菌种, 药物)匹配<b class="k">真实机制</b>——因此我们胜过基线时，胜过的是<b>真实的基线</b>。</p>
+  <div class="notes"><h4>讲（你的领域）</h4>氨苄西林在大肠埃希菌里意味着 β-内酰胺酶，但在肠球菌里是 pbp5。通用规则会是稻草人。我们按菌种匹配真实机制，因此我们的胜出是公平的。</div>
+</section>
+
+<!-- 21 校准 + VME -->
+<section class="slide">
+  <p class="kicker">校准与临床指标 ⚕</p><h2>有意义的概率 · 真正要紧的误差</h2>
+  <div class="two">
+    <div class="card"><h3>校准</h3><p>保序校准 + <b>Brier 分数</b> + 可靠性曲线。「90% 耐药」应约有 90% 的时候是对的——一个实为 0.6 的未校准 0.9 是危险的。</p></div>
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>VME / ME —— 优先报告</h3>
+      <p><b class="bad">极重大误差（VME）：</b>把耐药误判为敏感——病人用了无效的药。<b>危险的漏判。</b></p>
+      <p><b>重大误差（ME）：</b>把敏感误判为耐药——不必要的警报。</p>
+      <p>工作点调到把 <b class="k">VME 控制在 ≤ 3%</b>（CLSI/FDA 风格）。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1rem;max-width:74ch">在难判的药上，压低 VME 会<b>抬高</b> ME——这是一种临床权衡，<b class="k">公开呈现</b>，绝不隐藏。</p>
+  <div class="notes"><h4>讲（临床核心）</h4>准确率掩盖了会害人的误差。VME = 把耐药株判为敏感。我们在 AUC 之前报告 VME/ME，在折外训练数据上把 VME 压到 ≤3%，并用通过/未通过标记展示 ME 的权衡。</div>
+</section>
+
+<!-- 分隔：训练 -->
+<section class="slide divider">
+  <p class="kicker">第五部分</p><h1>训练与流程</h1>
+  <p class="lead">这条流水线——每一个环节都是一个可运行的文件。</p>
+</section>
+
+<!-- 22 流程 -->
+<section class="slide">
+  <p class="kicker">端到端</p><h2>基因组 → 可解释、经基准检验的预测</h2>
+  <div style="font-size:1.35rem;line-height:2.1;text-align:center;margin:1rem 0">
+    <span class="pill navy">FASTA</span> → <span class="pill navy">质控</span> → <span class="pill gold">AMRFinderPlus</span> → <span class="pill navy">特征矩阵</span> →
+    <span class="pill gold">MLST 谱系</span> → <span class="pill gold">谱系划分 · 零泄漏守卫</span> →
+    <span class="pill navy">逐药 XGBoost</span> → <span class="pill navy">校准 + VME≤3% 阈值</span> →
+    <span class="pill navy">评估：VME/ME · 置信区间 · DeLong</span> → <span class="pill navy">SHAP</span> → <span class="pill">演示程序</span>
+  </div>
+  <pre style="margin-top:1rem"><span class="c"># 每个阶段一条命令 —— 或一次跑完整条主线</span>
+make data · features · split · train · eval · figures        <span class="g"># make all</span></pre>
+  <p class="muted" style="margin-top:.8rem">两个决策关口：「每种药是否有足够的 R <b>和</b> S？」以及「能否泛化到未见谱系？」——若不能，则回到划分重来。</p>
+  <div class="notes"><h4>讲</h4>每个环节都是真实、可运行的文件。两个关口保护结果：足够的均衡数据，以及对未见谱系的泛化。</div>
+</section>
+
+<!-- 23 如何训练 -->
+<section class="slide">
+  <p class="kicker">模型如何构建</p><h2>绝不偷看测试集</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>在<b>训练谱系</b>上拟合 XGBoost。</li>
+      <li>校准（保序）。</li>
+      <li>在<b class="k">折外</b>训练预测上选取 VME≤3% 阈值——绝不用测试集。</li>
+      <li>在留出谱系上<b>只评估一次</b>。</li>
+    </ul></div>
+    <div class="card center"><h3>可部署的打包</h3><p>模型 + 校准器 + 阈值 + 特征列 → 每个「菌种-药物」一个 <code>.joblib</code></p>
+      <div class="stat" style="font-size:3.4rem;margin-top:.8rem">36<small>可部署模型（8 种菌）</small></div></div>
+  </div>
+  <div class="notes"><h4>讲</h4>阈值在折外训练预测上选取，在留出谱系上只评估一次。每个可部署模型都打包了演示所需的一切——共 36 个。</div>
+</section>
+
+<!-- 分隔：结果 -->
+<section class="slide divider">
+  <p class="kicker">第六部分</p><h1>结果</h1>
+  <p class="lead">在未见谱系上有强区分能力——并对「查找已经占优之处」保持诚实。</p>
+</section>
+
+<!-- 24 头孢西丁头条 -->
+<section class="slide center">
+  <p class="kicker">头条结果</p><h2 style="border:none;padding:0">头孢西丁——查找失效之处</h2>
+  <div style="display:flex;align-items:center;gap:2.5rem;justify-content:center;margin:1.5rem 0">
+    <div class="stat" style="color:var(--bad)">0.50<small>基因查找 AUC（掷硬币）</small></div>
+    <div class="arrow">→</div>
+    <div class="stat" style="color:var(--good)">0.90<small>模型 AUC（DeLong p ≈ 0）</small></div>
+  </div>
+  <p class="lead center" style="max-width:72ch">其耐药由<b class="hl">ompK36 孔蛋白缺失</b>驱动——药物进不来。基因<i>查找</i>对<b>缺失</b>的特征是盲的（漏掉约 92% 的耐药株）。模型学会了这种「缺失」的模式。</p>
+  <p style="margin-top:.8rem"><b class="k">这是「机器学习相对数据库查询能带来什么」最干净的证明。</b></p>
+  <div class="notes"><h4>讲</h4>关键的一页。头孢西丁耐药 = 孔蛋白缺失。查找看不到缺失的特征，所以只是随机水平。模型学会了缺失模式，达到 0.90。这个差距就是全部贡献。</div>
+</section>
+
+<!-- 25 面板表 -->
+<section class="slide">
+  <p class="kicker">肺炎克雷伯菌五药组合 · 未见谱系（合并交叉验证）</p><h2>全面且具统计显著性</h2>
+  <table>
+    <tr><th class="l">药物</th><th>模型 AUC</th><th>规则 AUC</th><th>VME</th><th>ME</th><th>DeLong p</th></tr>
+    <tr><td class="l">环丙沙星</td><td class="good">0.983</td><td>0.911</td><td>2.3%</td><td>7.7%</td><td>7e−36</td></tr>
+    <tr><td class="l">复方磺胺甲噁唑</td><td class="good">0.977</td><td>0.885</td><td>2.3%</td><td>18.3%</td><td>9e−51</td></tr>
+    <tr><td class="l">美罗培南</td><td class="good">0.968</td><td>0.933</td><td>1.3%</td><td>55.9%</td><td>5e−24</td></tr>
+    <tr><td class="l">庆大霉素</td><td class="good">0.981</td><td>0.948</td><td>1.6%</td><td>32.4%</td><td>1e−30</td></tr>
+    <tr><td class="l"><b>头孢西丁</b></td><td class="good">0.905</td><td class="bad">0.500</td><td>0.7%</td><td>94.2%</td><td>~0</td></tr>
+  </table>
+  <p class="lead" style="margin-top:1rem;max-width:76ch">VME 处处满足 ≤3% 标准 · 在全部五种药上都<b>显著</b>胜过查找。美罗培南/头孢西丁的高 ME 是 VME 优先的权衡，已用标记呈现。</p>
+  <div class="notes"><h4>讲</h4>在未见谱系上 AUC 0.90–0.98。VME 处处低于 3%。DeLong p 值极小。难判药上的高 ME 是刻意的 VME 优先权衡，并未隐藏。</div>
+</section>
+
+<!-- 26 诚实解读 -->
+<section class="slide">
+  <p class="kicker">诚实的解读 ⚕</p><h2>我们<span style="color:var(--bad)">不</span>占优之处——主动先说</h2>
+  <div class="cols3">
+    <div class="card"><h3>庆大霉素</h3><p>规则已经很强（AUC 0.948）——直接的酶信号。机器学习只是<b>持平</b>。我们照实说。</p></div>
+    <div class="card"><h3>沙门菌氯霉素</h3><p>规则基线<b class="bad">胜过</b>我们的模型。如实报告。</p></div>
+    <div class="card"><h3>肺炎链球菌 TMP-SMX</h3><p>作为耐药根源的 folA/folP <b>不在目录内</b> → 任何信号都是<b>共选择</b>，而非机制。据实标注。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem;max-width:74ch">拿奖靠的不是宣称样样都赢——而是<b class="k">清楚知道自己在哪里不赢。</b></p>
+  <div class="notes"><h4>讲（可信度）</h4>庆大霉素：查找已经很强，我们持平。沙门菌氯霉素：规则胜过我们。肺炎链球菌 TMP-SMX：共选择，而非机制。诚实是一项优点。</div>
+</section>
+
+<!-- 27 泛化热图 -->
+<section class="slide">
+  <p class="kicker">泛化能力</p><h2>8 种 WHO 重点病原体 · 同一流程</h2>
+  <figure><img src="../figures/generalization_heatmap.png" alt="泛化热图：8 种菌 × 药物，未见谱系 ROC-AUC">
+    <figcaption>未见谱系 ROC-AUC，8 种菌 × 至多 18 种药（36 个校准模型）。ROC 0.84–0.998。</figcaption></figure>
+  <div class="notes"><h4>讲</h4>同一流程——只改动 taxon、AMRFinderPlus 字符串与 MLST 方案——跑通了 8 种跨越革兰氏分界的病原体。机器学习在生物学呈组合性之处最见价值：金黄色葡萄球菌头孢西丁、鲍曼不动杆菌阿米卡星（+0.32）、屎肠球菌 pbp5（+0.35）、肺炎链球菌 PBP 镶嵌型。注意：阴沟肠杆菌与空肠弯曲菌因数据不足被排除——诚实的选择。</div>
+</section>
+
+<!-- 28 跨物种 -->
+<section class="slide">
+  <p class="kicker">跨物种零样本迁移</p><h2>模型学到的是生物学，而非谱系</h2>
+  <div class="two wide-r">
+    <figure><img src="../figures/cipro_transfer_matrix.png" alt="环丙沙星跨物种迁移矩阵">
+      <figcaption>在一种菌上训练，零样本测试于另一种。非对角线 = 迁移。</figcaption></figure>
+    <div class="card"><p>环丙沙星在<b class="good">革兰氏阴性菌之间</b>迁移良好（共享 gyrA/parC 靶点与位点编号）……</p>
+      <p>……而在革兰氏阳性的金黄色葡萄球菌上<b class="bad">崩塌</b>（其用 grlA，且 gyrA 编号不同）。</p>
+      <p class="lead" style="max-width:40ch">一个在机制上<b class="k">可预期</b>的边界——若模型只是记住谱系伪影，绝不可能出现。</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>在一种菌上训练，零样本测试于另一种。在革兰氏阴性菌间迁移，在革兰氏阳性的金黄色葡萄球菌上崩塌——正如微生物学家所料。这证明它学到的是机制。</div>
+</section>
+
+<!-- 29 统计严谨性 -->
+<section class="slide">
+  <p class="kicker">统计严谨性</p><h2>结论有统计支撑</h2>
+  <div class="cols3">
+    <div class="card"><h3>DeLong 检验</h3><p>模型在区分能力上<b>显著</b>胜过基因查找——每种药，p 从 2e−14 到 ~0。</p></div>
+    <div class="card"><h3>谱系聚类自助法</h3><p>重采样<b>整个谱系</b>而非单个基因组的 95% 置信区间——对小的耐药类别更诚实。</p></div>
+    <div class="card"><h3>抗不平衡指标</h3><p><b>MCC</b> + 现实患病率下的 PPV/NPV——单看准确率会美化我们。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem;max-width:76ch">我们的 AUC 位于<b>已发表区间</b>之内/之上——但是在<b class="k">更严格</b>的谱系划分下，还附带多数研究省略的可解释性与临床误差。结论是：<b>诚实测得</b>，而非全面最优。</p>
+  <div class="notes"><h4>讲</h4>核心结论由 DeLong 显著性支撑，而不只是肉眼可见的差距。置信区间重采样整个谱系。我们在更严格的划分下把数字放进已发表区间。</div>
+</section>
+
+<!-- 分隔：进阶 -->
+<section class="slide divider">
+  <p class="kicker">第七部分</p><h1>进阶与创新扩展</h1>
+  <p class="lead">MIC 回归 · 蛋白质语言模型 · 一个诚实的负面结果 · 不确定性与临床效用。</p>
+</section>
+
+<!-- 30 MIC -->
+<section class="slide">
+  <p class="kicker">超越二分类</p><h2>MIC 回归——预测耐药<i>程度</i></h2>
+  <div class="two wide-r">
+    <div><p>临床以 <b>MIC</b>（最低抑菌浓度）思考。我们连续地预测它，并按监管方式评分：<b class="k">基本一致性（EA）</b>——在 ±1 个二倍稀释度以内。</p>
+      <p class="muted">删失感知的评分——多数真实 MIC 是「&gt;32」/「≤0.5」这样的界值；朴素截断会扭曲指标。</p></div>
+    <table style="align-self:start">
+      <tr><th class="l">药物（肺炎克雷伯菌）</th><th>基本一致性（EA）</th></tr>
+      <tr><td class="l">环丙沙星</td><td class="good">92.7%</td></tr>
+      <tr><td class="l">庆大霉素</td><td>85.1%</td></tr>
+      <tr><td class="l">头孢西丁</td><td>79.9%</td></tr>
+      <tr><td class="l">美罗培南</td><td>75.4%</td></tr>
+    </table>
+  </div>
+  <div class="notes"><h4>讲</h4>不只是是否耐药，而是耐药有多强。按基本一致性评分——即监管采用的标准。环丙沙星达 92.7%。评分是删失感知的，因为多数 MIC 以界值报告。</div>
+</section>
+
+<!-- 31 ESM-2 -->
+<section class="slide">
+  <p class="kicker">蛋白质语言模型 · 诚实的正面结果</p><h2>ESM-2——为难缠的碳青霉烯类做等位基因级分辨</h2>
+  <div class="two">
+    <div><p>存在/缺失丢弃了<b>是哪个等位基因</b>——但碳青霉烯类的 MIC 依赖于此（KPC-2 对 KPC-3；OXA/NDM/VIM）。我们用 ESM-2 嵌入每个耐药蛋白的<b>实际序列</b>，使不同等位基因得到不同向量。</p></div>
+    <div class="card"><h3>真实、显著的增益——恰在预期之处</h3>
+      <p>肺炎克雷伯菌<b>美罗培南</b> EA <b class="good">68 → 73%</b>（+4.8，p=0.0004）</p>
+      <p>鲍曼不动杆菌<b>亚胺培南</b> EA <b class="good">54 → 60%</b>（+6.7，p=0.0001）</p>
+      <p class="muted">在决定因子已饱和之处保持中性（庆大霉素、环丙沙星）。650M 相较 150M 无额外增益 → 150M 是诚实、笔记本电脑可跑的选择。</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>真正的创新。等位基因身份驱动碳青霉烯类 MIC；存在/缺失把它丢掉了。ESM-2 把它找回——恰在难缠的碳青霉烯类上有显著增益，在别处中性，正如生物学所料。更大的模型没有更多收益。</div>
+</section>
+
+<!-- 32 GNN 负面 -->
+<section class="slide">
+  <p class="kicker">诚实的负面结果——答辩亮点</p><h2>我们实现了前沿图模型。它输了。</h2>
+  <div class="two wide-r">
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>菌株相似性图神经网络</h3><p>每个基因组为一个节点，按相似性连边（AMR-GNN 风格）。在相同的谱系分组折上，它在<b class="bad">全部 5 种药上都不如一个普通 MLP。</b></p></div>
+    <div><h3>原因——而且我们能解释</h3><p>我们精选的决定因子特征已经干净地捕捉了机制信号。群体结构图只会重新引入<b>我们刻意规避的谱系信息</b>，其平滑还会模糊清晰的「基因→表型」边界。</p>
+      <p class="lead" style="max-width:44ch">「我们测试了前沿方法，它没赢，原因如下」——比假设它会有用<b class="k">更有力</b>的立场。</p></div>
+  </div>
+  <div class="notes"><h4>讲（答辩最爱）</h4>一个负面结果。我们实现了真实的已发表图结构；它在每种药上都输了，因为我们的特征已携带信号，而图重新引入了谱系。测试并否定前沿方法，胜过假设。</div>
+</section>
+
+<!-- 33 保形 + 效用 -->
+<section class="slide">
+  <p class="kicker">不确定性与临床效用</p><h2>一个「知道自己何时不知道」的模型</h2>
+  <div class="two">
+    <div class="card"><h3>保形预测的弃判</h3><p>逐类覆盖率 + 一个显式的<b>「转交表型药敏检测」</b>选项。数据充足的药可自信处理约 95%；难缠的碳青霉烯类在<b class="k">近乎零 VME</b> 下自信判定约 55%，其余转交。已在谱系偏移下验证。</p></div>
+    <div class="card"><h3>决策曲线与风险-覆盖率</h3><p>在 VME 敏感区间内，净获益胜过查找与「全部治疗」。转交最不自信的<b>约 30%</b> 可将 VME 大致<b class="good">减半</b>（美罗培南 8.7% → 3.5%）。</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>一个负责任的工具会弃判。保形预测给出经验证的置信度加一个转交实验室的选项。决策曲线将其与临床净获益挂钩；转交最不自信的 30% 可将 VME 减半。</div>
+</section>
+
+<!-- 分隔：生物学 -->
+<section class="slide divider">
+  <p class="kicker">第八部分 ⚕</p><h1>可解释性与生物学验证</h1>
+  <p class="lead">微生物学家的部分——模型依赖的是真实机制吗？</p>
+</section>
+
+<!-- 34 SHAP 图 -->
+<section class="slide">
+  <p class="kicker">SHAP ⚕</p><h2>每次判定都指名其基因</h2>
+  <figure><img src="../figures/shap_meropenem.png" alt="美罗培南的 SHAP 蜂群图" style="max-height:58vh">
+    <figcaption>美罗培南 SHAP —— blaKPC-2 / blaKPC-3 位列首要决定因子（碳青霉烯酶）。逐株、可审计。</figcaption></figure>
+  <div class="notes"><h4>讲（你的领域）</h4>SHAP 对每次判定（整体与逐株）的决定因子排序。黑箱由此变成一个你可以与之争辩的同事——若它依赖无生物学意义的基因，我们能抓到。</div>
+</section>
+
+<!-- 35 生物学验证表 -->
+<section class="slide">
+  <p class="kicker">生物学验证 ⚕ —— 回报所在</p><h2>顶层特征 = 教科书机制</h2>
+  <table style="font-size:1.2rem">
+    <tr><th class="l">药物</th><th class="l">模型的顶层决定因子</th><th class="l">已知机制</th><th>✓</th></tr>
+    <tr><td class="l">环丙沙星</td><td class="l">gyrA、parC（QRDR）+ qnr</td><td class="l">DNA 促旋酶 / 拓扑异构酶靶点突变</td><td class="good">✓</td></tr>
+    <tr><td class="l">庆大霉素</td><td class="l">aac(3) 乙酰转移酶</td><td class="l">氨基糖苷修饰酶</td><td class="good">✓</td></tr>
+    <tr><td class="l">复方磺胺甲噁唑</td><td class="l">sul1、dfrA</td><td class="l">二氢蝶酸合成酶 / 二氢叶酸还原酶旁路</td><td class="good">✓</td></tr>
+    <tr><td class="l">美罗培南</td><td class="l">blaKPC-2、blaKPC-3</td><td class="l">碳青霉烯酶</td><td class="good">✓</td></tr>
+    <tr><td class="l">头孢西丁</td><td class="l">ompK36 孔蛋白缺失</td><td class="l">药物进入减少（缺失，而非获得）</td><td class="good">✓</td></tr>
+    <tr><td class="l">金黄色葡萄球菌苯唑西林</td><td class="l">mecA</td><td class="l">变异的 PBP2a</td><td class="good">✓</td></tr>
+    <tr><td class="l">屎肠球菌氨苄西林</td><td class="l">pbp5</td><td class="l">变异的青霉素结合蛋白</td><td class="good">✓</td></tr>
+    <tr><td class="l">肺炎链球菌青霉素</td><td class="l">pbp1a/2b/2x 镶嵌型</td><td class="l">变异的青霉素结合蛋白（镶嵌型）</td><td class="good">✓</td></tr>
+  </table>
+  <p class="muted" style="margin-top:.8rem"><b>诚实的告诫：</b>共选择会抬高某些同载质粒标记的表观重要性 → 应看逐株 SHAP，而非仅看均值。仅限已编目的决定因子 → 无新基因发现（需泛基因组特征）。</p>
+  <div class="notes"><h4>讲（重点）</h4>干净的验证：每种药的顶层决定因子都是教科书机制。头孢西丁正确地锁定孔蛋白缺失。模型学到了真实的微生物学。告诫：共选择会抬高同载标记，因此逐株 SHAP 才是诚实的视角。</div>
+</section>
+
+<!-- 分隔：演示 -->
+<section class="slide divider">
+  <p class="kicker">第九部分</p><h1>演示</h1>
+  <p class="lead">一个可用的网页应用——输入基因组，输出可解释的逐药判定。</p>
+</section>
+
+<!-- 36 演示 -->
+<section class="slide">
+  <p class="kicker">交互式应用</p><h2>8 种菌 · 上传基因组 · 获得可解释判定</h2>
+  <div class="two">
+    <div><ul>
+      <li>选择菌种 → 缓存基因组或<b>上传 FASTA</b>。</li>
+      <li>实时运行 AMRFinderPlus → 逐药 <b>耐药/敏感</b> + 校准的 P(耐药) + SHAP <b>驱动因子</b>。</li>
+      <li>可选的 <b>AI 临床解读</b>——仅为解释层，<b class="bad">绝不</b>改变判定；无 API 密钥时使用确定性模板。</li>
+    </ul>
+    <pre style="font-size:1.05rem"><span class="c"># 实时</span>
+python -m streamlit run src/app/streamlit_app.py</pre></div>
+    <div class="card"><h3>已验证示例</h3><p><b>金黄色葡萄球菌</b>基因组 →<br><code>苯唑西林 耐药（P=0.94）</code><br>驱动因子：<b>mecA</b> ↑、erm(C) ↑<br><code>环丙沙星 耐药（P=0.98）</code><br>驱动因子：<b>gyrA_S84L、parC_S80F</b> ↑</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>一个可用的应用，而非样机。选菌种、上传 FASTA，获得带有背后基因的逐药判定。AI 解读仅为解释，绝不改变判定。</div>
+</section>
+
+<!-- 37 安全 -->
+<section class="slide">
+  <p class="kicker">安全</p><h2>物种守卫</h2>
+  <div class="two wide-r">
+    <div><p>模型是决定因子向量的函数——它会对<b>任何</b>输入「预测」（曾有一个真菌文件产生过虚假判定）。</p>
+      <p>因此应用以<b>两种独立方式</b>核验物种：</p>
+      <ul><li><b>MLST 方案</b>（物种特异的分型）</li><li><b>固有标记基因</b>（对蛋白质输入也有效）</li></ul>
+      <p>不匹配 → <b class="k">不予给出预测</b>。</p></div>
+    <div class="card" style="border-top:5px solid var(--gold)"><h3>每个界面</h3><p class="lead" style="max-width:34ch">「仅供研究/决策支持——<b>非诊断用途</b>。补充、而非取代表型药敏试验。」</p></div>
+  </div>
+  <div class="notes"><h4>讲</h4>模型会对任何东西预测，因此我们通过 MLST + 固有标记核验物种，不匹配即不予输出预测。每个界面都重复免责声明。</div>
+</section>
+
+<!-- 分隔：优缺点 -->
+<section class="slide divider">
+  <p class="kicker">第十部分</p><h1>优点与缺点——诚实呈现</h1>
+  <p class="lead">两者都应上幻灯片。局限正是诚实这一主张的兑现之处。</p>
+</section>
+
+<!-- 38 优点 -->
+<section class="slide">
+  <p class="kicker">优点</p><h2>为何达到获奖级别</h2>
+  <div class="two">
+    <ul>
+      <li><b>诚实源自构造</b>——谱系划分由会让构建失败的测试强制执行。</li>
+      <li><b>在要紧之处胜过查找</b>，并有 DeLong 显著性。</li>
+      <li><b>泛化</b>到 8 种病原体及革兰氏分界；沿机制线零样本迁移。</li>
+      <li><b>可解释</b>——每次判定都被指名并经生物学验证。</li>
+    </ul>
+    <ul>
+      <li><b>以临床为框架</b>——VME 优先、经校准、可弃判、算净获益。</li>
+      <li><b>超越二分类</b>——MIC + ESM-2 等位基因级分辨。</li>
+      <li><b>严谨的负面结果</b>——GNN 经测试并被否定，且有理由。</li>
+      <li><b>可复现</b>——锁定环境、随机种子、清单、53 条决策、20 项测试。</li>
+    </ul>
+  </div>
+  <div class="notes"><h4>讲</h4>面向科学评委，先讲诚实划分 + 显著性。面向临床听众，先讲 VME 优先 + 弃判选项。</div>
+</section>
+
+<!-- 39 局限 -->
+<section class="slide">
+  <p class="kicker">局限 ⚕ —— 坦然说出</p><h2>评委会问的问题——我们先自问</h2>
+  <div class="two">
+    <ul>
+      <li><b>范围</b>——8 种菌，每种约 3–5 种药；并非通用工具。</li>
+      <li><b>共选择</b>会抬高某些同载决定因子（已减轻，未消除）。</li>
+      <li><b>VME≤3% 下难判药的高 ME</b>——是阈值权衡，而非区分能力失败。</li>
+      <li><b>数据库偏倚</b>——CARD/BV-BRC 偏向测序充分的地区。</li>
+    </ul>
+    <ul>
+      <li><b>仅用决定因子特征</b>——无新基因发现。</li>
+      <li><b>若干诚实的弱点</b>——沙门菌氯霉素、鲍曼不动杆菌碳青霉烯类、肺炎链球菌 TMP-SMX。</li>
+      <li><b>鲍曼不动杆菌美罗培南 MIC 增益处于临界</b>（p=0.051，样本不足）。</li>
+      <li><b>与已发表的对比是区间级</b>，而非逐一重跑对照。</li>
+    </ul>
+  </div>
+  <p class="lead" style="margin-top:1rem;max-width:76ch">自己主动提出的局限读作<b class="k">功力</b>；被追问出来的则读作漏洞。</p>
+  <div class="notes"><h4>讲</h4>这些是刻意放上幻灯片的。每一条都是评委会问的问题——所以我们先自问并回答。这里正是诚实主张的兑现之处。</div>
+</section>
+
+<!-- 40 伦理/复现 -->
+<section class="slide">
+  <p class="kicker">第十一部分 · 伦理与可复现性</p><h2>为受检验而建，而非为被信任</h2>
+  <div class="two">
+    <div class="card"><h3>伦理</h3><ul style="font-size:1.3rem"><li>决策支持，<b>非诊断器械</b></li><li>补充表型试验——故 VME 优先</li><li>仅用公共、去标识化数据；坦述数据库偏倚</li><li>可解释性 = 一种伦理保障</li></ul></div>
+    <div class="card"><h3>可复现性</h3><ul style="font-size:1.3rem"><li>锁定环境 + 固定随机种子</li><li>数据清单 + 53 条决策记录</li><li>任何人可运行的 20 项测试</li><li>原始数据可依清单重新生成</li></ul></div>
+  </div>
+  <div class="notes"><h4>讲</h4>非诊断用途——漏判耐药有真实代价，故我们以 VME 优先。仅用公共数据。可解释性本身即保障。一切都为可重建、可核验而设计。</div>
+</section>
+
+<!-- 41 收尾 -->
+<section class="slide title-slide center">
+  <div class="dna">🧬</div>
+  <h1>诚实测得</h1>
+  <p class="sub">不是「全面最优」——而是<b>可信</b></p>
+  <div class="two" style="max-width:60rem;margin:1.6rem auto 0;color:#fff">
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">0.50→0.90<small style="color:#bcdbe0">头孢西丁：查找 → 模型</small></div></div>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">8 · 36<small style="color:#bcdbe0">病原体 · 可部署模型</small></div></div>
+  </div>
+  <div class="meta">我们做的最重要的一件事：由测试强制执行的谱系感知划分。下游的一切之所以可信，全靠它。</div>
+  <div class="notes"><h4>收尾</h4>若只记住一件事：由测试强制执行的谱系感知划分，让每个数字都可信。我们不宣称样样都赢——我们宣称诚实测得。答辩问答准备见演讲者指南。</div>
+</section>
+
+</div><!-- /deck -->
+
+<div class="bar" id="bar"></div>
+<div class="counter" id="counter">1 / 41</div>
+<div class="hint">← → 翻页 · <b>F</b> 全屏 · <b>S</b> 演讲者备注 · <b>P</b> 打印/PDF</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let i = 0;
+  const counter = document.getElementById('counter');
+  const bar = document.getElementById('bar');
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=>s.classList.toggle('active', k===i));
+    counter.textContent = (i+1)+' / '+slides.length;
+    bar.style.width = ((i+1)/slides.length*100)+'%';
+  }
+  function toggleNotes(){
+    document.body.classList.toggle('notes-on');
+    document.querySelectorAll('.notes').forEach(n=>n.classList.toggle('show', document.body.classList.contains('notes-on')));
+  }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ show(i+1); e.preventDefault(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ show(i-1); e.preventDefault(); }
+    else if(e.key==='Home'){ show(0); }
+    else if(e.key==='End'){ show(slides.length-1); }
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();} }
+    else if(e.key==='s'||e.key==='S'){ toggleNotes(); }
+    else if(e.key==='p'||e.key==='P'){ window.print(); }
+  });
+  document.getElementById('deck').addEventListener('click', e=>{
+    if(e.target.closest('a,button,pre')) return;
+    show(e.clientX > window.innerWidth/2 ? i+1 : i-1);
+  });
+  show(0);
+</script>
+</body>
+</html>
