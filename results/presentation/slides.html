@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading Resistance — presentation</title>
+<style>
+  :root{
+    --navy:#12314f; --navy-d:#0c2136; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --ink:#1a2229; --muted:#5a6b78; --line:#c9d6de; --bg:#f4f7f9; --card:#ffffff;
+    --good:#1f8a4c; --bad:#b4472e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink)}
+  body{background:#0b1622;overflow:hidden}
+
+  /* ---- deck / slide ---- */
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:5.5vh 7vw;background:var(--bg);animation:fade .35s ease}
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* section accent bar */
+  .kicker{font-size:1.05rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:0 0 .6rem}
+  h1{font-size:4.2rem;line-height:1.02;margin:0;color:var(--navy);letter-spacing:-1px}
+  h2{font-size:2.9rem;line-height:1.08;margin:0 0 1.4rem;color:var(--navy);
+     border-left:.5rem solid var(--teal);padding-left:1rem}
+  h3{font-size:1.5rem;margin:1.2rem 0 .5rem;color:var(--teal)}
+  p,li{font-size:1.5rem;line-height:1.5;color:var(--ink)}
+  ul{margin:.4rem 0;padding-left:1.6rem} li{margin:.5rem 0}
+  .lead{font-size:1.9rem;color:var(--muted);max-width:60ch}
+  .muted{color:var(--muted)} .good{color:var(--good);font-weight:700} .bad{color:var(--bad);font-weight:700}
+  b.k{color:var(--navy)}
+  .hl{background:linear-gradient(transparent 60%, #ffe9b8 60%);padding:0 .15em}
+  .center{align-items:center;text-align:center}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:center}
+  .two.wide-r{grid-template-columns:1fr 1.25fr}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.4rem 1.6rem;
+        box-shadow:0 6px 22px rgba(18,49,79,.07)}
+  .card h3{margin-top:0}
+  .pill{display:inline-block;background:var(--teal-l);color:var(--teal);border-radius:999px;
+        padding:.15em .8em;font-weight:700;font-size:1.05rem;margin:.15rem .2rem}
+  .pill.gold{background:#f6e7c8;color:#8a5c15}
+  .pill.navy{background:#dbe6f0;color:var(--navy)}
+
+  table{width:100%;border-collapse:collapse;font-size:1.25rem;margin-top:.4rem}
+  th,td{padding:.55rem .7rem;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--navy);color:#fff;font-weight:600}
+  td.l,th.l{text-align:left}
+  tr:nth-child(even) td{background:#f0f5f7}
+
+  figure{margin:0;text-align:center}
+  figure img{max-width:100%;max-height:66vh;border:1px solid var(--line);border-radius:10px;background:#fff}
+  figcaption{font-size:1.05rem;color:var(--muted);margin-top:.5rem}
+
+  .stat{font-size:5.5rem;font-weight:800;color:var(--navy);line-height:1}
+  .stat small{display:block;font-size:1.3rem;font-weight:600;color:var(--muted);margin-top:.3rem}
+  .arrow{font-size:3rem;color:var(--gold);font-weight:800}
+
+  code,.mono{font-family:"SF Mono",Menlo,Consolas,monospace}
+  pre{background:#0e2033;color:#e7eef4;border-radius:12px;padding:1.3rem 1.5rem;font-size:1.2rem;
+      line-height:1.55;overflow:auto;border:1px solid #1c3550}
+  pre .c{color:#7fa9c9} pre .g{color:#8fd4a0}
+
+  /* title slide */
+  .title-slide{background:linear-gradient(135deg,#12314f 0%,#0e7c86 140%);color:#fff;text-align:center}
+  .title-slide h1{color:#fff;font-size:5rem}
+  .title-slide .sub{font-size:2.1rem;color:#cfe6e8;margin:1.2rem 0 .4rem;font-weight:600}
+  .title-slide .meta{font-size:1.3rem;color:#9fc3d4;margin-top:2rem}
+  .title-slide .dna{font-size:5rem}
+
+  /* section divider slides */
+  .divider{background:var(--navy);color:#fff;justify-content:center}
+  .divider h1{color:#fff} .divider .kicker{color:var(--gold)}
+  .divider .lead{color:#cfe0ee}
+
+  /* chrome: progress + counter + hint */
+  .bar{position:fixed;left:0;bottom:0;height:5px;background:var(--gold);z-index:20;transition:width .3s}
+  .counter{position:fixed;right:16px;bottom:14px;font-size:.95rem;color:var(--muted);z-index:20;
+    background:rgba(255,255,255,.8);padding:.15rem .6rem;border-radius:999px}
+  .hint{position:fixed;left:16px;bottom:12px;font-size:.85rem;color:var(--muted);z-index:20;
+    background:rgba(255,255,255,.8);padding:.15rem .6rem;border-radius:999px}
+  .divider .counter,.title-slide ~ .counter{}
+
+  /* speaker notes */
+  .notes{position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;
+    background:#0e2033;color:#e7eef4;border-top:3px solid var(--gold);padding:1rem 1.4rem 1.4rem;
+    font-size:1.15rem;line-height:1.5;z-index:30;display:none}
+  .notes.show{display:block}
+  .notes h4{margin:.1rem 0 .5rem;color:var(--gold);font-size:1rem;letter-spacing:.1em;text-transform:uppercase}
+  body.notes-on .slide{padding-bottom:40vh}
+
+  /* PRINT: all slides stacked, notes shown */
+  @media print{
+    body{overflow:visible;background:#fff}
+    .deck{position:static}
+    .slide{position:relative;display:flex!important;min-height:100vh;page-break-after:always;
+      box-shadow:none;animation:none}
+    .bar,.counter,.hint{display:none}
+    figure img{max-height:60vh}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1 TITLE -->
+<section class="slide active title-slide center">
+  <div class="dna">🧬</div>
+  <h1>Reading Resistance</h1>
+  <div class="sub">An interpretable, honestly-benchmarked ML classifier for<br>antibiotic resistance from bacterial genomes</div>
+  <p style="font-size:1.5rem;color:#bcdbe0;max-width:52ch;margin:1.4rem auto 0">
+    Predict resistant vs. susceptible per antibiotic — validated on unseen lineages,
+    benchmarked against a transparent gene-lookup, explaining the genes behind every call.</p>
+  <div class="meta">8 WHO-priority pathogens · 36 models · fully computational · public data · two-person team</div>
+  <div class="notes"><h4>Opening</h4>Antibiotic resistance is projected to become a leading cause of death worldwide. Deciding whether a strain resists a drug normally takes <b>days</b> of lab culturing — but the genome already carries the answer. This project reads it directly from sequence, and does it <b>honestly</b>, which is the hard part and the whole point.</div>
+</section>
+
+<!-- 2 TEAM -->
+<section class="slide">
+  <p class="kicker">The team</p>
+  <h2>Two people, complementary by design</h2>
+  <div class="two">
+    <div class="card"><h3>Software / ML engineer</h3><ul>
+      <li>Data pipeline &amp; feature extraction</li><li>Phylogeny-aware splitting</li>
+      <li>Modeling, calibration, SHAP tooling</li><li>The interactive demo</li></ul></div>
+    <div class="card"><h3>Microbiology M.Sc. ⚕</h3><ul>
+      <li>Organism &amp; drug selection</li><li>Phenotype-label quality control</li>
+      <li>Biological validation of determinants</li><li>Clinical error trade-offs &amp; limitations</li></ul></div>
+  </div>
+  <p class="lead" style="margin-top:1.6rem">Engineering builds the rigor; microbiology owns every biological decision and proves the model learned <b class="k">real mechanisms</b>, not noise.</p>
+  <div class="notes"><h4>Say</h4>Deliberately two-person. A leaky pipeline with perfect biology is worthless; perfect code predicting nonsense genes is worthless. Neither half stands alone.</div>
+</section>
+
+<!-- 3 60-SECOND STORY -->
+<section class="slide center">
+  <p class="kicker">The whole system in one breath</p>
+  <div class="two" style="width:100%;margin:1rem 0 2rem">
+    <div class="card center"><div style="font-size:2.6rem">🧬 → 🧩</div><h3>Genome in → determinant features</h3><p class="muted">Which known resistance genes &amp; mutations does this strain carry?</p></div>
+    <div class="card center"><div style="font-size:2.6rem">📊 → 💬</div><h3>Per-drug R/S + the reason</h3><p class="muted">Calibrated probability, and the genes that drove the call.</p></div>
+  </div>
+  <p class="lead center" style="max-width:70ch">Headline: for <b class="hl">cefoxitin</b>, a gene-lookup misses <b class="bad">~92%</b> of resistant strains —
+    resistance comes from <b>losing a porin</b>, not gaining a gene. Our model lifts AUC from <b>0.50 → 0.90</b>. <b class="k">That gap is the contribution.</b></p>
+  <div class="notes"><h4>Say</h4>Genome in → annotate the genes it carries → per-drug call with a calibrated probability → and it names the genes behind the call. The cefoxitin gap is the cleanest demonstration of what ML adds over a database query.</div>
+</section>
+
+<!-- DIVIDER: PROBLEM -->
+<section class="slide divider">
+  <p class="kicker">Part 1</p><h1>The problem &amp; why it matters</h1>
+  <p class="lead">Why genomes can predict resistance — and the two traps that fool naive projects.</p>
+</section>
+
+<!-- 4 WHY AMR -->
+<section class="slide">
+  <p class="kicker">Why AMR</p><h2>Resistance is written in the genome</h2>
+  <div class="two">
+    <div><ul>
+      <li>Bacteria resist by carrying a <b class="k">gene</b> (an enzyme that destroys the drug)…</li>
+      <li>…or by a <b class="k">point mutation</b> in the drug's target.</li>
+      <li>Standard testing grows the strain against the drug — accurate but <b>slow (days)</b>.</li>
+      <li>Whole-genome sequencing of clinical isolates is now routine → huge public collections of
+        genomes <b>paired with lab phenotypes</b> already exist.</li>
+    </ul></div>
+    <div class="card"><h3>The opportunity</h3><p>The raw material for genome→resistance prediction is sitting in public databases. The challenge isn't data — it's <b class="k">honest evaluation</b>.</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Two mechanisms: acquired genes, or target mutations. Sequencing is routine, so genomes paired with lab phenotypes already exist at scale.</div>
+</section>
+
+<!-- 5 PITFALLS -->
+<section class="slide">
+  <p class="kicker">The gap we fill ⚕</p><h2>Two traps that inflate every naive result</h2>
+  <div class="two">
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>1 · Clonal population structure</h3>
+      <p>Bacteria are <b>clonal</b> — the data is full of near-twins from the same lineage. A <b class="bad">random</b> train/test split lets the model see a resistant strain in training and its near-identical cousin in test → it's rewarded for <b>recognizing the clone</b>, not understanding resistance. Every metric inflates.</p></div>
+    <div class="card" style="border-top:5px solid var(--gold)"><h3>2 · "It's just a database lookup"</h3>
+      <p>If a model merely detects a known resistance gene, it's a <b>database query, not science.</b> The value is in what the model <b class="k">adds</b> over that lookup.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem">Our whole design answers both: a <b class="k">phylogeny-aware split</b> and an explicit <b class="k">rules baseline</b>.</p>
+  <div class="notes"><h4>Say</h4>Trap 1 is the bacterial version of data leakage — the single biggest way these projects fool themselves. Trap 2: beating a gene-lookup is the only claim worth making.</div>
+</section>
+
+<!-- 6 RQ -->
+<section class="slide">
+  <p class="kicker">Research question &amp; hypothesis</p><h2>What we set out to prove</h2>
+  <div class="card" style="margin-bottom:1.2rem"><p><b class="k">Question.</b> Can an interpretable model predict resistance from genomic features, <b>generalize to lineages it has never seen</b>, and be honestly benchmarked against a gene-lookup and published work?</p></div>
+  <div class="card"><p><b class="k">Hypothesis.</b> A gradient-boosted model on determinant features, under a phylogeny-aware split, will:
+    <span class="pill navy">a · strong per-drug discrimination on unseen lineages</span>
+    <span class="pill navy">b · match/beat the gene-lookup, cutting dangerous errors</span>
+    <span class="pill navy">c · top features = established mechanisms</span></p></div>
+  <div class="notes"><h4>Say</h4>Three-part hypothesis: discrimination on unseen lineages, beating the lookup on the dangerous errors, and features that map to real biology.</div>
+</section>
+
+<!-- 7 NON-NEGOTIABLES -->
+<section class="slide">
+  <p class="kicker">Our honesty contract</p><h2>Nine non-negotiables, enforced in code</h2>
+  <div class="cols3">
+    <div class="card"><p>✓ Split by <b>lineage</b>, never randomly</p></div>
+    <div class="card"><p>✓ Always report the <b>gene-lookup baseline</b></p></div>
+    <div class="card"><p>✓ <b>One model per antibiotic</b></p></div>
+    <div class="card"><p>✓ <b>VME / ME</b> reported before accuracy</p></div>
+    <div class="card"><p>✓ <b>Determinant features only</b> (no k-mers)</p></div>
+    <div class="card"><p>✓ Always <b>calibrate</b> probabilities</p></div>
+    <div class="card"><p>✓ No <b>state-of-the-art</b> overclaim</p></div>
+    <div class="card"><p>✓ <b>Scope discipline</b></p></div>
+    <div class="card"><p>✓ <b>Never fabricate</b> a genome/label/number</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.2rem">Written before touching data. A <b class="k">test fails the build</b> if a single lineage crosses the split.</p>
+  <div class="notes"><h4>Say</h4>These nine rules were fixed up-front and never broken. Each is enforced in code or tests — the leakage test literally fails the build on any overlap.</div>
+</section>
+
+<!-- DIVIDER: SETUP -->
+<section class="slide divider">
+  <p class="kicker">Part 2</p><h1>Setting up from scratch</h1>
+  <p class="lead">How anyone rebuilds this from nothing — the environment, tools, and reproducibility spine.</p>
+</section>
+
+<!-- 8 STACK -->
+<section class="slide">
+  <p class="kicker">The stack</p><h2>Free, public, laptop-scale</h2>
+  <div class="two">
+    <div><h3>Python data-science</h3><p>Python 3.11 · pandas · numpy · scikit-learn · <b>XGBoost</b> / LightGBM · <b>SHAP</b> · matplotlib · scipy</p>
+      <h3>Bioinformatics (bioconda)</h3><p><b class="k">AMRFinderPlus</b> 4.2.7 — resistance-gene caller (the feature engine)<br><b class="k">mlst</b> 2.33.1 — lineage typing</p></div>
+    <div class="card"><h3>Optional extensions</h3><p>Streamlit — the demo web app<br>PyTorch + <b>ESM-2</b> (fair-esm) — protein-language-model MIC extension<br><span class="muted">Runs on a laptop; ESM-2 embeds on Apple-Silicon GPU in minutes.</span></p>
+      <p style="margin-top:1rem"><span class="pill">conda, not pip</span> the bio tools ship via bioconda</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Everything free and public. We use conda specifically because AMRFinderPlus and mlst come from bioconda. Standard ML stack otherwise.</div>
+</section>
+
+<!-- 9 INSTALL -->
+<section class="slide">
+  <p class="kicker">Install</p><h2>From bare machine to a prediction in 4 commands</h2>
+  <pre><span class="c"># 1 · Get the code</span>
+git clone https://github.com/kappaborg/amr-resistance-predictor
+cd amr-resistance-predictor
+
+<span class="c"># 2 · Build the exact pinned environment (conda — for the bio tools)</span>
+conda env create -f environment.yml
+conda activate amr-resistance-predictor
+
+<span class="c"># 3 · Prove it works — runs the zero-lineage-leakage test</span>
+make test          <span class="g"># -> 20 passed</span>
+
+<span class="c"># 4 · Predict on a cached genome (instant, no download)</span>
+python -m src.app.predict --organism saureus --genome-id 1280.10000</pre>
+  <p class="lead" style="margin-top:1rem"><code>environment.yml</code> pins exact tool + DB versions, so anyone regenerates the <b class="k">same features</b>.</p>
+  <div class="notes"><h4>Say</h4>Four commands from nothing to a working prediction. Bio-tool paths resolve automatically from the active env, so this works on her laptop, Linux, or Colab — not just the original machine.</div>
+</section>
+
+<!-- 10 REPRO -->
+<section class="slide">
+  <p class="kicker">Reproducibility spine</p><h2>Nothing scientific is hard-coded or untracked</h2>
+  <div class="cols3">
+    <div class="card"><h3>Fixed seed 42</h3><p>everywhere — splits, models, bootstraps</p></div>
+    <div class="card"><h3>config.yaml</h3><p>organism, drugs, thresholds, model choice</p></div>
+    <div class="card"><h3>data/manifest.md</h3><p>every source, version, query, count</p></div>
+    <div class="card"><h3>Makefile</h3><p>one command per pipeline stage</p></div>
+    <div class="card"><h3>decisions.md</h3><p><b>53 logged decisions</b> — the lab notebook</p></div>
+    <div class="card"><h3>data/raw/ git-ignored</h3><p>regenerates from the manifest</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Reproducibility is the spine, not a slide. 53 decisions logged with rationale — that's our defense script and lab notebook.</div>
+</section>
+
+<!-- DIVIDER: DATA -->
+<section class="slide divider">
+  <p class="kicker">Part 3</p><h1>The data</h1>
+  <p class="lead">Public resources, data-driven organism choice, and the label discipline that keeps it honest.</p>
+</section>
+
+<!-- 11 RESOURCES -->
+<section class="slide">
+  <p class="kicker">Resources</p><h2>Five public sources, no wet lab</h2>
+  <table>
+    <tr><th class="l">Role</th><th>Source</th><th class="l">What it gives</th></tr>
+    <tr><td class="l">Genomes + labels</td><td><b>BV-BRC</b></td><td class="l">Assembled genomes + <b>laboratory</b> R/S phenotypes</td></tr>
+    <tr><td class="l">Reference determinants</td><td><b>CARD</b></td><td class="l">Catalog of known resistance genes + mutations</td></tr>
+    <tr><td class="l">Feature annotation</td><td><b>AMRFinderPlus</b></td><td class="l">Genome → gene/mutation presence-absence</td></tr>
+    <tr><td class="l">Lineage typing</td><td><b>mlst</b></td><td class="l">Each genome → sequence type (lineage)</td></tr>
+    <tr><td class="l">Validation reference</td><td><b>Published AMR-ML</b></td><td class="l">Honest external comparison</td></tr>
+  </table>
+  <div class="notes"><h4>Say</h4>BV-BRC gives genomes paired with lab phenotypes. CARD + AMRFinderPlus are the vocabulary and the tool. mlst assigns lineages for the honest split.</div>
+</section>
+
+<!-- 12 ORGANISM CHOICE -->
+<section class="slide">
+  <p class="kicker">Week-1 decision ⚕</p><h2>Organism chosen by data, not gut</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>Queried BV-BRC for <b>lab-phenotype counts</b> across candidate pathogens/drugs.</li>
+      <li>Picked for <b class="k">abundant, class-balanced</b> resistant/susceptible data.</li>
+      <li><b>Locked: Klebsiella pneumoniae</b> (taxon 573) + a 5-drug panel.</li>
+    </ul></div>
+    <div class="card"><h3>Why K. pneumoniae fits the thesis</h3>
+      <p>Carbapenem resistance is exactly where single-gene rules <b>fail</b> — porin loss <b>+</b> β-lactamase combinations → real, catchable dangerous errors.</p>
+      <p>Strong clonal structure → the lineage-aware split genuinely <b>bites</b>.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1rem">5-drug panel = <b>5 distinct mechanisms</b>: meropenem · gentamicin · ciprofloxacin · TMP-SMX · cefoxitin.</p>
+  <div class="notes"><h4>Say (your call)</h4>We queried for balanced data first. K. pneumoniae won on the science — carbapenem resistance is combinatorial, and its clonality makes the honest split meaningful. Five drugs = five different mechanisms = genuinely distinct explanations.</div>
+</section>
+
+<!-- 13 LABELS -->
+<section class="slide">
+  <p class="kicker">Label discipline</p><h2>Lab phenotypes only — avoiding circularity</h2>
+  <div class="two">
+    <div class="card" style="border-left:5px solid var(--good)"><h3>Kept ✓</h3><p><b>evidence = "Laboratory Method"</b> — actual measured susceptibility.</p></div>
+    <div class="card" style="border-left:5px solid var(--bad)"><h3>Excluded ✗</h3><p><b>Computational</b> AMR predictions — training on them = predicting another model's output (circular).</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem">MIC / SIR → binary <b>R/S</b>; the ambiguous <b>"Intermediate"</b> class is <b class="k">dropped, not guessed</b> (⚕ sign-off).</p>
+  <div class="notes"><h4>Say</h4>Critical subtlety: BV-BRC mixes lab and computational phenotypes. We kept only lab-measured — otherwise we'd be predicting predictions. Intermediate is dropped rather than guessed.</div>
+</section>
+
+<!-- 14 ACQUISITION + BUG -->
+<section class="slide">
+  <p class="kicker">Acquisition</p><h2>Rigor shows in the bugs you catch</h2>
+  <div class="two">
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>🐛 Caught: silent truncation</h3><p>The genome API defaulted to <b>25 records</b> → assemblies truncated to ~2 of ~5.5 Mbp. A truncated genome <b>drops genes</b> → false-absent features → corrupted labels. Caught by a file-size integrity check; fixed and re-downloaded everything.</p></div>
+    <div class="card" style="border-top:5px solid var(--teal)"><h3>Robust by design</h3><p>BV-BRC REST API — no bulk download, size flagged first. Downloader <b>retries with backoff</b> and <b>resumes</b> — one timeout shouldn't kill an overnight run.</p></div>
+  </div>
+  <p class="muted" style="margin-top:1rem">Decision log entries #15–#16.</p>
+  <div class="notes"><h4>Say</h4>Two stories that show rigor: we caught a truncation bug that would have silently corrupted labels, and the downloader is resumable. Both in the decision log.</div>
+</section>
+
+<!-- 15 QC -->
+<section class="slide">
+  <p class="kicker">Quality control ⚕</p><h2>Literature-aligned thresholds (MIMAG)</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>Completeness ≥90%, contamination ≤5% <span class="muted">(Bowers 2017)</span></li>
+      <li>Contigs ≤500 · length 4.5–7.5 Mbp <span class="muted">(Kleborate range)</span></li>
+      <li>Length cap widened to 7.5 Mbp — MDR plasmid strains legitimately reach ~6.6 Mbp; a tight cap discards <b>real resistant</b> strains.</li>
+      <li>Drops only <b>1.9%</b>, and the drops are <b class="k">class-balanced</b> → no label bias.</li>
+    </ul></div>
+    <div class="card center"><div class="stat">3,850<small>QC-passed K. pneumoniae genomes</small></div>
+      <div class="stat" style="font-size:3.4rem;margin-top:1rem">688<small>determinant features</small></div></div>
+  </div>
+  <div class="notes"><h4>Say (your domain)</h4>Thresholds follow MIMAG, not guesswork. We widened the length cap on purpose so we don't throw away real MDR resistant strains. Drops are balanced, so labels aren't biased. End with 3,850 genomes.</div>
+</section>
+
+<!-- DIVIDER: METHODS -->
+<section class="slide divider">
+  <p class="kicker">Part 4</p><h1>Methods — the science core</h1>
+  <p class="lead">Features, the lineage split (the crown jewel), models, calibration, and the clinical metric.</p>
+</section>
+
+<!-- 16 FEATURES -->
+<section class="slide">
+  <p class="kicker">Feature extraction</p><h2>Genome → binary determinant matrix</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>AMRFinderPlus <code>--organism Klebsiella_pneumoniae</code> on every genome.</li>
+      <li>Assemble a binary matrix: rows = genomes, cols = determinants, <b>1 = present</b>.</li>
+      <li>Keep only true <b>AMR</b> elements — exclude virulence / stress genes.</li>
+      <li>Include <b class="k">point mutations</b> (gyrA, parC…) — the whole story for fluoroquinolones.</li>
+    </ul>
+    <p class="lead">Fast &amp; <b>interpretable</b> — <b class="bad">not</b> black-box k-mers.</p></div>
+    <div class="card center"><div class="stat" style="font-size:3.2rem">3,850 × 688<small>genomes × determinants (K. pneumoniae)</small></div></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Every genome → the known genes and mutations it carries → binary matrix. We include point mutations because those are the fluoroquinolone story. Deliberately not k-mers.</div>
+</section>
+
+<!-- 17 THE SPLIT (crown jewel) -->
+<section class="slide" style="background:linear-gradient(180deg,#fff 0%,#eef6f7 100%)">
+  <p class="kicker">⭐ The most important slide</p><h2>The lineage-aware split</h2>
+  <div class="two">
+    <div><ul>
+      <li><b>mlst</b> assigns each genome its <b>sequence type</b> (lineage).</li>
+      <li><code>StratifiedGroupKFold</code> holds out <b class="k">whole lineages</b> for testing — the model is tested only on sequence types it has <b>never seen</b>.</li>
+      <li>R/S balance preserved across the split.</li>
+      <li>Untypeable genomes each get a <b>unique</b> synthetic lineage — they can never secretly pool into one leaky group.</li>
+    </ul></div>
+    <div class="card" style="border:2px solid var(--teal)"><h3>The guard</h3>
+      <p>A <b class="k">test asserts zero lineage overlap</b> between train and test — for <b>all 8 organisms</b>. If one sequence type ever appears in both, <b class="bad">the build fails.</b></p>
+      <p class="muted"><code>tests/test_split.py</code> · 20 tests pass</p></div>
+  </div>
+  <p class="lead center" style="margin-top:1rem">This one choice is <b>why every number afterwards is trustworthy.</b></p>
+  <div class="notes"><h4>Say</h4>The most important slide. We hold out entire lineages and a test fails the build on any overlap. Everything downstream is only trustworthy because of this.</div>
+</section>
+
+<!-- 18 LEAKAGE QUANTIFIED -->
+<section class="slide">
+  <p class="kicker">Why it matters — measured</p><h2>We quantified the leakage we avoided</h2>
+  <div class="two wide-r">
+    <div><p>Same model, scored under a naive <b>random</b> split vs our <b>lineage</b> split:</p>
+      <div class="card center" style="margin:1rem 0"><div class="stat" style="font-size:3rem">+0.010<small>mean AUC inflation from a random split (max +0.032, cefoxitin)</small></div></div>
+      <p class="lead">The inflation is <b class="k">small</b> — because our features encode <b>mechanism, not ancestry</b>. A genome resists because it carries blaKPC, not because of its clade.</p></div>
+    <div class="card"><h3>Contrast</h3><p>K-mer models — which secretly encode lineage — lose <b class="bad">0.1–0.2 AUC</b> on this same test.</p>
+      <p>Our small gap is itself <b class="k">evidence we learned biology</b>. We still report the honest lineage number everywhere.</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>A beautiful result: the random split only inflates us by +0.010 because our features are mechanistic. K-mer models lose 0.1–0.2. The small gap proves we learned biology, not lineage.</div>
+</section>
+
+<!-- 19 MODELS -->
+<section class="slide">
+  <p class="kicker">Modeling</p><h2>One model per antibiotic, three honest tiers</h2>
+  <div class="cols3">
+    <div class="card"><h3>1 · Rules baseline</h3><p>"Resistant if any known gene for this drug is present." The transparent <b>yardstick</b>.</p></div>
+    <div class="card"><h3>2 · Logistic regression</h3><p>Simple, linear, interpretable reference.</p></div>
+    <div class="card" style="border-top:5px solid var(--teal)"><h3>3 · XGBoost</h3><p>Gradient-boosted — the primary model. Calibrated + thresholded.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem">Resistance is drug-specific → <b class="k">never pool drugs into one label</b>. All three reported so "what ML adds" stays honest.</p>
+  <div class="notes"><h4>Say</h4>Strictly one model per antibiotic. Three tiers — rules, logreg, XGBoost — so the added value over the lookup is always visible.</div>
+</section>
+
+<!-- 20 ORG-AWARE RULES -->
+<section class="slide">
+  <p class="kicker">Fairness ⚕</p><h2>The gene-lookup baseline is organism-aware</h2>
+  <div class="card" style="margin-bottom:1.2rem"><p>"Ampicillin resistance" is <b>not</b> the same gene in every bug:</p>
+    <p><span class="pill navy">E. coli → β-lactamases</span> <span class="pill gold">Enterococcus → pbp5</span> <span class="pill navy">S. pneumoniae penicillin → pbp1a/2b/2x mosaic</span></p></div>
+  <p class="lead">A single generic rule would be a <b class="bad">strawman</b> baseline in some organisms. <code>ORG_RULES</code> matches the <b class="k">actual mechanism</b> per (organism, drug) — so when we beat the baseline, we beat a <b>real one</b>.</p>
+  <div class="notes"><h4>Say (your domain)</h4>Ampicillin means β-lactamases in E. coli but pbp5 in Enterococcus. A generic rule would be a strawman. We match the real mechanism per organism, so our wins are fair.</div>
+</section>
+
+<!-- 21 CALIBRATION + VME -->
+<section class="slide">
+  <p class="kicker">Calibration &amp; the clinical metric ⚕</p><h2>Probabilities that mean something · errors that matter</h2>
+  <div class="two">
+    <div class="card"><h3>Calibration</h3><p>Isotonic calibration + <b>Brier score</b> + reliability curves. A "90% resistant" must be right ~90% of the time — an uncalibrated 0.9 that's really 0.6 is dangerous.</p></div>
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>VME / ME — reported first</h3>
+      <p><b class="bad">Very-major error (VME):</b> resistant called susceptible — patient gets a drug that won't work. <b>The dangerous miss.</b></p>
+      <p><b>Major error (ME):</b> susceptible called resistant — an unnecessary alarm.</p>
+      <p>Operating point tuned to cap <b class="k">VME ≤ 3%</b> (CLSI/FDA-style).</p></div>
+  </div>
+  <p class="lead" style="margin-top:1rem">Capping VME <b>raises</b> ME on hard drugs — a clinical trade-off, made <b class="k">in the open</b>, never hidden.</p>
+  <div class="notes"><h4>Say (clinical heart)</h4>Accuracy hides the error that kills. VME = calling a resistant strain susceptible. We report VME/ME before AUC, cap VME at ≤3% on out-of-fold train data, and show the ME trade-off with pass/fail flags.</div>
+</section>
+
+<!-- DIVIDER: TRAINING -->
+<section class="slide divider">
+  <p class="kicker">Part 5</p><h1>Training &amp; the pipeline</h1>
+  <p class="lead">The assembly line — every box is a file you can run.</p>
+</section>
+
+<!-- 22 PIPELINE -->
+<section class="slide">
+  <p class="kicker">End-to-end</p><h2>Genome → explained, benchmarked prediction</h2>
+  <div style="font-size:1.35rem;line-height:2.1;text-align:center;margin:1rem 0">
+    <span class="pill navy">FASTA</span> → <span class="pill navy">QC</span> → <span class="pill gold">AMRFinderPlus</span> → <span class="pill navy">feature matrix</span> →
+    <span class="pill gold">MLST lineage</span> → <span class="pill gold">lineage split · zero-leak guard</span> →
+    <span class="pill navy">per-drug XGBoost</span> → <span class="pill navy">calibrate + VME≤3% threshold</span> →
+    <span class="pill navy">eval: VME/ME · CIs · DeLong</span> → <span class="pill navy">SHAP</span> → <span class="pill">demo app</span>
+  </div>
+  <pre style="margin-top:1rem"><span class="c"># one command per stage — or the whole spine at once</span>
+make data · features · split · train · eval · figures        <span class="g"># make all</span></pre>
+  <p class="muted" style="margin-top:.8rem">Two decision gates: "enough R <b>and</b> S per drug?" and "generalizes to unseen lineages?" — if not, loop back to the split.</p>
+  <div class="notes"><h4>Say</h4>Every box is a real, runnable file. Two gates protect the result: enough balanced data, and generalization to unseen lineages.</div>
+</section>
+
+<!-- 23 HOW TRAINED -->
+<section class="slide">
+  <p class="kicker">How a model is built</p><h2>No peeking at the test set</h2>
+  <div class="two wide-r">
+    <div><ul>
+      <li>Fit XGBoost on the <b>training lineages</b>.</li>
+      <li>Calibrate (isotonic).</li>
+      <li>Pick the VME≤3% threshold on <b class="k">out-of-fold</b> training predictions — never the test set.</li>
+      <li>Evaluate <b>once</b> on the held-out lineages.</li>
+    </ul></div>
+    <div class="card center"><h3>Deployable bundle</h3><p>model + calibrator + threshold + feature columns → one <code>.joblib</code> per organism-drug</p>
+      <div class="stat" style="font-size:3.4rem;margin-top:.8rem">36<small>deployable models (8 organisms)</small></div></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Threshold chosen on out-of-fold training predictions, evaluated once on held-out lineages. Each deployable model bundles everything the demo needs — 36 of them.</div>
+</section>
+
+<!-- DIVIDER: RESULTS -->
+<section class="slide divider">
+  <p class="kicker">Part 6</p><h1>Results</h1>
+  <p class="lead">Strong discrimination on unseen lineages — and honest about where the lookup already wins.</p>
+</section>
+
+<!-- 24 CEFOXITIN HEADLINE -->
+<section class="slide center">
+  <p class="kicker">The headline</p><h2 style="border:none;padding:0">Cefoxitin — where the lookup fails</h2>
+  <div style="display:flex;align-items:center;gap:2.5rem;justify-content:center;margin:1.5rem 0">
+    <div class="stat" style="color:var(--bad)">0.50<small>gene-lookup AUC (coin flip)</small></div>
+    <div class="arrow">→</div>
+    <div class="stat" style="color:var(--good)">0.90<small>model AUC (DeLong p ≈ 0)</small></div>
+  </div>
+  <p class="lead center" style="max-width:70ch">Resistance is driven by <b class="hl">losing the ompK36 porin</b> — the drug can't get in. A gene-<i>lookup</i> is blind to a <b>missing</b> feature (misses ~92% of resistant strains). The model learns the absence pattern.</p>
+  <p style="margin-top:.8rem"><b class="k">The cleanest possible demonstration of what ML adds over a database query.</b></p>
+  <div class="notes"><h4>Say</h4>The money slide. Cefoxitin resistance = porin loss. A lookup can't see a missing feature, so it's at chance. The model learns the absence pattern and reaches 0.90. That gap is the whole contribution.</div>
+</section>
+
+<!-- 25 PANEL TABLE -->
+<section class="slide">
+  <p class="kicker">K. pneumoniae 5-drug panel · unseen lineages (pooled CV)</p><h2>Strong &amp; significant across the board</h2>
+  <table>
+    <tr><th class="l">Drug</th><th>AUC model</th><th>AUC rules</th><th>VME</th><th>ME</th><th>DeLong p</th></tr>
+    <tr><td class="l">ciprofloxacin</td><td class="good">0.983</td><td>0.911</td><td>2.3%</td><td>7.7%</td><td>7e−36</td></tr>
+    <tr><td class="l">TMP-SMX</td><td class="good">0.977</td><td>0.885</td><td>2.3%</td><td>18.3%</td><td>9e−51</td></tr>
+    <tr><td class="l">meropenem</td><td class="good">0.968</td><td>0.933</td><td>1.3%</td><td>55.9%</td><td>5e−24</td></tr>
+    <tr><td class="l">gentamicin</td><td class="good">0.981</td><td>0.948</td><td>1.6%</td><td>32.4%</td><td>1e−30</td></tr>
+    <tr><td class="l"><b>cefoxitin</b></td><td class="good">0.905</td><td class="bad">0.500</td><td>0.7%</td><td>94.2%</td><td>~0</td></tr>
+  </table>
+  <p class="lead" style="margin-top:1rem">VME at/below the 3% bar everywhere · beats the lookup <b>significantly</b> on all five. High ME on meropenem/cefoxitin = the VME-first trade-off, shown with flags.</p>
+  <div class="notes"><h4>Say</h4>AUC 0.90–0.98 on unseen lineages. VME under 3% everywhere. DeLong p-values astronomically small. High ME on the hard drugs is the deliberate VME-first trade-off, not hidden.</div>
+</section>
+
+<!-- 26 HONEST READING -->
+<section class="slide">
+  <p class="kicker">The honest reading ⚕</p><h2>Where we do <span style="color:var(--bad)">not</span> win — said first</h2>
+  <div class="cols3">
+    <div class="card"><h3>Gentamicin</h3><p>Rules already excellent (AUC 0.948) — direct enzyme signal. ML only <b>matches</b> it. We say so.</p></div>
+    <div class="card"><h3>Salmonella chloramphenicol</h3><p>Rules baseline <b class="bad">beats</b> our model. Reported plainly.</p></div>
+    <div class="card"><h3>S. pneumoniae TMP-SMX</h3><p>Causal folA/folP <b>not in the catalog</b> → any signal is <b>co-selection</b>, not mechanism. Labeled as such.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem">An award isn't won by claiming you win everything — it's won by <b class="k">knowing exactly where you don't.</b></p>
+  <div class="notes"><h4>Say (credibility)</h4>Gentamicin: lookup already strong, we match. Salmonella chloramphenicol: rules beat us. S. pneumoniae TMP-SMX: co-selection, not mechanism. Honesty is a feature.</div>
+</section>
+
+<!-- 27 GENERALIZATION HEATMAP -->
+<section class="slide">
+  <p class="kicker">Generalization</p><h2>8 WHO-priority pathogens · one pipeline</h2>
+  <figure><img src="../figures/generalization_heatmap.png" alt="Generalization heatmap: 8 organisms × drugs, unseen-lineage ROC-AUC">
+    <figcaption>Unseen-lineage ROC-AUC, 8 organisms × up to 18 drugs (36 calibrated models). ROC 0.84–0.998.</figcaption></figure>
+  <div class="notes"><h4>Say</h4>Identical pipeline — only taxon, AMRFinderPlus string, and MLST scheme change — across 8 pathogens spanning the Gram divide. ML earns its keep where biology is combinatorial: S. aureus cefoxitin, A. baumannii amikacin (+0.32), E. faecium pbp5 (+0.35), S. pneumoniae PBP mosaic. Note: E. cloacae and C. jejuni excluded for insufficient data — honest selection.</div>
+</section>
+
+<!-- 28 CROSS-SPECIES -->
+<section class="slide">
+  <p class="kicker">Cross-species zero-shot transfer</p><h2>The model learned biology, not lineage</h2>
+  <div class="two wide-r">
+    <figure><img src="../figures/cipro_transfer_matrix.png" alt="Ciprofloxacin cross-species transfer matrix">
+      <figcaption>Train on one species, test zero-shot on another. Off-diagonal = transfer.</figcaption></figure>
+    <div class="card"><p>Ciprofloxacin transfers <b class="good">across Gram-negatives</b> (shared gyrA/parC target + numbering)…</p>
+      <p>…and <b class="bad">collapses</b> to Gram-positive S. aureus (uses grlA, different gyrA numbering).</p>
+      <p class="lead">A mechanistically-<b class="k">expected</b> boundary — impossible if the model had memorized lineage artifacts.</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Trained on one species, tested zero-shot on another. Transfers among Gram-negatives, collapses to Gram-positive S. aureus — exactly what a microbiologist would predict. Proof it learned mechanism.</div>
+</section>
+
+<!-- 29 RIGOR -->
+<section class="slide">
+  <p class="kicker">Statistical rigor</p><h2>The claim, backed by statistics</h2>
+  <div class="cols3">
+    <div class="card"><h3>DeLong test</h3><p>Model beats the gene-lookup <b>significantly</b> on discrimination — every drug, p from 2e−14 to ~0.</p></div>
+    <div class="card"><h3>Lineage-clustered bootstrap</h3><p>95% CIs that resample <b>whole lineages</b>, not genomes — honest for a small resistant class.</p></div>
+    <div class="card"><h3>Imbalance-robust</h3><p><b>MCC</b> + PPV/NPV at realistic prevalence — accuracy alone would flatter us.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.4rem">Our AUCs sit in/above the <b>published band</b> — but under a <b class="k">stricter</b> lineage split, with interpretability + clinical errors most studies omit. Claim: <b>honestly measured</b>, not state-of-the-art.</p>
+  <div class="notes"><h4>Say</h4>The core claim is backed by DeLong significance, not just a visible gap. CIs resample whole lineages. We place our numbers in the published band under a stricter split.</div>
+</section>
+
+<!-- DIVIDER: ADVANCED -->
+<section class="slide divider">
+  <p class="kicker">Part 7</p><h1>Advanced &amp; novel extensions</h1>
+  <p class="lead">MIC regression · protein language models · an honest negative · uncertainty &amp; clinical utility.</p>
+</section>
+
+<!-- 30 MIC -->
+<section class="slide">
+  <p class="kicker">Beyond binary</p><h2>MIC regression — predicting the <i>level</i></h2>
+  <div class="two wide-r">
+    <div><p>Clinicians think in <b>MIC</b> — the minimum inhibitory concentration. We predict it continuously and score it the way regulators do: <b class="k">Essential Agreement</b> (within ±1 two-fold dilution).</p>
+      <p class="muted">Censor-aware scoring — most real MICs are "&gt;32" / "≤0.5" bounds; naive clipping distorts the metric.</p></div>
+    <table style="align-self:start">
+      <tr><th class="l">Drug (K. pneumoniae)</th><th>Essential Agreement</th></tr>
+      <tr><td class="l">ciprofloxacin</td><td class="good">92.7%</td></tr>
+      <tr><td class="l">gentamicin</td><td>85.1%</td></tr>
+      <tr><td class="l">cefoxitin</td><td>79.9%</td></tr>
+      <tr><td class="l">meropenem</td><td>75.4%</td></tr>
+    </table>
+  </div>
+  <div class="notes"><h4>Say</h4>Not just whether but how strongly a strain resists. Scored by Essential Agreement — the regulatory criterion. Cipro hits 92.7%. Scoring is censor-aware because most MICs are reported as bounds.</div>
+</section>
+
+<!-- 31 ESM-2 -->
+<section class="slide">
+  <p class="kicker">Protein language model · honest positive</p><h2>ESM-2 — allele resolution for the hard carbapenems</h2>
+  <div class="two">
+    <div><p>Presence/absence discards <b>which allele</b> — but carbapenem MIC depends on it (KPC-2 vs KPC-3; OXA/NDM/VIM). We embed each resistance protein's <b>actual sequence</b> with ESM-2, so different alleles get different vectors.</p></div>
+    <div class="card"><h3>Real, significant gains — exactly where predicted</h3>
+      <p>K. pneumoniae <b>meropenem</b> EA <b class="good">68 → 73%</b> (+4.8, p=0.0004)</p>
+      <p>A. baumannii <b>imipenem</b> EA <b class="good">54 → 60%</b> (+6.7, p=0.0001)</p>
+      <p class="muted">Neutral where determinants already saturate (gentamicin, cipro). 650M gave no extra gain → 150M is the honest, laptop-scale choice.</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Genuinely novel. Allele identity drives carbapenem MIC; presence/absence throws it away. ESM-2 recovers it — significant gains on exactly the hard carbapenems, neutral elsewhere, as the biology predicts. Bigger model gave nothing more.</div>
+</section>
+
+<!-- 32 GNN NEGATIVE -->
+<section class="slide">
+  <p class="kicker">Honest negative — a defense highlight</p><h2>We implemented the SOTA graph model. It lost.</h2>
+  <div class="two wide-r">
+    <div class="card" style="border-top:5px solid var(--bad)"><h3>Isolate-similarity GNN</h3><p>Each genome a node, edges by similarity (AMR-GNN style). On identical lineage-grouped folds it was <b class="bad">worse than a plain MLP on all 5 drugs.</b></p></div>
+    <div><h3>Why — and we can explain it</h3><p>Our curated determinant features already capture the mechanistic signal cleanly. A population-structure graph only re-adds the <b>lineage information we deliberately avoid</b>, and its smoothing blurs sharp gene→phenotype boundaries.</p>
+      <p class="lead">"We tested state-of-the-art, it didn't win, and here's exactly why" — a <b class="k">stronger</b> position than assuming it would help.</p></div>
+  </div>
+  <div class="notes"><h4>Say (favorite for defense)</h4>A negative result. We implemented the actual published graph architecture; it lost on every drug because our features already carry the signal and the graph re-adds lineage. Testing and rejecting SOTA beats assuming.</div>
+</section>
+
+<!-- 33 CONFORMAL + UTILITY -->
+<section class="slide">
+  <p class="kicker">Uncertainty &amp; clinical utility</p><h2>A model that knows when it doesn't know</h2>
+  <div class="two">
+    <div class="card"><h3>Conformal abstention</h3><p>Per-class coverage + an explicit <b>"defer to phenotypic testing"</b> option. Confidently handles ~95% for well-powered drugs; for hard carbapenems, ~55% at <b class="k">near-zero VME</b>, defers the rest. Validated under lineage shift.</p></div>
+    <div class="card"><h3>Decision curve &amp; risk-coverage</h3><p>Net benefit beats the lookup + treat-all across the VME-averse region. Deferring the least-confident <b>~30%</b> roughly <b class="good">halves VME</b> (meropenem 8.7% → 3.5%).</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>A responsible tool abstains. Conformal gives a validated confidence + a defer-to-lab option. Decision-curve ties it to clinical net benefit; deferring the least-confident 30% halves VME.</div>
+</section>
+
+<!-- DIVIDER: BIO -->
+<section class="slide divider">
+  <p class="kicker">Part 8 ⚕</p><h1>Interpretability &amp; biological validation</h1>
+  <p class="lead">The microbiologist's section — does the model rely on real mechanisms?</p>
+</section>
+
+<!-- 34 SHAP FIG -->
+<section class="slide">
+  <p class="kicker">SHAP ⚕</p><h2>Every call names its genes</h2>
+  <figure><img src="../figures/shap_meropenem.png" alt="SHAP beeswarm for meropenem" style="max-height:58vh">
+    <figcaption>Meropenem SHAP — blaKPC-2 / blaKPC-3 rank as the top determinants (the carbapenemase). Per-strain, auditable.</figcaption></figure>
+  <div class="notes"><h4>Say (your domain)</h4>SHAP ranks which determinants drove each call, globally and per strain. A black box becomes a colleague you can argue with — if it leans on a nonsensical gene, we catch it.</div>
+</section>
+
+<!-- 35 BIO VALIDATION TABLE -->
+<section class="slide">
+  <p class="kicker">Biological validation ⚕ — the payoff</p><h2>Top features = textbook mechanisms</h2>
+  <table style="font-size:1.2rem">
+    <tr><th class="l">Drug</th><th class="l">Model's top determinants</th><th class="l">Known mechanism</th><th>✓</th></tr>
+    <tr><td class="l">ciprofloxacin</td><td class="l">gyrA, parC (QRDR) + qnr</td><td class="l">DNA gyrase / topoisomerase target mutation</td><td class="good">✓</td></tr>
+    <tr><td class="l">gentamicin</td><td class="l">aac(3) acetyltransferases</td><td class="l">Aminoglycoside-modifying enzyme</td><td class="good">✓</td></tr>
+    <tr><td class="l">TMP-SMX</td><td class="l">sul1, dfrA</td><td class="l">DHPS / DHFR bypass</td><td class="good">✓</td></tr>
+    <tr><td class="l">meropenem</td><td class="l">blaKPC-2, blaKPC-3</td><td class="l">Carbapenemase</td><td class="good">✓</td></tr>
+    <tr><td class="l">cefoxitin</td><td class="l">ompK36 porin loss</td><td class="l">Reduced drug entry (loss, not gain)</td><td class="good">✓</td></tr>
+    <tr><td class="l">S. aureus oxacillin</td><td class="l">mecA</td><td class="l">Altered PBP2a</td><td class="good">✓</td></tr>
+    <tr><td class="l">E. faecium ampicillin</td><td class="l">pbp5</td><td class="l">Altered penicillin-binding protein</td><td class="good">✓</td></tr>
+    <tr><td class="l">S. pneumoniae penicillin</td><td class="l">pbp1a/2b/2x mosaic</td><td class="l">Altered PBPs (mosaic)</td><td class="good">✓</td></tr>
+  </table>
+  <p class="muted" style="margin-top:.8rem"><b>Honest caveat:</b> co-selection inflates some co-carried plasmid markers → read per-strain SHAP, not just averages. Catalogued determinants only → no novel-gene discovery (needs pan-genome features).</p>
+  <div class="notes"><h4>Say (headline)</h4>Clean validation: every drug's top determinants are the textbook mechanism. Cefoxitin correctly keys on porin loss. The model learned real microbiology. Caveat: co-selection inflates co-carried markers, so per-strain SHAP is the honest lens.</div>
+</section>
+
+<!-- DIVIDER: DEMO -->
+<section class="slide divider">
+  <p class="kicker">Part 9</p><h1>The demo</h1>
+  <p class="lead">A working web app — genome in, explained per-drug calls out.</p>
+</section>
+
+<!-- 36 DEMO -->
+<section class="slide">
+  <p class="kicker">Interactive app</p><h2>8 organisms · upload a genome · get explained calls</h2>
+  <div class="two">
+    <div><ul>
+      <li>Pick an organism → cached genome or <b>upload a FASTA</b>.</li>
+      <li>Runs AMRFinderPlus live → per-drug <b>R/S</b> + calibrated P(resistant) + SHAP <b>drivers</b>.</li>
+      <li>Optional <b>AI clinical narrative</b> — explanation layer only, <b class="bad">never</b> changes a call; deterministic template with no API key.</li>
+    </ul>
+    <pre style="font-size:1.05rem"><span class="c"># live</span>
+python -m streamlit run src/app/streamlit_app.py</pre></div>
+    <div class="card"><h3>Verified example</h3><p><b>S. aureus</b> genome →<br><code>oxacillin RESISTANT (P=0.94)</code><br>drivers: <b>mecA</b> ↑, erm(C) ↑<br><code>ciprofloxacin RESISTANT (P=0.98)</code><br>drivers: <b>gyrA_S84L, parC_S80F</b> ↑</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>A working app, not a mockup. Pick an organism, upload a FASTA, get per-drug calls with the genes behind them. The AI narrative is explanation-only and never changes a call.</div>
+</section>
+
+<!-- 37 SAFETY -->
+<section class="slide">
+  <p class="kicker">Safety</p><h2>The species guard</h2>
+  <div class="two wide-r">
+    <div><p>The model is a function of the determinant vector — it will "predict" on <b>anything</b> (a fungal file once produced a spurious call).</p>
+      <p>So the app verifies species <b>two independent ways</b>:</p>
+      <ul><li><b>MLST scheme</b> (species-specific typing)</li><li><b>Intrinsic marker genes</b> (works on protein input too)</li></ul>
+      <p>Mismatch → predictions <b class="k">withheld</b>.</p></div>
+    <div class="card" style="border-top:5px solid var(--gold)"><h3>Every screen</h3><p class="lead">"Research / decision-support only — <b>not a diagnostic</b>. Complements, does not replace, phenotypic susceptibility testing."</p></div>
+  </div>
+  <div class="notes"><h4>Say</h4>The model predicts on anything, so we verify species via MLST + intrinsic markers and withhold on a mismatch. Every screen repeats the disclaimer.</div>
+</section>
+
+<!-- DIVIDER: POS/NEG -->
+<section class="slide divider">
+  <p class="kicker">Part 10</p><h1>Positives &amp; negatives — honestly</h1>
+  <p class="lead">Both belong on the slide. The limitations are where the honesty thesis pays off.</p>
+</section>
+
+<!-- 38 STRENGTHS -->
+<section class="slide">
+  <p class="kicker">Strengths</p><h2>What makes this award-grade</h2>
+  <div class="two">
+    <ul>
+      <li><b>Honest by construction</b> — lineage split enforced by a build-failing test.</li>
+      <li><b>Beats the lookup where it matters</b>, with DeLong significance.</li>
+      <li><b>Generalizes</b> across 8 pathogens + the Gram divide; transfers along mechanistic lines.</li>
+      <li><b>Interpretable</b> — every call named &amp; biologically validated.</li>
+    </ul>
+    <ul>
+      <li><b>Clinically framed</b> — VME-first, calibrated, abstention, net-benefit.</li>
+      <li><b>Beyond binary</b> — MIC + ESM-2 allele resolution.</li>
+      <li><b>Rigorous negatives</b> — GNN tested &amp; rejected with a reason.</li>
+      <li><b>Reproducible</b> — pinned env, seeds, manifest, 53 decisions, 20 tests.</li>
+    </ul>
+  </div>
+  <div class="notes"><h4>Say</h4>For a science panel, lead with the honest split + significance. For a clinical audience, lead with VME-first + abstention.</div>
+</section>
+
+<!-- 39 LIMITATIONS -->
+<section class="slide">
+  <p class="kicker">Limitations ⚕ — say them proudly</p><h2>The questions a judge would ask — asked first</h2>
+  <div class="two">
+    <ul>
+      <li><b>Scope</b> — 8 organisms, ~3–5 drugs each; not a universal tool.</li>
+      <li><b>Co-selection</b> inflates some co-carried determinants (reduced, not gone).</li>
+      <li><b>High ME at VME≤3%</b> for hard drugs — a threshold trade-off, not a discrimination failure.</li>
+      <li><b>Database bias</b> — CARD/BV-BRC over-represent well-sequenced regions.</li>
+    </ul>
+    <ul>
+      <li><b>Determinant features only</b> — no novel-gene discovery.</li>
+      <li><b>Honest weak spots</b> — Salmonella chloramphenicol, A. baumannii carbapenems, S. pneumoniae TMP-SMX.</li>
+      <li><b>A. baumannii meropenem MIC gain borderline</b> (p=0.051, under-powered).</li>
+      <li><b>Published comparison is band-level</b>, not a re-run head-to-head.</li>
+    </ul>
+  </div>
+  <p class="lead" style="margin-top:1rem">A limitation you raise yourself reads as <b class="k">mastery</b>; dragged out of you, it reads as a gap.</p>
+  <div class="notes"><h4>Say</h4>These are on the slide on purpose. Every one is a question a judge would ask — so we ask it first and answer it. This is where the honesty thesis pays off.</div>
+</section>
+
+<!-- 40 ETHICS/REPRO -->
+<section class="slide">
+  <p class="kicker">Part 11 · Ethics &amp; reproducibility</p><h2>Built to be checked, not trusted</h2>
+  <div class="two">
+    <div class="card"><h3>Ethics</h3><ul style="font-size:1.3rem"><li>Decision-support, <b>not a diagnostic device</b></li><li>Complements phenotypic testing — hence VME-first</li><li>Public, de-identified data only; database bias stated</li><li>Interpretability = an ethical safeguard</li></ul></div>
+    <div class="card"><h3>Reproducibility</h3><ul style="font-size:1.3rem"><li>Pinned environment + fixed seed</li><li>Data manifest + 53-entry decision log</li><li>20-test suite anyone can run</li><li>Raw data regenerates from the manifest</li></ul></div>
+  </div>
+  <div class="notes"><h4>Say</h4>Not a diagnostic — a missed resistant call has real cost, which is why we lead with VME. Only public data. Interpretability is itself a safeguard. Everything is designed to be rebuilt and checked.</div>
+</section>
+
+<!-- 41 CLOSE -->
+<section class="slide title-slide center">
+  <div class="dna">🧬</div>
+  <h1>Honestly measured</h1>
+  <p class="sub">not "state-of-the-art" — <b>trustworthy</b></p>
+  <div class="two" style="max-width:60rem;margin:1.6rem auto 0;color:#fff">
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">0.50→0.90<small style="color:#bcdbe0">cefoxitin: lookup → model</small></div></div>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">8 · 36<small style="color:#bcdbe0">pathogens · deployable models</small></div></div>
+  </div>
+  <div class="meta">The single most important thing we did: the lineage-aware split, enforced by a test. Everything downstream is trustworthy because of it.</div>
+  <div class="notes"><h4>Close</h4>If you remember one thing: the lineage-aware split enforced by a test makes every number trustworthy. We don't claim to win everything — we claim to have measured honestly. Q&amp;A prep is in the speaker guide.</div>
+</section>
+
+</div><!-- /deck -->
+
+<div class="bar" id="bar"></div>
+<div class="counter" id="counter">1 / 41</div>
+<div class="hint">← → navigate · <b>F</b> fullscreen · <b>S</b> speaker notes · <b>P</b> print/PDF</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let i = 0;
+  const counter = document.getElementById('counter');
+  const bar = document.getElementById('bar');
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=>s.classList.toggle('active', k===i));
+    counter.textContent = (i+1)+' / '+slides.length;
+    bar.style.width = ((i+1)/slides.length*100)+'%';
+    // move active slide's notes into view state (they're inside the slide already)
+  }
+  function toggleNotes(){
+    document.body.classList.toggle('notes-on');
+    document.querySelectorAll('.notes').forEach(n=>n.classList.toggle('show', document.body.classList.contains('notes-on')));
+  }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ show(i+1); e.preventDefault(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ show(i-1); e.preventDefault(); }
+    else if(e.key==='Home'){ show(0); }
+    else if(e.key==='End'){ show(slides.length-1); }
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();} }
+    else if(e.key==='s'||e.key==='S'){ toggleNotes(); }
+    else if(e.key==='p'||e.key==='P'){ window.print(); }
+  });
+  // click right/left half to navigate
+  document.getElementById('deck').addEventListener('click', e=>{
+    if(e.target.closest('a,button,pre')) return;
+    show(e.clientX > window.innerWidth/2 ? i+1 : i-1);
+  });
+  show(0);
+</script>
+</body>
+</html>

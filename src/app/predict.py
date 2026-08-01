@@ -28,7 +28,24 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from src.app.registry import ORGANISMS, ORG_ORDER, SCHEME_ORG  # noqa: E402
 
-ENV_BIN = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
+def _env_bin() -> str:
+    """bin/ dir holding amrfinder+mlst — portable across machines.
+
+    Prefers the conda env running this interpreter (so `python -m ...` always finds the
+    matching tools), then anything on PATH, then the original dev path as a last resort.
+    """
+    import shutil
+    cand = Path(sys.executable).parent
+    if (cand / "amrfinder").exists() or (cand / "mlst").exists():
+        return str(cand)
+    for tool in ("amrfinder", "mlst"):
+        found = shutil.which(tool)
+        if found:
+            return str(Path(found).parent)
+    return "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
+
+
+ENV_BIN = _env_bin()
 AMR = f"{ENV_BIN}/amrfinder"
 MLST = f"{ENV_BIN}/mlst"
 MLST_ENV = {**os.environ, "PATH": f"{ENV_BIN}:{os.environ.get('PATH', '')}"}  # mlst needs blastn on PATH

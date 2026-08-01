@@ -60,7 +60,9 @@ def main() -> int:
                 continue
             m = LogisticRegression(max_iter=2000, class_weight="balanced",
                                    random_state=42).fit(Xtr_full[common].values.astype(int), ytr)
-            if i == j:  # within-organism: honest 70/30 split
+            if i == j:  # within-organism reference: random 70/30 (lineage-AGNOSTIC, so optimistic
+                        # vs the lineage-held-out panel numbers) — a same-species ceiling for reading
+                        # the off-diagonal zero-shot transfer, not a headline generalization claim
                 rng = np.random.RandomState(42)
                 idx = rng.permutation(len(yte)); c = int(0.7 * len(yte))
                 X = Xte_full[common].values.astype(int)

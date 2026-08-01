@@ -35,9 +35,24 @@ from src.data.qc_metadata import fetch_qc  # noqa: E402
 from src.evaluation.metrics import full_report  # noqa: E402
 from src.models.train_panel import pick_threshold  # noqa: E402
 
-ENV_BIN = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
-AMR_BIN, MLST_BIN = f"{ENV_BIN}/amrfinder", f"{ENV_BIN}/mlst"
 import os  # noqa: E402
+import shutil  # noqa: E402
+
+
+def _env_bin() -> str:
+    """bin/ dir holding amrfinder+mlst — portable (active conda env → PATH → dev path)."""
+    cand = Path(sys.executable).parent
+    if (cand / "amrfinder").exists() or (cand / "mlst").exists():
+        return str(cand)
+    for tool in ("amrfinder", "mlst"):
+        found = shutil.which(tool)
+        if found:
+            return str(Path(found).parent)
+    return "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
+
+
+ENV_BIN = _env_bin()
+AMR_BIN, MLST_BIN = f"{ENV_BIN}/amrfinder", f"{ENV_BIN}/mlst"
 MLST_ENV = {**os.environ, "PATH": f"{ENV_BIN}:{os.environ.get('PATH', '')}"}
 AMR_API = "https://www.bv-brc.org/api/genome_amr/"
 LAB = 'eq(evidence,%22Laboratory%20Method%22)'

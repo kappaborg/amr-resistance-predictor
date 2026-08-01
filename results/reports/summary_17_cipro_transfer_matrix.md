@@ -1,6 +1,6 @@
 # Summary #17 — 6-Organism Ciprofloxacin Cross-Species Transfer
 
-Ciprofloxacin (gyrA/parC/grlA) modelled in **6 organisms**. ROC-AUC; **rows = train organism, columns = test organism**. Diagonal = within-organism (70/30); off-diagonal = **zero-shot cross-species transfer** (shared determinants only, no target training).
+Ciprofloxacin (gyrA/parC/grlA) modelled in **6 organisms**. ROC-AUC; **rows = train organism, columns = test organism**. Diagonal = within-organism reference (**random 70/30, lineage-agnostic — an optimistic same-species ceiling**, not our honest lineage-held-out number; use the panel/rigor tables for that); off-diagonal = **zero-shot cross-species transfer** (shared determinants only, no target training) — the actual result this figure exists to show.
 
 | train \ test | K.pneumoniae | E.coli | A.baumannii | S.aureus | P.aeruginosa | S.enterica |
 |---|---|---|---|---|---|---|

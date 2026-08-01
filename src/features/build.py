@@ -22,7 +22,18 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-AMR = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin/amrfinder"
+import shutil
+
+
+def _amrfinder_bin() -> str:
+    """Path to amrfinder — portable (active conda env → PATH → dev path)."""
+    cand = Path(sys.executable).parent / "amrfinder"
+    if cand.exists():
+        return str(cand)
+    return shutil.which("amrfinder") or "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin/amrfinder"
+
+
+AMR = _amrfinder_bin()
 ORGANISM = "Klebsiella_pneumoniae"
 GENOMES = REPO / "data/raw/genomes"
 CACHE = REPO / "data/interim/amrfinder"

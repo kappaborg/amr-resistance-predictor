@@ -27,7 +27,19 @@ import yaml
 from sklearn.model_selection import StratifiedGroupKFold
 
 REPO = Path(__file__).resolve().parents[2]
-ENV_BIN = "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
+import shutil
+
+
+def _env_bin() -> str:
+    """bin/ dir holding mlst — portable (active conda env → PATH → dev path)."""
+    cand = Path(sys.executable).parent
+    if (cand / "mlst").exists():
+        return str(cand)
+    found = shutil.which("mlst")
+    return str(Path(found).parent) if found else "/opt/homebrew/anaconda3/envs/amr-resistance-predictor/bin"
+
+
+ENV_BIN = _env_bin()
 MLST = f"{ENV_BIN}/mlst"
 # mlst's `#!/usr/bin/env perl` shebang must resolve to the CONDA perl (not system Homebrew perl),
 # and mlst needs blastn on PATH — both fixed by prepending the env bin dir.
