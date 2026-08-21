@@ -145,7 +145,11 @@ def amrfinder_one(acc: str, threads: int = 3) -> tuple[str, str]:
         )
         if r.returncode != 0:
             return acc, f"fail: {r.stderr.strip()[-160:]}"
-        dest.write_text(r.stdout)
+        if not r.stdout.startswith("Protein id"):        # guard against a truncated/empty run
+            return acc, "fail: unexpected AMRFinderPlus output"
+        tmp_out = dest.with_suffix(".tsv.part")           # atomic: write then rename, so killing
+        tmp_out.write_text(r.stdout)                      # the job never leaves a partial .tsv
+        tmp_out.replace(dest)
         return acc, "ok"
     except Exception as exc:  # noqa: BLE001
         return acc, f"fail: {type(exc).__name__}"

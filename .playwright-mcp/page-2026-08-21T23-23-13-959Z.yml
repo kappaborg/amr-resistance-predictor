@@ -1,0 +1,453 @@
+- generic [ref=f1e2]:
+  - banner [ref=f1e3]:
+    - paragraph [ref=f1e4]: 解读耐药 · 通俗版讲解
+    - heading "我们如何让计算机读懂细菌基因组，预测哪些抗生素会失效" [level=1] [ref=f1e5]
+    - paragraph [ref=f1e6]: 按顺序讲完项目的每一步，不预设任何编程或机器学习基础。本文是为「讲出来」而写的。
+  - heading "我们要解决的问题" [level=2] [ref=f1e7]
+  - paragraph [ref=f1e8]:
+    - text: 当病人发生严重细菌感染时，医生必须知道哪些抗生素真的能杀死这种细菌。细菌常常是
+    - strong [ref=f1e9]: 耐药
+    - text: 的—— 药物对它已经不起作用了。如果给病人用了一种细菌本就耐药的药，就等于在一个重病患者身上白白浪费了好几天的治疗时间。
+  - paragraph [ref=f1e10]:
+    - text: 可靠的做法是在实验室里把细菌培养出来，直接拿药去试。这个办法准确，但需要大约
+    - strong [ref=f1e11]: 两天
+    - text: 。 在这两天里，医生只能靠经验猜。
+  - paragraph [ref=f1e12]:
+    - text: 而今天读取细菌的 DNA 已经又快又便宜。所以整个项目背后的问题就是：
+    - strong [ref=f1e13]: 我们能不能直接读 DNA，把实验室的结论提前预测出来，而不必等实验室？
+  - figure [ref=f1e14]:
+    - img "从患者样本到答案的两条路线：实验室路线约需两天；基因组路线只需几分钟，并且还会给出每次判定的理由。" [ref=f1e16]:
+      - generic [ref=f1e17]: 目前 — 实验室路线
+      - generic [ref=f1e19]: 患者样本
+      - generic [ref=f1e20]: 培养
+      - generic [ref=f1e22]: 培养出菌落
+      - generic [ref=f1e23]: ~24 h
+      - generic [ref=f1e25]: 逐一测试药物
+      - generic [ref=f1e26]: ~24 h
+      - generic [ref=f1e28]: 答案
+      - generic [ref=f1e29]: ≈ 2 天
+      - generic [ref=f1e30]: 本项目 — 基因组路线
+      - generic [ref=f1e32]: 患者样本
+      - generic [ref=f1e33]: 测序
+      - generic [ref=f1e35]: 读取 DNA
+      - generic [ref=f1e37]: 我们的模型
+      - generic [ref=f1e38]: 几分钟
+      - generic [ref=f1e40]: 答案
+      - generic [ref=f1e41]: + 判定理由
+      - generic [ref=f1e42]: 几分钟
+    - generic [ref=f1e43]:
+      - text: 实验室路线才是可信的答案，我们并不打算取代它。我们要做的是：在实验室还在培养细菌的时候， 先从 DNA 给出同样的答案——而且与「黑箱」不同，我们还要说明
+      - emphasis [ref=f1e44]: 为什么
+      - text: 。
+  - paragraph [ref=f1e46]:
+    - strong [ref=f1e47]: 这句话要早讲、反复讲：
+    - text: 这是一个研究工具，不是医疗器械。没有人会依据我们的输出去治疗病人。它只是决策辅助，实验室药敏试验始终是最终依据。
+  - heading "十个步骤，按顺序" [level=2] [ref=f1e48]
+  - generic [ref=f1e49]:
+    - generic [ref=f1e50]: "1"
+    - generic [ref=f1e51]:
+      - heading "收集已经有实验室答案的基因组" [level=2] [ref=f1e52]
+      - paragraph [ref=f1e53]:
+        - text: 要教会计算机，就必须有一批「已知正确答案」的例子。我们使用了一个免费公开的数据库
+        - strong [ref=f1e54]: BV-BRC
+        - text: ，里面收录了世界各地实验室测序
+        - emphasis [ref=f1e55]: 并且
+        - text: 做过抗生素药敏试验的细菌基因组。
+      - paragraph [ref=f1e56]:
+        - text: 所以每一个例子都是一对：
+        - strong [ref=f1e57]: 一株细菌的完整 DNA
+        - text: ，以及
+        - strong [ref=f1e58]: 实验室对每种药物的判定
+        - text: ——耐药还是敏感。
+      - paragraph [ref=f1e59]:
+        - text: 这里有一个非常关键的取舍。该数据库里还有一部分判定本身就是
+        - emphasis [ref=f1e60]: 由计算机预测出来的
+        - text: 。我们把这些全部剔除，只保留真正的实验室结果。用另一台计算机的猜测来训练模型，学到的只是那些猜测，而不是生物学。
+      - paragraph [ref=f1e61]:
+        - text: 最终我们得到了
+        - strong [ref=f1e62]: 3,850 个
+        - emphasis [ref=f1e63]: 肺炎克雷伯菌
+        - text: 基因组——这是一种严重的医院病原菌——之后又把整套流程在另外七个菌种上重复了一遍。
+  - generic [ref=f1e64]:
+    - generic [ref=f1e65]: "2"
+    - generic [ref=f1e66]:
+      - heading "剔除质量不合格的基因组" [level=2] [ref=f1e67]
+      - paragraph [ref=f1e68]: DNA 测序并不完美。有些基因组测出来是不完整的，或者混进了样本中其他生物的 DNA。如果把这些数据喂进去，教给计算机的就只是噪声。
+      - paragraph [ref=f1e69]:
+        - text: 因此我们采用了微生物学界已有共识的质量清单：基因组完整度至少 90%，污染率不超过 5%，且大小要落在
+        - emphasis [ref=f1e70]: 克雷伯菌
+        - text: 基因组应有的范围内。任何一项不达标的都被剔除。
+      - paragraph [ref=f1e71]:
+        - text: 这一步删掉了约
+        - strong [ref=f1e72]: 2%
+        - text: 的基因组——更重要的是，它在耐药株和敏感株中删除的比例是相同的，因此没有悄悄让数据产生偏倚。
+  - generic [ref=f1e73]:
+    - generic [ref=f1e74]: "3"
+    - generic [ref=f1e75]:
+      - heading "把每个基因组变成一张简单的清单" [level=2] [ref=f1e76]
+      - paragraph [ref=f1e77]: 一个基因组包含数百万个 DNA 字母——直接丢给计算机，原始信息量实在太大。我们需要把它压缩成有意义的东西。
+      - paragraph [ref=f1e78]:
+        - text: 幸运的是，科学家早已把「哪些基因和突变会让细菌对哪种药耐药」编成了目录。美国国立卫生研究院提供的免费工具
+        - strong [ref=f1e79]: AMRFinderPlus
+        - text: 可以扫描一个基因组，报告它携带了目录中的哪些已知耐药特征。
+      - generic [ref=f1e80]:
+        - generic [ref=f1e81]: 可以这样理解
+        - paragraph [ref=f1e82]: 把每株细菌想象成一个小偷，把抗生素想象成一把锁。科学家已经把「能撬开哪把锁的作案工具」登记成册。AMRFinderPlus 打开小偷的工具包，逐项勾出里面有哪些工具。我们不是把整个工具包交给计算机——我们交给它的是那张勾选清单。
+      - paragraph [ref=f1e83]:
+        - text: 于是每个基因组变成一行
+        - strong [ref=f1e84]: 688 个「有／无」方框
+        - text: ：它带
+        - code [ref=f1e85]: blaKPC-2
+        - text: 吗？有。带
+        - code [ref=f1e86]: gyrA_S83I
+        - text: 吗？没有。以此类推。计算机真正学习的就是这张勾选表——而且因为每个方框都对应一个真实的生物学名称，我们事后永远能解释一次预测是怎么来的。
+  - figure [ref=f1e87]:
+    - img "一个基因组文件经 AMRFinderPlus 扫描，变成一张 688 列的「有／无」清单，再送入五个各自独立的模型（每种抗生素一个），每个模型给出耐药或敏感的判定。" [ref=f1e89]:
+      - generic [ref=f1e91]: 一个基因组
+      - generic [ref=f1e92]: DNA 文件
+      - generic [ref=f1e93]: 扫描
+      - generic [ref=f1e95]: AMRFinderPlus
+      - generic [ref=f1e96]: 找出已知基因
+      - generic [ref=f1e98]: 688 个「有／无」方框
+      - generic [ref=f1e99]: blaKPC-2
+      - generic [ref=f1e100]: ✓
+      - generic [ref=f1e101]: gyrA_S83I
+      - generic [ref=f1e102]: ✓
+      - generic [ref=f1e103]: ompK36…
+      - generic [ref=f1e104]: ✗
+      - generic [ref=f1e105]: … 还有 685 个
+      - generic [ref=f1e107]: 模型 · 美罗培南
+      - generic [ref=f1e109]: 模型 · 庆大霉素
+      - generic [ref=f1e111]: 模型 · 环丙沙星
+      - generic [ref=f1e113]: 模型 · 复方磺胺甲噁唑
+      - generic [ref=f1e115]: 模型 · 头孢西丁
+      - generic [ref=f1e116]: 耐药
+      - generic [ref=f1e117]: 敏感
+      - generic [ref=f1e118]: 耐药
+      - generic [ref=f1e119]: 敏感
+      - generic [ref=f1e120]: 耐药
+    - generic [ref=f1e121]:
+      - text: 一个基因组进去，五个独立的答案出来。请注意
+      - strong [ref=f1e122]: 每种抗生素都有各自独立的模型
+      - text: ——对不同药物的耐药性来自不同的生物学机制，把它们混在一起是没有意义的。
+  - generic [ref=f1e123]:
+    - generic [ref=f1e124]: "4"
+    - generic [ref=f1e125]:
+      - heading "弄清楚哪些细菌是「亲戚」" [level=2] [ref=f1e126]
+      - paragraph [ref=f1e127]: 这一步看上去像是整理档案，实际上却是整个项目的核心。
+      - paragraph [ref=f1e128]:
+        - text: 细菌靠自我复制来繁殖。这意味着现实中收集到的这批细菌并不是 3,850 个彼此独立的个体——而是
+        - strong [ref=f1e129]: 一个个几乎完全相同的「双胞胎大家族」
+        - text: 。一株在医院里传播开来的成功菌株，可能就贡献了数百个本质上是同一个生物体的样本。
+      - paragraph [ref=f1e130]:
+        - text: 有一种标准方法可以判断每株细菌属于哪个家族，叫做
+        - strong [ref=f1e131]: MLST
+        - text: 。它读取七个特定的管家基因，给出一个家族编号——即「序列型」，写作
+        - code [ref=f1e132]: ST258
+        - text: 、
+        - code [ref=f1e133]: ST307
+        - text: 等等。我们对每个基因组都跑了一遍。结果这 3,850 个基因组分属
+        - strong [ref=f1e134]: 513 个家族
+        - text: 。
+  - generic [ref=f1e135]:
+    - generic [ref=f1e136]: "5"
+    - generic [ref=f1e137]:
+      - heading "按家族划分数据——整个项目最重要的一个决定" [level=2] [ref=f1e138]
+      - paragraph [ref=f1e139]: 要判断一个模型好不好，做法是在训练时藏起一部分数据，之后再用这部分被藏起来的数据去考它。这是标准做法。
+      - paragraph [ref=f1e140]:
+        - text: 但
+        - emphasis [ref=f1e141]: 怎么选
+        - text: 要藏哪一部分，会彻底改变结论。最直觉的做法——把所有数据打乱、随机取 30%——在这里是严重错误的。这一点是你的同事最需要理解的。
+      - generic [ref=f1e142]:
+        - generic [ref=f1e143]: 可以这样理解
+        - paragraph [ref=f1e144]:
+          - text: 设想你要用一场考试来判断一个学生是否真的懂医学。如果你把一家同卵双胞胎拆开——一部分放进复习材料，他们的双胞胎兄弟放进考卷——那么这个学生靠
+          - emphasis [ref=f1e145]: 认脸
+          - text: 就能考出高分，完全不需要学过任何医学。要考出他真正掌握了什么，就必须用
+          - strong [ref=f1e146]: 他从未见过的家族
+          - text: 来考他。
+      - paragraph [ref=f1e147]: 所以我们按家族划分：同一个序列型的所有基因组，要么全部进入训练集，要么全部进入测试集，绝不同时出现在两边。这样模型只会在它真正从未见过的谱系上接受评判。
+      - paragraph [ref=f1e148]:
+        - text: 这会让我们的数字
+        - emphasis [ref=f1e149]: 看起来不如
+        - text: 大多数已发表的论文——那些论文通常使用随机划分。但这正是重点。我们宁愿报告一个真实的数字，也不要一个好看的数字。我们还写了一个自动检查：只要有任何一个家族同时出现在两边，整个项目的测试就会失败。
+  - figure "我们不只是断言随机划分会虚高结果——我们把它量了出来。同一个模型用两种方式各跑一遍，随机划分在每种药上得分都更高。这个差距，正是模型没有凭本事挣到的那部分分数。" [ref=f1e150]:
+    - img "两种数据划分方式的对比。随机划分会把家族拦腰切开，使得近乎相同的「双胞胎」同时出现在训练集和测试集中，让模型靠认家族就能得高分。按家族划分则把整个家族留在同一侧，迫使模型去泛化到它从未见过的谱系。" [ref=f1e152]:
+      - generic [ref=f1e153]: 随机划分 — 会泄漏
+      - generic [ref=f1e154]: 家族被拦腰切开
+      - generic [ref=f1e156]: 训练集
+      - generic [ref=f1e158]: A
+      - generic [ref=f1e160]: A
+      - generic [ref=f1e162]: B
+      - generic [ref=f1e164]: B
+      - generic [ref=f1e166]: C
+      - generic [ref=f1e168]: A
+      - generic [ref=f1e170]: 测试集
+      - generic [ref=f1e172]: A
+      - generic [ref=f1e174]: B
+      - generic [ref=f1e176]: C
+      - generic [ref=f1e177]: 家族 A、B、C 两边都有。
+      - generic [ref=f1e178]: 模型靠认出它们就能取胜。
+      - generic [ref=f1e179]: 按家族划分 — 诚实
+      - generic [ref=f1e180]: 整个家族留在同一侧
+      - generic [ref=f1e182]: 训练集
+      - generic [ref=f1e184]: A
+      - generic [ref=f1e186]: A
+      - generic [ref=f1e188]: A
+      - generic [ref=f1e190]: B
+      - generic [ref=f1e192]: B
+      - generic [ref=f1e194]: B
+      - generic [ref=f1e196]: 测试集
+      - generic [ref=f1e198]: C
+      - generic [ref=f1e200]: C
+      - generic [ref=f1e202]: C
+      - generic [ref=f1e203]: 家族 C 在训练中从未出现。
+      - generic [ref=f1e204]: 模型必须解释全新的生物学。
+      - generic [ref=f1e205]: 为什么这很重要
+      - generic [ref=f1e207]: 随机划分得分
+      - generic [ref=f1e208]: "0.935"
+      - generic [ref=f1e209]: 按家族划分得分
+      - generic [ref=f1e210]: "0.903"
+      - generic [ref=f1e211]: 差值 = 白送的分数
+      - generic [ref=f1e212]: "0.032"
+      - generic [ref=f1e213]: 基于我们自己的头孢西丁
+      - generic [ref=f1e214]: 模型实测。随机划分把模型
+      - generic [ref=f1e215]: 没凭本事挣到的分数送给它——
+      - generic [ref=f1e216]: 所以我们始终报告较低的那个数。
+  - generic [ref=f1e218]:
+    - generic [ref=f1e219]: "6"
+    - generic [ref=f1e220]:
+      - heading "为每种抗生素各训练一个模型" [level=2] [ref=f1e221]
+      - paragraph [ref=f1e222]: 现在进入真正的「学习」环节。下面用不带术语的话说明「训练一个模型」到底是什么意思。
+      - paragraph [ref=f1e223]:
+        - text: 计算机一开始什么都不知道。它逐一查看成千上万个例子——每个例子都是一张基因勾选清单加上实验室的判定——然后逐渐摸索出
+        - strong [ref=f1e224]: 哪些勾选组合会对应「耐药」
+        - text: 。这是大规模的找规律，而不是推理。
+      - paragraph [ref=f1e225]:
+        - text: 我们采用的具体方法叫做
+        - strong [ref=f1e226]: 梯度提升
+        - text: 。它会建立一长串非常简单的「是／否」规则，每一条新规则都专门用来纠正前面那些规则犯过的错。几百次小修小补累加起来，就形成了一个很强的整体判断力。
+      - generic [ref=f1e227]:
+        - generic [ref=f1e228]: 可以这样理解
+        - paragraph [ref=f1e229]: 一名实习生翻阅成千上万份既往病例。每看完一批，带教老师只指出他判错的那些，实习生就补上一条小规则，好让下次不再犯同样的错。如此重复三百遍。没有人事先写好这些规则；它们全是从错误中学出来的。
+      - paragraph [ref=f1e230]:
+        - text: 有一个刻意的选择值得一提：我们
+        - strong [ref=f1e231]: 没有调参
+        - text: 。模型上确实有一些旋钮，拧一拧能把分数再挤高一点，但一边盯着自己的测试数据一边拧旋钮，是一种隐蔽的作弊。我们固定了一套合理的配置，对每种药、每个菌种都原样使用。
+  - figure "整个循环都只在训练数据内部进行。测试家族只在最后被动用一次。正是这份纪律，让报告出来的数字变得可信。" [ref=f1e232]:
+    - img "单一抗生素的训练循环：数据按家族分成若干折，模型在训练折上学习并在留出折上检验，随后校准概率并选定安全阈值，最后在从未使用过的家族上做一次最终测试。" [ref=f1e234]:
+      - generic [ref=f1e235]: 训练一种药物的模型
+      - generic [ref=f1e237]: 3,850 张清单
+      - generic [ref=f1e238]: + 实验室判定
+      - generic [ref=f1e239]: 分组
+      - generic [ref=f1e241]: 按家族划分
+      - generic [ref=f1e242]: 513 个序列型
+      - generic [ref=f1e244]: 轮流留出每一折，反复进行
+      - generic [ref=f1e246]: 在 3 折上学习
+      - generic [ref=f1e247]: 构建纠错规则
+      - generic [ref=f1e249]: 在第 4 折上检验
+      - generic [ref=f1e250]: 未见过的家族
+      - generic [ref=f1e252]: 校准
+      - generic [ref=f1e253]: 让「70%」名副其实
+      - generic [ref=f1e255]: 设定安全阈值
+      - generic [ref=f1e256]: 漏判耐药 ≤ 3%
+      - generic [ref=f1e258]: 最终得分
+      - generic [ref=f1e259]: 从未使用过的家族——
+      - generic [ref=f1e260]: 只测一次，原样报告
+      - generic [ref=f1e261]: 左侧的一切都只发生在
+      - generic [ref=f1e262]: 训练数据内部。
+      - generic [ref=f1e263]: 尤其是阈值的选取，
+      - generic [ref=f1e264]: 全程都没有看过测试家族——
+      - generic [ref=f1e265]: 否则最终得分就
+      - generic [ref=f1e266]: 不诚实了。
+  - generic [ref=f1e268]:
+    - generic [ref=f1e269]: "7"
+    - generic [ref=f1e270]:
+      - heading "让置信度数字诚实可信，再选定一个安全档位" [level=2] [ref=f1e271]
+      - paragraph [ref=f1e272]: 模型并不只是说「耐药」——它会给出一个 0 到 1 之间的数字，也就是置信度。未经处理的置信度通常是不准的：模型可能声称「有 90% 把握」，而实际上这类判断只有 70% 是对的。
+      - paragraph [ref=f1e273]:
+        - strong [ref=f1e274]: 校准
+        - text: 就是用来纠正这一点的。我们调整这些数字，使得模型说 70% 时，它确实大约有 70% 是对的。对于一个临床医生将来可能会依赖的工具来说，一个会说谎的置信度，比根本不给置信度更糟糕。
+      - paragraph [ref=f1e275]:
+        - text: 接下来我们要决定：把「判为耐药」和「判为敏感」之间的那条线画在哪里。这是一个
+        - emphasis [ref=f1e276]: 临床
+        - text: 决定，而不是数学决定，因为这两种可能的错误，严重程度并不相同。
+  - figure "一个坚决不肯漏掉耐药的工具，必然会把耐药判多。这个取舍是我们刻意做出并公开说明的选择——不是我们藏起来的缺陷。" [ref=f1e277]:
+    - img "预测与真实情况的二乘二矩阵。危险的错误是把耐药株判为敏感，这会让病人用上无效的药；代价高的错误是把敏感株判为耐药，这会浪费一种本可使用的药。" [ref=f1e279]:
+      - generic [ref=f1e280]: 两种错误并不对等
+      - generic [ref=f1e281]: 真实：耐药
+      - generic [ref=f1e282]: 真实：敏感
+      - generic [ref=f1e283]: 我们判：耐药
+      - generic [ref=f1e284]: 我们判：敏感
+      - generic [ref=f1e286]: 正确
+      - generic [ref=f1e288]: 重大误差 (ME)
+      - generic [ref=f1e289]: 浪费了一种可用的药
+      - generic [ref=f1e291]: 极重大误差 (VME)
+      - generic [ref=f1e292]: 病人用上了无效的药
+      - generic [ref=f1e294]: 正确
+      - generic [ref=f1e295]: 我们调整模型，把红框
+      - generic [ref=f1e296]: 控制在 3% 以下——
+      - generic [ref=f1e297]: 代价是接受更多橙框，
+      - generic [ref=f1e298]: 这是换取安全的代价。
+      - generic [ref=f1e299]: 这些是标准的临床术语——监管机构用的正是这套词汇。
+  - generic [ref=f1e301]:
+    - generic [ref=f1e302]: "8"
+    - generic [ref=f1e303]:
+      - heading "与那个最显而易见的简单方法作对比" [level=2] [ref=f1e304]
+      - paragraph [ref=f1e305]:
+        - text: 下面这个问题，决定了这个项目到底值不值得做：
+        - strong [ref=f1e306]: 相比单纯查一下基因，机器学习究竟多带来了什么？
+      - paragraph [ref=f1e307]: 你完全可以跳过全部训练，直接写一条规则：「如果这株细菌携带了该药物的已知耐药基因，就判为耐药。」这就是一次数据库查询，而且对某些药物效果非常好。我们把这个基线做了出来，并把它放在每一个结果旁边一起报告——因为如果我们的模型只是跟它打平，那我们不过是造了一张昂贵的查询表。
+      - paragraph [ref=f1e308]: 结果确实有好有坏，我们如实说明：
+      - table [ref=f1e310]:
+        - rowgroup [ref=f1e311]:
+          - row [ref=f1e312]:
+            - columnheader "药物" [ref=f1e313]
+            - columnheader "基因查找" [ref=f1e314]
+            - columnheader "我们的模型" [ref=f1e315]
+            - columnheader "结论" [ref=f1e316]
+        - rowgroup [ref=f1e317]:
+          - row [ref=f1e318]:
+            - cell "庆大霉素" [ref=f1e319]
+            - cell "0.948" [ref=f1e320]
+            - cell "0.981" [ref=f1e321]
+            - cell "查找本身已经很好——我们几乎没有提升" [ref=f1e322]
+          - row [ref=f1e323]:
+            - cell "美罗培南" [ref=f1e324]
+            - cell "0.933" [ref=f1e325]
+            - cell "0.968" [ref=f1e326]
+            - cell "小幅提升" [ref=f1e327]
+          - row [ref=f1e328]:
+            - cell "环丙沙星" [ref=f1e329]
+            - cell "0.911" [ref=f1e330]
+            - cell "0.983" [ref=f1e331]
+            - cell "明显提升" [ref=f1e332]
+          - row [ref=f1e333]:
+            - cell "复方磺胺甲噁唑" [ref=f1e334]
+            - cell "0.885" [ref=f1e335]
+            - cell "0.977" [ref=f1e336]
+            - cell "明显提升" [ref=f1e337]
+          - row [ref=f1e338]:
+            - cell [ref=f1e339]:
+              - strong [ref=f1e340]: 头孢西丁
+            - cell "0.500" [ref=f1e341]
+            - cell "0.905" [ref=f1e342]
+            - cell [ref=f1e343]:
+              - strong [ref=f1e344]: 头条结果——见下文
+      - paragraph [ref=f1e345]: （1.0 表示完美，0.5 相当于抛硬币。）
+      - heading "为什么要把头孢西丁作为头条结果" [level=3] [ref=f1e346]
+      - paragraph [ref=f1e347]:
+        - text: 在头孢西丁上，基因查找是
+        - strong [ref=f1e348]: 完全无效的
+        - text: ——0.500，字面意义上就是抛硬币。它漏掉了
+        - strong [ref=f1e349]: 96.6% 的耐药株
+        - text: （381 株中漏掉 368 株）。
+      - paragraph [ref=f1e350]:
+        - text: 其中的生物学原因非常漂亮。这类细菌对头孢西丁的耐药，往往并不是因为
+        - emphasis [ref=f1e351]: 获得
+        - text: 了某个防御基因，而是因为
+        - emphasis [ref=f1e352]: 失去
+        - text: 了一道门——一种叫做孔蛋白的表面蛋白，药物本来要从这里进入细胞。这道门没了，药就进不来了。
+      - paragraph [ref=f1e353]:
+        - text: 一个只会问「它带了哪些武器？」的查找方法，在结构上就看不见一个
+        - strong [ref=f1e354]: 缺失
+        - text: 的特征。而我们的模型学会了这种「缺失」的模式，把分数从 0.500 提升到 0.905。
+      - generic [ref=f1e355]:
+        - generic [ref=f1e356]: 讲给同事听的一句话版本
+        - paragraph [ref=f1e357]:
+          - text: 「对大多数药物来说，查一下基因清单几乎和我们的模型一样好——这一点我们如实说明。但对头孢西丁，基因清单等同于抛硬币，因为它的耐药来自某种
+          - emphasis [ref=f1e358]: 缺失
+          - text: 的东西，而不是某种存在的东西——而这正是机器学习真正体现价值的地方。」
+  - generic [ref=f1e359]:
+    - generic [ref=f1e360]: "9"
+    - generic [ref=f1e361]:
+      - heading "让每一次预测都可以解释" [level=2] [ref=f1e362]
+      - paragraph [ref=f1e363]:
+        - text: 一个临床医生无法追问的预测，用处不大。因此对每一次判定，工具都会列出推动这一判定的具体基因，并按各自贡献大小排序——用的是一种标准方法，叫做
+        - strong [ref=f1e364]: SHAP
+        - text: 。
+      - paragraph [ref=f1e365]:
+        - text: 这同时也是我们的科学性自查。当我们问模型「你到底依据了什么」时，它给出的正是微生物学界早已熟知的机制：美罗培南对应
+        - code [ref=f1e366]: blaKPC
+        - text: ，环丙沙星对应
+        - code [ref=f1e367]: gyrA
+        - text: 和
+        - code [ref=f1e368]: parC
+        - text: 突变，头孢西丁对应
+        - code [ref=f1e369]: ompK36
+        - text: 孔蛋白。模型独立地把教科书重新发现了一遍——这有力地说明它学到的是生物学，而不是统计噪声。
+      - paragraph [ref=f1e370]:
+        - text: 这里有一点我们格外谨慎：某个基因排名靠前，并不能证明它
+        - emphasis [ref=f1e371]: 导致
+        - text: 了耐药。耐药基因常常搭乘同一段可移动 DNA 一起传播，所以一个基因可能仅仅因为和真正的元凶「同行」而显得重要。我们公开标注这一点，而不是宣称每个排名靠前的基因都是耐药的根源。
+  - generic [ref=f1e372]:
+    - generic [ref=f1e373]: "10"
+    - generic [ref=f1e374]:
+      - heading "拿完全来自别处的数据来检验它" [level=2] [ref=f1e375]
+      - paragraph [ref=f1e376]:
+        - text: 以上所有验证用的都是同一个来源的数据。有一条批评始终成立：也许这个模型只在
+        - emphasis [ref=f1e377]: 那一批
+        - text: 数据上有效。
+      - paragraph [ref=f1e378]:
+        - text: 因此我们现在正拿完全由其他团队整理的细菌来检验它——而且模型是
+        - strong [ref=f1e379]: 冻结
+        - text: 的，也就是说：不调整、不重训、没有第二次机会。
+      - paragraph [ref=f1e380]:
+        - text: 找到真正独立的数据，比听上去难得多。那个最显而易见的来源，其实是
+        - emphasis [ref=f1e381]: 汇入
+        - text: 我们原始数据库的上游，所以简单地拿来对比，等于又拿模型已经学过的细菌重考了一遍。我们必须先识别并剔除这部分重叠——占候选数据的 16%——之后的结果才有意义。
+      - paragraph [ref=f1e382]:
+        - text: 而且我们在跑之前就
+        - emphasis [ref=f1e383]: 预先承诺
+        - text: 了要报告什么：五种药全部报告，无论数字如何，并且额外报告一个更严格的第二队列——其中排除了模型见过的任何细菌家族。如果结果更差，那这就是结论，照样写进报告。
+  - generic [ref=f1e384]:
+    - heading "如果只有两分钟，该怎么讲" [level=2] [ref=f1e385]
+    - list [ref=f1e386]:
+      - listitem [ref=f1e387]:
+        - strong [ref=f1e388]: 问题：
+        - text: 要弄清哪些抗生素有效，实验室需要两天。而 DNA 几分钟就能读完。我们能不能从 DNA 预测出实验室的答案？
+      - listitem [ref=f1e389]:
+        - strong [ref=f1e390]: 我们做了什么：
+        - text: 为每种抗生素各建一个独立的预测器，依据的是从基因组中查出的已知耐药基因清单。
+      - listitem [ref=f1e391]:
+        - strong [ref=f1e392]: 难点在哪：
+        - text: 细菌是克隆繁殖的，所以马虎的考法会让模型靠「认家族」而不是靠懂生物学来取胜。我们只在它从未见过的家族上测试——这会拉低我们的数字，而这是刻意为之。
+      - listitem [ref=f1e393]:
+        - strong [ref=f1e394]: 诚实的对比：
+        - text: 对大多数药物，单纯查基因几乎一样好，这一点我们如实报告。而对头孢西丁，查找等于抛硬币，我们的模型达到 0.905——因为那种耐药来自一道
+        - emphasis [ref=f1e395]: 缺失
+        - text: 的门，而不是新增的武器。
+      - listitem [ref=f1e396]:
+        - strong [ref=f1e397]: 每一个答案都有解释，
+        - text: 而且它所依据的基因与已知微生物学吻合。
+      - listitem [ref=f1e398]:
+        - strong [ref=f1e399]: 它不是医疗器械。
+        - text: 它是决策辅助；实验室药敏试验始终是最终依据。
+    - heading "同事可能会听到我们用的词" [level=3] [ref=f1e400]
+    - generic [ref=f1e401]:
+      - term [ref=f1e402]: 基因组
+      - definition [ref=f1e403]: 细菌的全部 DNA——它完整的说明书。
+      - term [ref=f1e404]: 耐药 / 敏感
+      - definition [ref=f1e405]: 药物无效 / 药物有效。
+      - term [ref=f1e406]: 决定因子
+      - definition [ref=f1e407]: 已知会导致对某种特定药物耐药的基因或突变。
+      - term [ref=f1e408]: 特征
+      - definition [ref=f1e409]: 我们交给计算机的那张清单上的一个「有／无」方框。
+      - term [ref=f1e410]: 序列型（ST）
+      - definition [ref=f1e411]:
+        - text: 近乎相同的细菌所属家族的编号，例如
+        - code [ref=f1e412]: ST258
+        - text: 。
+      - term [ref=f1e413]: 训练
+      - definition [ref=f1e414]: 给计算机看成千上万个已知答案的例子，让它自己找出规律。
+      - term [ref=f1e415]: 校准
+      - definition [ref=f1e416]: 让置信度百分比真正名副其实。
+      - term [ref=f1e417]: 极重大误差（VME）
+      - definition [ref=f1e418]: 把耐药株判成敏感。危险的那种错误。
+      - term [ref=f1e419]: 重大误差（ME）
+      - definition [ref=f1e420]: 把敏感株判成耐药。浪费，但不危险。
+      - term [ref=f1e421]: ROC-AUC
+      - definition [ref=f1e422]: 衡量模型区分两类能力的分数，范围 0.5 到 1.0。0.5 相当于抛硬币。
+      - term [ref=f1e423]: 基线
+      - definition [ref=f1e424]: 那个简单方法——我们必须胜过它，复杂方法才算有存在理由。
+    - paragraph [ref=f1e425]: 本页所有数字均来自项目自身的结果文件。第 10 步所述的外部验证在撰写本文时仍在运行中，因此这里未引用任何外部验证的数字。
