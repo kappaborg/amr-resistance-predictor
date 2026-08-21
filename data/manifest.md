@@ -16,14 +16,14 @@ Every data source used in this project: source, version/date, exact query, and p
 
 | Role | Source | Version / date | Size | Access | Status |
 |---|---|---|---|---|---|
-| External AST phenotypes | NCBI Pathogen Detection, Klebsiella | release `PDG000000012.2502` (2026-08-21) | **179 MB** (187,325,514 B, verified) | `ftp.ncbi.nlm.nih.gov/pathogen/Results/Klebsiella/PDG000000012.2502/AMR/PDG000000012.2502.amr.metadata.tsv` | ✅ pulled |
+| External AST phenotypes (primary) | **EMBL-EBI AMR Portal / CABBAGE** | release `2026-07` | **16.6 MB** (md5-verified) | `ftp.ebi.ac.uk/pub/databases/amr_portal/releases/2026-07/phenotype.csv.gz` | ✅ pulled |
+| External AST phenotypes (top-up) | NCBI Pathogen Detection, Klebsiella | release `PDG000000012.2502` (2026-08-21) | **179 MB** (187,325,514 B, verified) | `ftp.ncbi.nlm.nih.gov/pathogen/Results/Klebsiella/PDG000000012.2502/AMR/PDG000000012.2502.amr.metadata.tsv` | ✅ pulled |
 | Accession map for overlap removal | BV-BRC `genome` API | pulled 2026-08-22 | <1 MB | POST `in(genome_id,(...))&select(genome_id,biosample_accession,assembly_accession)` | ✅ pulled |
 
 **Why:** all training data came from BV-BRC, which ingests AMR phenotypes *from* NCBI BioSample /
 Antibiogram records. NCBI Pathogen Detection is therefore **upstream** of our corpus, so isolates
 overlapping our training set were removed by **BioSample/assembly accession anti-join** before any
-use. 1,630 K. pneumoniae isolates carry ≥1 panel drug; 262 (16.1%) overlapped and were excluded;
-**1,368 unseen**, of which **1,038** have a downloadable assembly. Residual risk: 129 training
+use. The Portal additionally exposes a **`database` provenance column**, so PATRIC-sourced rows are dropped **by construction** (800 isolates survive); the NCBI route relies on the anti-join alone (262 of 1,630, 16.1%, overlapped and were excluded). **Union = 1,312 isolates, 1,144 with usable panel labels**; the 524-isolate overlap between sources showed **zero conflicting R/S calls**. Residual risk: 129 training
 genomes (3.4%) carry no accession and could not be anti-joined — an upper bound of ≤12.4% undetected
 overlap, reported with any result. Cohort manifest:
 `data/raw/external_validation/external_cohort_kpneu.csv`. Full scoping + pre-registered analysis
