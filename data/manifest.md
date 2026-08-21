@@ -12,6 +12,25 @@ Every data source used in this project: source, version/date, exact query, and p
 | Lineage typing | `mlst` schemes (PubMLST) | bundled w/ mlst 2.33.1 | bundled w/ tool | ✅ |
 | Protein language model | ESM-2 (`esm2_t30_150M_UR50D`, `esm2_t33_650M_UR50D`) | fair-esm 2.0.0 weights | auto-download (fair-esm) | ✅ cached |
 
+## External validation cohort (Step 1 — metadata only, 2026-08-22)
+
+| Role | Source | Version / date | Size | Access | Status |
+|---|---|---|---|---|---|
+| External AST phenotypes | NCBI Pathogen Detection, Klebsiella | release `PDG000000012.2502` (2026-08-21) | **179 MB** (187,325,514 B, verified) | `ftp.ncbi.nlm.nih.gov/pathogen/Results/Klebsiella/PDG000000012.2502/AMR/PDG000000012.2502.amr.metadata.tsv` | ✅ pulled |
+| Accession map for overlap removal | BV-BRC `genome` API | pulled 2026-08-22 | <1 MB | POST `in(genome_id,(...))&select(genome_id,biosample_accession,assembly_accession)` | ✅ pulled |
+
+**Why:** all training data came from BV-BRC, which ingests AMR phenotypes *from* NCBI BioSample /
+Antibiogram records. NCBI Pathogen Detection is therefore **upstream** of our corpus, so isolates
+overlapping our training set were removed by **BioSample/assembly accession anti-join** before any
+use. 1,630 K. pneumoniae isolates carry ≥1 panel drug; 262 (16.1%) overlapped and were excluded;
+**1,368 unseen**, of which **1,038** have a downloadable assembly. Residual risk: 129 training
+genomes (3.4%) carry no accession and could not be anti-joined — an upper bound of ≤12.4% undetected
+overlap, reported with any result. Cohort manifest:
+`data/raw/external_validation/external_cohort_kpneu.csv`. Full scoping + pre-registered analysis
+plan: `results/reports/summary_32_external_validation_scoping.md`.
+
+**Genome assemblies for this cohort are NOT yet downloaded** (Step 2, ~5.1 GB, pending approval).
+
 ## Acquisition log — genomes + phenotypes (one row per organism)
 All via BV-BRC. Phenotype filter is **laboratory-confirmed only** (`evidence="Laboratory Method"`);
 genomes are assembled contigs (`genome_sequence`, `limit(25000)`, `application/dna+fasta`). QC per

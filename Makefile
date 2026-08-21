@@ -2,7 +2,7 @@
 # Processed artifacts regenerate from raw + code; data/raw is never a build target.
 # Each target maps to a pipeline phase. Stubs raise until the phase is implemented.
 
-.PHONY: all data features split train eval rigor figures leakage dca riskcov organisms models test clean help
+.PHONY: all data features split train eval rigor figures leakage dca riskcov extscope organisms models test clean help
 .DEFAULT_GOAL := help
 
 CONFIG := config/config.yaml
@@ -40,6 +40,9 @@ dca:  ## Decision-curve analysis (clinical net benefit) — needs eval first (po
 
 riskcov:  ## Risk-coverage curves + AURC for the defer-to-lab abstention — needs eval first
 	$(PY) -m src.evaluation.risk_coverage
+
+extscope:  ## External-validation Step 1: scope an independent NCBI PD cohort (metadata only, ~179 MB)
+	$(PY) -m src.evaluation.external_validation
 
 organisms:  ## Annotate + MLST + train one organism (ORG=paeruginosa|senterica|efaecium|...)
 	$(PY) -m src.organism_pipeline --organism $(ORG)

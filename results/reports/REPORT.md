@@ -304,6 +304,13 @@ none). CLI equivalent: `python -m src.app.predict --organism saureus --genome <f
   practice and a different geographic/temporal sampling frame. A temporal split (`summary_12`) is a
   partial proxy only. Until a genuinely independent cohort is scored, all reported numbers should be
   read as **internal validation under a strict split**, not as external validation.
+  *In progress (`summary_32`):* an independent cohort has been **scoped but not yet scored**. Note
+  that BV-BRC ingests AMR phenotypes *from* NCBI BioSample/Antibiogram records, so NCBI Pathogen
+  Detection is **upstream** of our corpus and a naive comparison would re-test training isolates;
+  after a BioSample/assembly anti-join removed the 16.1% that overlapped, **1,038 unseen
+  K. pneumoniae isolates** remain (496–780 usable R/S per drug). The Step-2 analysis plan is
+  **pre-registered** in `summary_32` — frozen models, no re-tuning, all five drugs reported whatever
+  the result. No external number exists in this report yet.
 - **Cross-species transfer degrades outside a family** (§4.2) — zero-shot transfer is strong within
   Enterobacterales but unreliable to non-fermenters and absent across the Gram divide; the models are
   organism-specific tools, not a universal predictor.
@@ -488,9 +495,13 @@ study. Presenting it as anything else would be the overclaim the project exists 
 
 ## Appendix B — Next steps
 
-1. **External validation (highest priority).** Score the frozen models, unchanged, on a cohort
-   assembled independently of BV-BRC, and report the result whatever it is. This is the one claim the
-   study currently cannot make (§7, item 16 above).
+1. **External validation (highest priority — Step 1 complete).** Score the frozen models, unchanged,
+   on a cohort assembled independently of BV-BRC, and report the result whatever it is. This is the
+   one claim the study currently cannot make (§7, item 16 above). **Step 1 is done** (`summary_32`):
+   1,038 genuinely unseen *K. pneumoniae* isolates identified from NCBI Pathogen Detection after
+   anti-joining out the 16.1% that overlapped our training set, with the analysis plan pre-registered.
+   **Step 2** — download ~5.1 GB of assemblies, annotate (~14 h), score the frozen models — is the
+   next action.
 2. **Resolve the `Intermediate` decision** (⚕) and, if `I` is folded into `R`, re-run the full panel.
 3. **Quantify representation bias** (item 14) — stratify performance by isolate collection region and
    year where metadata permit, rather than only disclosing the bias narratively.
