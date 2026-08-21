@@ -104,19 +104,19 @@
       <div class="card">
         <h2>Results — unseen lineages, VME ≤ 3%</h2>
         <table>
-          <tr><th class="l">Drug</th><th>ROC-AUC</th><th>VME</th><th>Rules AUC</th><th>DeLong p</th></tr>
-          <tr><td class="l">ciprofloxacin</td><td>0.979</td><td>2.3%</td><td>0.911</td><td>9×10⁻³³</td></tr>
-          <tr><td class="l">TMP-SMX</td><td>0.977</td><td>2.3%</td><td>0.885</td><td>5×10⁻⁵⁰</td></tr>
-          <tr><td class="l">meropenem</td><td>0.967</td><td>1.3%</td><td>0.945</td><td>2×10⁻¹⁴</td></tr>
-          <tr><td class="l">gentamicin</td><td>0.979</td><td>1.6%</td><td>0.948</td><td>6×10⁻²⁶</td></tr>
-          <tr><td class="l"><b>cefoxitin</b></td><td><b>0.899</b></td><td>0.7%</td><td class="bad">0.518</td><td>≈0</td></tr>
+          <tr><th class="l">Drug</th><th>ROC-AUC</th><th>VME [95% CI]</th><th>Rules AUC</th><th>DeLong p</th></tr>
+          <tr><td class="l">ciprofloxacin</td><td>0.983</td><td>2.3% [1.3–5.1]</td><td>0.911</td><td>7×10⁻³⁶</td></tr>
+          <tr><td class="l">TMP-SMX</td><td>0.977</td><td>2.3% [1.4–3.9]</td><td>0.885</td><td>9×10⁻⁵¹</td></tr>
+          <tr><td class="l">meropenem</td><td>0.968</td><td>1.3% [0.3–3.5]</td><td>0.933</td><td>5×10⁻²⁴</td></tr>
+          <tr><td class="l">gentamicin</td><td>0.981</td><td>1.6% [0.8–2.8]</td><td>0.948</td><td>1×10⁻³⁰</td></tr>
+          <tr><td class="l"><b>cefoxitin</b></td><td><b>0.905</b></td><td>0.7% [0.2–1.7]</td><td class="bad">0.500</td><td>≈0</td></tr>
         </table>
         <p style="margin-top:3mm"><span class="pill">DeLong paired test</span> The model beats the gene-lookup baseline on <b>every drug</b> — significant, not just numerically larger.</p>
       </div>
       <div class="card big">
         <h2>The headline: cefoxitin</h2>
-        <p>Resistance is driven by <b>porin loss</b> a gene-lookup cannot see. The baseline is near-useless — it misses ~92% of resistant strains:</p>
-        <p style="text-align:center;margin:4mm 0"><span class="num">0.52 <small>→</small> 0.90</span></p>
+        <p>Resistance is driven by <b>porin loss</b> a gene-lookup cannot see. The baseline is near-useless — it misses 96.6% of resistant strains (368 of 381):</p>
+        <p style="text-align:center;margin:4mm 0"><span class="num">0.50 <small>→</small> 0.91</span></p>
         <p style="text-align:center">rules ROC-AUC → model ROC-AUC. This is <b>what machine learning adds over a database query</b>, made concrete.</p>
       </div>
       <div class="card">

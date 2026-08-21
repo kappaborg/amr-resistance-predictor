@@ -83,10 +83,35 @@ basis for the write-up and defense. ⚕ = microbiology sign-off required.
 
 | 53 | 2026-07-18 | Rigor | **Three net-new analyses added (audit improvement tier).** (1) **MCC + PPV/NPV** (at 10/30/50% prevalence) added to the all-8 regulator table (`clinical_rigor.py`) — robust to the class imbalance that inflates accuracy/CA. (2) **Decision-curve analysis** (`decision_curve.py`, `summary_30`, fig) — standardized net benefit vs threshold probability; model beats rules + treat-all across the low-p_t (VME-averse) region for most K. pneumoniae drugs (cipro only >0.33, honest). (3) **Risk-coverage + AURC** (`risk_coverage.py`, `summary_31`, fig) — deferring least-confident ~30% halves error/VME (meropenem VME 8.7%→3.5%); AURC 0.013–0.056. `clinical_rigor` now saves `pooled_predictions.pkl` (reused by both). Makefile `dca`/`riskcov` targets; REPORT §5.6–5.8. | Adds the clinical-utility + rigorous-abstention axes most AMR-ML omits; all honesty-safe (post-hoc on lineage-held-out predictions). 20 tests pass. | SWE + user |
 
-## Open decisions (pending)
-- ⚕ **Phase 3:** "Intermediate" handling — currently excluded (R/S only); ⚕ confirm for the full panel.
-- **Phase 2b:** re-validate QC thresholds on the full 5-drug panel (distribution may shift).
-- **Phase 6/7:** hyperparameter scope for XGBoost per drug.
+| 54 | 2026-08-22 | Rigor | **Submission-polish pass + numbers audit + TRIPOD+AI appendix.** (1) **Caught 4 stale/unsupported numbers** by re-deriving every headline claim from `results/metrics/*.json`: the abstract claimed cefoxitin "lifts ROC-AUC to 0.96" (**no model reaches that** — 0.906 logreg / 0.935 calibrated XGB) and a "0.88–0.98" range (actual 0.91–0.98); the cefoxitin rules baseline misses **96.6%** of resistant strains (368/381), not the "~92%" repeated in poster + both decks + speaker guide; §4.3 cited "AUC 0.899 vs rules 0.518" (actual 0.905 vs 0.500) and "DeLong p from 2×10⁻¹⁴" (actual worst p = 5.3×10⁻²⁴); the **poster table was a whole generation stale** (pre-#51 regeneration). All corrected from source JSON, everywhere. (2) **VME honesty upgrade:** "VME clears ≤3% on all five" → point estimates do, but lineage-clustered CIs are wide and **meropenem's upper bound is 3.49%**, so we now claim the target is met *in expectation, not guaranteed at the upper bound* — in REPORT, both decks, and speaker notes. (3) **Cross-species claim de-staled:** "transfers across the three Gram-negatives (0.74–0.98)" was computed at 4 organisms and is false at 6 (Salmonella→P. aeruginosa is **0.393**); replaced with a tiered table — near-lossless within Enterobacterales (0.95–0.98), degraded to non-fermenters (0.39–0.89), collapsed across the Gram divide (0.46–0.69). (4) **Appendix A: TRIPOD+AI checklist** (all 52 rows, verified against the official PDF + Europe PMC + the E&E supplement) mapped honestly — ✅30 / ⚠️9 / ❌1 / ➖12, with the ❌ (no sample-size calculation) and the N/A evaluation track both stated plainly. (5) **Appendix B: next steps.** (6) **References rebuilt** — 20 entries with DOIs resolved against Crossref/PubMed/doi.org; caught that **Nguyen 2019 is *Salmonella*, not *Klebsiella*** (the K. pneumoniae paper is Nguyen 2018, Sci Rep) and cited both; standards documents marked "no DOI" rather than given invented ones. (7) Report structure fixed (4.1→4.4 and 5.1→5.7 now sequential, heading levels nested, complete figure index); stale "🔜 remaining poster" and "50 decisions" markers removed. PDFs regenerated (51 pp each, verified). | Every fix moved a claim **toward** what the data support — two of them made the result look *better* (96.6% miss rate, p = 5×10⁻²⁴), one made it look worse but honest (the VME CI), which is the point. 20 tests pass. | SWE |
+
+## Open decisions
+
+**Genuinely open — needs microbiology sign-off (1):**
+- ⚕ **Phase 3 — "Intermediate" handling.** Isolates phenotyped `I` are currently **excluded**; models
+  are trained and evaluated on `R`/`S` only. This is the standard choice in the genomic-AMR literature
+  and keeps the VME/ME definitions clean (both are defined against a binary reference), but it
+  (a) discards data and (b) means the tool is silent on exactly the isolates a clinician finds hardest.
+  The alternatives are to fold `I` into `R` (conservative, treatment-relevant, inflates apparent
+  resistance prevalence) or to model three classes (loses the CLSI error vocabulary). **Deliberately
+  left to the microbiologist** — it is a clinical-interpretation call, not an engineering one. Any
+  change requires re-running the full panel. **Status: open, documented, and disclosed in the report.**
+
+**Closed by what shipped (2) — recorded here because they were previously listed as open:**
+- ✅ **Phase 2b — QC thresholds on the full panel.** Resolved by the Phase-8 refresh (#`summary_08`):
+  the identical QC gate (completeness ≥90%, contamination ≤5%, contigs ≤500, length 4.5–7.5 Mbp) was
+  **re-run on the enlarged 3,850-genome set**, not carried over. It dropped 66 genomes (~1.7%) and
+  remained class-balanced, so the distribution shift the item worried about did not materialise and
+  the thresholds stand unchanged. No further action.
+- ✅ **Phase 6/7 — XGBoost hyperparameter scope.** Resolved as **"one fixed, documented configuration,
+  no per-drug tuning"**: `n_estimators=300, max_depth=4, learning_rate=0.1, subsample=0.9,
+  colsample_bytree=0.8, scale_pos_weight=<class ratio>, random_state=42`, isotonic-calibrated, used
+  identically for every drug and every organism (`train_panel.py`, `save_models.py`,
+  `organism_pipeline.py`, `conformal.py`). This was a deliberate honesty choice, not an oversight:
+  per-drug tuning inside a lineage-grouped CV, on top of a VME-constrained operating point selected
+  from the same folds, is a realistic route to optimistic bias on the small resistant class — and no
+  tuning gain was ever demonstrated to justify that risk. The fixed configuration is therefore part of
+  the reported method, and the honest framing is "untuned defaults, tuned threshold."
 
 ### Resolved
 - ✅ Organism + drugs (#11–13) · lab-only labels (#8) · thresholds (#9) · QC (#19) · annotator=AMRFinderPlus (#20) · lineage method=MLST (#22).

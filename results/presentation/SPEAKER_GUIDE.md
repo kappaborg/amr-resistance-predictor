@@ -44,7 +44,7 @@ the call. Plus the headline stat.
 **What to say:** "Here's the whole system in one breath. A genome goes in. We annotate the known
 resistance genes and mutations it carries. A per-drug model gives a resistant/susceptible call with a
 calibrated probability. And — unlike a black box — it names the genes that drove the call. The headline
-result: for **cefoxitin**, a simple gene-lookup misses ~92% of resistant strains, because resistance
+result: for **cefoxitin**, a simple gene-lookup misses 96.6% of resistant strains, because resistance
 there comes from *losing* a porin, not gaining a gene. Our model lifts discrimination from a coin-flip
 (AUC 0.50) to 0.90. That gap *is* the contribution."
 
@@ -329,7 +329,7 @@ demo loads. 8 organisms × their drug panels = **36 deployable models**."
 
 **What to say:** "This is the money slide. Cefoxitin resistance in K. pneumoniae is often driven by
 *losing* a porin — ompK36 — so the drug can't get in. A gene-*lookup* is blind to a *missing* feature,
-so it performs at chance: AUC 0.50, and it misses ~92% of resistant strains. Our model *learns the
+so it performs at chance: AUC 0.517, and it misses 96.6% of resistant strains (368 of 381). Our model *learns the
 absence pattern* and lifts AUC to 0.90, a difference that's statistically overwhelming. This is the
 cleanest possible demonstration of what machine learning adds over a database query."
 

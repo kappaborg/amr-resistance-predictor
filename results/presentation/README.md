@@ -15,6 +15,16 @@ Everything needed to deliver a detailed talk on **Reading Resistance**.
 > applied (e.g. isotonic → 保序, causal genes → 作为耐药根源的). Gene names (`gyrA`, `mecA`,
 > `blaKPC`…) and standard acronyms (ROC-AUC, VME, MIC, SHAP) are intentionally kept in the original.
 
+## Corrections applied (2026-08-22)
+A numbers audit against `results/metrics/*.json` found and fixed two stale figures that had been
+carried over from an earlier, smaller run. **If you downloaded an earlier copy of this pack, use this one.**
+- The cefoxitin rules baseline misses **96.6%** of resistant strains (368 of 381), not "~92%". The
+  corrected number makes the headline *stronger*, not weaker.
+- The VME claim is now stated precisely: every drug's VME **point estimate** is ≤3%, but the
+  lineage-clustered 95% CIs are wide (meropenem 1.3% [0.3–3.5%] crosses the bar at its upper bound),
+  so the deck now says the target is met **in expectation, not guaranteed**. Expect a judge to probe
+  this — the honest answer is now on the slide.
+
 ## Notes
 - Open `slides.html` from **inside this folder** (or from the repo) so its `../figures/*.png`
   references resolve. If a figure looks missing, regenerate figures with `make figures` from the repo root.

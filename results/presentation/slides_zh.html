@@ -140,7 +140,7 @@
     <div class="card center"><div style="font-size:2.6rem">🧬 → 🧩</div><h3>基因组输入 → 决定因子特征</h3><p class="muted">这个菌株携带哪些已知的耐药基因与突变？</p></div>
     <div class="card center"><div style="font-size:2.6rem">📊 → 💬</div><h3>逐药「耐药/敏感」+ 依据</h3><p class="muted">校准后的概率，以及驱动该判定的基因。</p></div>
   </div>
-  <p class="lead center" style="max-width:64ch">头条结果：对于<b class="hl">头孢西丁</b>，基因查找会漏掉约 <b class="bad">92%</b> 的耐药株——
+  <p class="lead center" style="max-width:64ch">头条结果：对于<b class="hl">头孢西丁</b>，基因查找会漏掉 <b class="bad">96.6%</b> 的耐药株——
     因为其耐药来自<b>孔蛋白缺失</b>，而非获得某个基因。我们的模型把 AUC 从 <b>0.50 提升到 0.90</b>。<b class="k">这个差距就是贡献所在。</b></p>
   <div class="notes"><h4>讲</h4>基因组输入 → 注释它携带的基因 → 逐药给出判定与校准概率 → 并说明判定背后的基因。头孢西丁的差距是「机器学习相对数据库查询能带来什么」最干净的证明。</div>
 </section>
@@ -474,7 +474,7 @@ make data · features · split · train · eval · figures        <span class="g
     <div class="arrow">→</div>
     <div class="stat" style="color:var(--good)">0.90<small>模型 AUC（DeLong p ≈ 0）</small></div>
   </div>
-  <p class="lead center" style="max-width:72ch">其耐药由<b class="hl">ompK36 孔蛋白缺失</b>驱动——药物进不来。基因<i>查找</i>对<b>缺失</b>的特征是盲的（漏掉约 92% 的耐药株）。模型学会了这种「缺失」的模式。</p>
+  <p class="lead center" style="max-width:72ch">其耐药由<b class="hl">ompK36 孔蛋白缺失</b>驱动——药物进不来。基因<i>查找</i>对<b>缺失</b>的特征是盲的（漏掉 96.6% 的耐药株）。模型学会了这种「缺失」的模式。</p>
   <p style="margin-top:.8rem"><b class="k">这是「机器学习相对数据库查询能带来什么」最干净的证明。</b></p>
   <div class="notes"><h4>讲</h4>关键的一页。头孢西丁耐药 = 孔蛋白缺失。查找看不到缺失的特征，所以只是随机水平。模型学会了缺失模式，达到 0.90。这个差距就是全部贡献。</div>
 </section>
@@ -490,8 +490,8 @@ make data · features · split · train · eval · figures        <span class="g
     <tr><td class="l">庆大霉素</td><td class="good">0.981</td><td>0.948</td><td>1.6%</td><td>32.4%</td><td>1e−30</td></tr>
     <tr><td class="l"><b>头孢西丁</b></td><td class="good">0.905</td><td class="bad">0.500</td><td>0.7%</td><td>94.2%</td><td>~0</td></tr>
   </table>
-  <p class="lead" style="margin-top:1rem;max-width:76ch">VME 处处满足 ≤3% 标准 · 在全部五种药上都<b>显著</b>胜过查找。美罗培南/头孢西丁的高 ME 是 VME 优先的权衡，已用标记呈现。</p>
-  <div class="notes"><h4>讲</h4>在未见谱系上 AUC 0.90–0.98。VME 处处低于 3%。DeLong p 值极小。难判药上的高 ME 是刻意的 VME 优先权衡，并未隐藏。</div>
+  <p class="lead" style="margin-top:1rem;max-width:76ch">五种药的 VME <b>点估计</b>均满足 ≤3% 标准 · 在全部五种药上都<b>显著</b>胜过查找。诚实说明：按谱系聚类的自助置信区间较宽（美罗培南 1.3%［0.3–3.5］），因此该目标是<i>在期望意义上</i>达成，而非在置信上界得到保证。美罗培南/头孢西丁的高 ME 是 VME 优先的权衡，已用标记呈现。</p>
+  <div class="notes"><h4>讲</h4>在未见谱系上 AUC 0.90–0.98。每种药的 VME 点估计都低于 3%。若被追问请讲清楚：我们是按谱系（而非按基因组）做自助重采样，所以区间较宽——美罗培南的上界为 3.5%，因此我们说该目标是在期望意义上达成，而非得到保证。DeLong p 值极小。难判药上的高 ME 是刻意的 VME 优先权衡，并未隐藏。</div>
 </section>
 
 <!-- 26 诚实解读 -->
