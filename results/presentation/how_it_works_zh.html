@@ -1,0 +1,619 @@
+<title>解读耐药 — 逐步讲解我们做了什么</title>
+
+<style>
+  :root{
+    /* project identity, carried over from the deck and poster */
+    --navy:#12314f; --navy-d:#0c2136; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --good:#1f8a4c; --bad:#b4472e;
+    /* neutrals biased slightly toward the teal so they read as chosen, not default */
+    --ink:#16212a; --muted:#5a6b78; --line:#ccd9e0; --bg:#f5f8f9; --card:#ffffff;
+    --rail:#e8eff2;
+    --serif: "Songti SC","Noto Serif CJK SC","Source Han Serif SC",STSong,SimSun,Georgia,serif;
+    --sans: "PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",
+            -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --navy:#9fc4e0; --navy-d:#cfe2f0; --teal:#5cc2ca; --teal-l:#12303a; --gold:#e0a955;
+      --good:#5fc98a; --bad:#e8836a;
+      --ink:#e4ecf1; --muted:#9aacb8; --line:#2b3d4a; --bg:#0e1820; --card:#152430;
+      --rail:#152430;
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy:#9fc4e0; --navy-d:#cfe2f0; --teal:#5cc2ca; --teal-l:#12303a; --gold:#e0a955;
+    --good:#5fc98a; --bad:#e8836a;
+    --ink:#e4ecf1; --muted:#9aacb8; --line:#2b3d4a; --bg:#0e1820; --card:#152430;
+    --rail:#152430;
+  }
+  :root[data-theme="light"]{
+    --navy:#12314f; --navy-d:#0c2136; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --good:#1f8a4c; --bad:#b4472e;
+    --ink:#16212a; --muted:#5a6b78; --line:#ccd9e0; --bg:#f5f8f9; --card:#ffffff;
+    --rail:#e8eff2;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:clamp(2rem,5vw,4.5rem) clamp(1.1rem,4vw,2rem) 6rem;}
+
+  /* ---------- masthead ---------- */
+  .mast{border-bottom:3px solid var(--teal); padding-bottom:1.6rem; margin-bottom:2.6rem;}
+  .eyebrow{font-family:var(--mono); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--teal); margin:0 0 .9rem;}
+  h1{font-family:var(--serif); font-weight:600; font-size:clamp(2.1rem,5.4vw,3.3rem); line-height:1.08;
+     margin:0 0 .7rem; color:var(--navy); letter-spacing:-.01em; text-wrap:balance;}
+  .standfirst{font-family:var(--serif); font-size:clamp(1.05rem,2.4vw,1.28rem); line-height:1.5;
+     color:var(--muted); margin:0; max-width:62ch;}
+
+  /* ---------- reading rhythm ---------- */
+  h2{font-family:var(--serif); font-weight:600; font-size:clamp(1.45rem,3.4vw,1.95rem);
+     color:var(--navy); margin:0 0 .5rem; line-height:1.2; text-wrap:balance; letter-spacing:-.005em;}
+  h3{font-size:1rem; font-weight:700; color:var(--teal); margin:1.9rem 0 .4rem;
+     letter-spacing:.02em;}
+  p{margin:0 0 1rem; max-width:66ch;}
+  ul,ol{max-width:66ch; padding-left:1.15rem; margin:0 0 1rem;}
+  li{margin-bottom:.45rem;}
+  strong{color:var(--navy); font-weight:650;}
+  code{font-family:var(--mono); font-size:.86em; background:var(--rail); color:var(--navy);
+    padding:.1em .35em; border-radius:3px;}
+  a{color:var(--teal);}
+
+  /* ---------- numbered steps: the sequence is real, so it is numbered ---------- */
+  .step{display:grid; grid-template-columns:4.2rem 1fr; gap:0 1.5rem;
+    padding:2.4rem 0; border-top:1px solid var(--line);}
+  .step:first-of-type{border-top:none;}
+  .num{font-family:var(--mono); font-size:.95rem; font-weight:600; color:var(--card);
+    background:var(--navy); width:2.6rem; height:2.6rem; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-top:.15rem;
+    font-variant-numeric:tabular-nums;}
+  .step-body{min-width:0;}
+  @media (max-width:640px){
+    .step{grid-template-columns:1fr; gap:.9rem 0;}
+    .num{width:2.3rem;height:2.3rem;font-size:.85rem;}
+  }
+
+  /* ---------- analogy callout: the whole point of this document ---------- */
+  .analogy{background:var(--teal-l); border-left:4px solid var(--teal);
+    padding:.95rem 1.15rem; margin:1.1rem 0 1.2rem; border-radius:0 5px 5px 0;}
+  .analogy p{margin:0; max-width:60ch;}
+  .analogy .tag{display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--teal); margin-bottom:.35rem; font-weight:600;}
+
+  .warn{border-left:4px solid var(--gold); background:color-mix(in srgb, var(--gold) 9%, transparent);
+    padding:.95rem 1.15rem; margin:1.1rem 0; border-radius:0 5px 5px 0;}
+  .warn p{margin:0;}
+
+  /* ---------- figures ---------- */
+  figure{margin:1.6rem 0 1.4rem; padding:0;}
+  .figbox{background:var(--card); border:1px solid var(--line); border-radius:7px;
+    padding:1.2rem 1rem .8rem; overflow-x:auto;}
+  svg{display:block; max-width:100%; height:auto; margin:0 auto; color:var(--ink);}
+  figcaption{font-size:.87rem; color:var(--muted); margin-top:.7rem; line-height:1.5;
+    max-width:64ch;}
+
+  /* ---------- tables ---------- */
+  .tablewrap{overflow-x:auto; margin:1.2rem 0;}
+  table{border-collapse:collapse; width:100%; font-size:.92rem; min-width:420px;}
+  th,td{text-align:left; padding:.5rem .7rem; border-bottom:1px solid var(--line);
+    vertical-align:top;}
+  th{font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--muted);
+    font-weight:700; border-bottom:2px solid var(--line);}
+  td.num-cell{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .good{color:var(--good); font-weight:650;}
+  .bad{color:var(--bad); font-weight:650;}
+
+  /* ---------- glossary ---------- */
+  .gloss{display:grid; grid-template-columns:minmax(9rem,13rem) 1fr; gap:.55rem 1.4rem;
+    margin:1.2rem 0; font-size:.95rem;}
+  .gloss dt{font-weight:700; color:var(--navy);}
+  .gloss dd{margin:0; color:var(--ink);}
+  @media (max-width:600px){ .gloss{grid-template-columns:1fr; gap:.15rem 0;}
+    .gloss dd{margin-bottom:.75rem; color:var(--muted);} }
+
+  .closing{margin-top:3rem; padding-top:1.8rem; border-top:3px solid var(--teal);}
+  .footnote{font-size:.85rem; color:var(--muted); margin-top:2.5rem; font-style:italic;}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">解读耐药 · 通俗版讲解</p>
+  <h1>我们如何让计算机读懂细菌基因组，预测哪些抗生素会失效</h1>
+  <p class="standfirst">按顺序讲完项目的每一步，不预设任何编程或机器学习基础。本文是为「讲出来」而写的。</p>
+</header>
+
+<h2>我们要解决的问题</h2>
+
+<p>当病人发生严重细菌感染时，医生必须知道哪些抗生素真的能杀死这种细菌。细菌常常是<strong>耐药</strong>的——
+药物对它已经不起作用了。如果给病人用了一种细菌本就耐药的药，就等于在一个重病患者身上白白浪费了好几天的治疗时间。</p>
+
+<p>可靠的做法是在实验室里把细菌培养出来，直接拿药去试。这个办法准确，但需要大约<strong>两天</strong>。
+在这两天里，医生只能靠经验猜。</p>
+
+<p>而今天读取细菌的 DNA 已经又快又便宜。所以整个项目背后的问题就是：
+<strong>我们能不能直接读 DNA，把实验室的结论提前预测出来，而不必等实验室？</strong></p>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 760 210" role="img" aria-label="从患者样本到答案的两条路线：实验室路线约需两天；基因组路线只需几分钟，并且还会给出每次判定的理由。">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+        <marker id="art" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="var(--teal)"/>
+        </marker>
+      </defs>
+
+      <text x="0" y="16" font-size="11" font-weight="700" fill="currentColor" letter-spacing="1.2">目前 — 实验室路线</text>
+      <rect x="0"   y="28" width="112" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="56"  y="53" font-size="12" text-anchor="middle" fill="currentColor">患者样本</text>
+      <line x1="112" y1="49" x2="158" y2="49" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+      <text x="135" y="41" font-size="10" text-anchor="middle" fill="currentColor" opacity=".75">培养</text>
+      <rect x="158" y="28" width="112" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="214" y="47" font-size="12" text-anchor="middle" fill="currentColor">培养出菌落</text>
+      <text x="214" y="62" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">~24 h</text>
+      <line x1="270" y1="49" x2="316" y2="49" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+      <rect x="316" y="28" width="130" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="381" y="47" font-size="12" text-anchor="middle" fill="currentColor">逐一测试药物</text>
+      <text x="381" y="62" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">~24 h</text>
+      <line x1="446" y1="49" x2="492" y2="49" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+      <rect x="492" y="28" width="120" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="552" y="53" font-size="12" text-anchor="middle" fill="currentColor">answer</text>
+      <text x="640" y="53" font-size="13" font-weight="700" fill="currentColor">≈ 2 天</text>
+
+      <line x1="0" y1="100" x2="760" y2="100" stroke="currentColor" stroke-width="1" opacity=".25"/>
+
+      <text x="0" y="128" font-size="11" font-weight="700" fill="var(--teal)" letter-spacing="1.2">本项目 — 基因组路线</text>
+      <rect x="0"   y="140" width="112" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.4"/>
+      <text x="56"  y="165" font-size="12" text-anchor="middle" fill="var(--teal)">patient sample</text>
+      <line x1="112" y1="161" x2="158" y2="161" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#art)"/>
+      <text x="135" y="153" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".8">测序</text>
+      <rect x="158" y="140" width="112" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.4"/>
+      <text x="214" y="165" font-size="12" text-anchor="middle" fill="var(--teal)">读取 DNA</text>
+      <line x1="270" y1="161" x2="316" y2="161" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#art)"/>
+      <rect x="316" y="140" width="130" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="2.2"/>
+      <text x="381" y="159" font-size="12" font-weight="700" text-anchor="middle" fill="var(--teal)">我们的模型</text>
+      <text x="381" y="173" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".8">几分钟</text>
+      <line x1="446" y1="161" x2="492" y2="161" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#art)"/>
+      <rect x="492" y="140" width="120" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.4"/>
+      <text x="552" y="158" font-size="12" text-anchor="middle" fill="var(--teal)">answer</text>
+      <text x="552" y="172" font-size="10" text-anchor="middle" fill="var(--teal)">+ 判定理由</text>
+      <text x="640" y="165" font-size="13" font-weight="700" fill="var(--teal)">minutes</text>
+    </svg>
+  </div>
+  <figcaption>实验室路线才是可信的答案，我们并不打算取代它。我们要做的是：在实验室还在培养细菌的时候，
+  先从 DNA 给出同样的答案——而且与「黑箱」不同，我们还要说明<em>为什么</em>。</figcaption>
+</figure>
+
+<div class="warn">
+  <p><strong>这句话要早讲、反复讲：</strong>这是一个研究工具，不是医疗器械。没有人会依据我们的输出去治疗病人。它只是决策辅助，实验室药敏试验始终是最终依据。</p>
+</div>
+
+<h2>十个步骤，按顺序</h2>
+
+<div class="step">
+  <div class="num">1</div>
+  <div class="step-body">
+    <h2>收集已经有实验室答案的基因组</h2>
+    <p>要教会计算机，就必须有一批「已知正确答案」的例子。我们使用了一个免费公开的数据库 <strong>BV-BRC</strong>，里面收录了世界各地实验室测序<em>并且</em>做过抗生素药敏试验的细菌基因组。</p>
+    <p>所以每一个例子都是一对：<strong>一株细菌的完整 DNA</strong>，以及<strong>实验室对每种药物的判定</strong>——耐药还是敏感。</p>
+    <p>这里有一个非常关键的取舍。该数据库里还有一部分判定本身就是<em>由计算机预测出来的</em>。我们把这些全部剔除，只保留真正的实验室结果。用另一台计算机的猜测来训练模型，学到的只是那些猜测，而不是生物学。</p>
+    <p>最终我们得到了 <strong>3,850 个</strong><em>肺炎克雷伯菌</em>基因组——这是一种严重的医院病原菌——之后又把整套流程在另外七个菌种上重复了一遍。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">2</div>
+  <div class="step-body">
+    <h2>剔除质量不合格的基因组</h2>
+    <p>DNA 测序并不完美。有些基因组测出来是不完整的，或者混进了样本中其他生物的 DNA。如果把这些数据喂进去，教给计算机的就只是噪声。</p>
+    <p>因此我们采用了微生物学界已有共识的质量清单：基因组完整度至少 90%，污染率不超过 5%，且大小要落在<em>克雷伯菌</em>基因组应有的范围内。任何一项不达标的都被剔除。</p>
+    <p>这一步删掉了约 <strong>2%</strong> 的基因组——更重要的是，它在耐药株和敏感株中删除的比例是相同的，因此没有悄悄让数据产生偏倚。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">3</div>
+  <div class="step-body">
+    <h2>把每个基因组变成一张简单的清单</h2>
+    <p>一个基因组包含数百万个 DNA 字母——直接丢给计算机，原始信息量实在太大。我们需要把它压缩成有意义的东西。</p>
+    <p>幸运的是，科学家早已把「哪些基因和突变会让细菌对哪种药耐药」编成了目录。美国国立卫生研究院提供的免费工具 <strong>AMRFinderPlus</strong> 可以扫描一个基因组，报告它携带了目录中的哪些已知耐药特征。</p>
+
+    <div class="analogy">
+      <span class="tag">可以这样理解</span>
+      <p>把每株细菌想象成一个小偷，把抗生素想象成一把锁。科学家已经把「能撬开哪把锁的作案工具」登记成册。AMRFinderPlus 打开小偷的工具包，逐项勾出里面有哪些工具。我们不是把整个工具包交给计算机——我们交给它的是那张勾选清单。</p>
+    </div>
+
+    <p>于是每个基因组变成一行 <strong>688 个「有／无」方框</strong>：它带 <code>blaKPC-2</code> 吗？有。带 <code>gyrA_S83I</code> 吗？没有。以此类推。计算机真正学习的就是这张勾选表——而且因为每个方框都对应一个真实的生物学名称，我们事后永远能解释一次预测是怎么来的。</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 760 178" role="img" aria-label="一个基因组文件经 AMRFinderPlus 扫描，变成一张 688 列的「有／无」清单，再送入五个各自独立的模型（每种抗生素一个），每个模型给出耐药或敏感的判定。">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect x="0" y="46" width="96" height="62" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="48" y="72" font-size="12" text-anchor="middle" fill="currentColor">一个基因组</text>
+      <text x="48" y="88" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">DNA 文件</text>
+
+      <line x1="96" y1="77" x2="140" y2="77" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+      <text x="118" y="69" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".75">扫描</text>
+
+      <rect x="140" y="46" width="124" height="62" rx="4" fill="none" stroke="var(--teal)" stroke-width="2"/>
+      <text x="202" y="70" font-size="12" font-weight="700" text-anchor="middle" fill="var(--teal)">AMRFinderPlus</text>
+      <text x="202" y="87" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".85">找出已知基因</text>
+
+      <line x1="264" y1="77" x2="308" y2="77" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="308" y="30" width="128" height="94" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="372" y="24" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".8">688 个「有／无」方框</text>
+      <text x="318" y="49" font-size="9.5" font-family="monospace" fill="currentColor">blaKPC-2</text>
+      <text x="424" y="49" font-size="10" text-anchor="end" fill="var(--good)" font-weight="700">✓</text>
+      <text x="318" y="68" font-size="9.5" font-family="monospace" fill="currentColor">gyrA_S83I</text>
+      <text x="424" y="68" font-size="10" text-anchor="end" fill="var(--good)" font-weight="700">✓</text>
+      <text x="318" y="87" font-size="9.5" font-family="monospace" fill="currentColor">ompK36…</text>
+      <text x="424" y="87" font-size="10" text-anchor="end" fill="currentColor" opacity=".45">✗</text>
+      <text x="318" y="108" font-size="9.5" font-family="monospace" fill="currentColor" opacity=".5">… 还有 685 个</text>
+
+      <line x1="436" y1="77" x2="480" y2="77" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="480" y="6"   width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="23"  font-size="10.5" text-anchor="middle" fill="currentColor">模型 · 美罗培南</text>
+      <rect x="480" y="36"  width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="53"  font-size="10.5" text-anchor="middle" fill="currentColor">模型 · 庆大霉素</text>
+      <rect x="480" y="66"  width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="83"  font-size="10.5" text-anchor="middle" fill="currentColor">模型 · 环丙沙星</text>
+      <rect x="480" y="96"  width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="113" font-size="10.5" text-anchor="middle" fill="currentColor">模型 · 复方磺胺甲噁唑</text>
+      <rect x="480" y="126" width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="143" font-size="10.5" text-anchor="middle" fill="currentColor">模型 · 头孢西丁</text>
+
+      <line x1="612" y1="19"  x2="650" y2="19"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="49"  x2="650" y2="49"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="79"  x2="650" y2="79"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="109" x2="650" y2="109" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="139" x2="650" y2="139" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+      <text x="656" y="23"  font-size="11" font-weight="700" fill="var(--bad)">耐药</text>
+      <text x="656" y="53"  font-size="11" font-weight="700" fill="var(--good)">敏感</text>
+      <text x="656" y="83"  font-size="11" font-weight="700" fill="var(--bad)">耐药</text>
+      <text x="656" y="113" font-size="11" font-weight="700" fill="var(--good)">敏感</text>
+      <text x="656" y="143" font-size="11" font-weight="700" fill="var(--bad)">耐药</text>
+    </svg>
+  </div>
+  <figcaption>一个基因组进去，五个独立的答案出来。请注意<strong>每种抗生素都有各自独立的模型</strong>——对不同药物的耐药性来自不同的生物学机制，把它们混在一起是没有意义的。</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">4</div>
+  <div class="step-body">
+    <h2>弄清楚哪些细菌是「亲戚」</h2>
+    <p>这一步看上去像是整理档案，实际上却是整个项目的核心。</p>
+    <p>细菌靠自我复制来繁殖。这意味着现实中收集到的这批细菌并不是 3,850 个彼此独立的个体——而是<strong>一个个几乎完全相同的「双胞胎大家族」</strong>。一株在医院里传播开来的成功菌株，可能就贡献了数百个本质上是同一个生物体的样本。</p>
+    <p>有一种标准方法可以判断每株细菌属于哪个家族，叫做 <strong>MLST</strong>。它读取七个特定的管家基因，给出一个家族编号——即「序列型」，写作 <code>ST258</code>、<code>ST307</code> 等等。我们对每个基因组都跑了一遍。结果这 3,850 个基因组分属 <strong>513 个家族</strong>。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">5</div>
+  <div class="step-body">
+    <h2>按家族划分数据——整个项目最重要的一个决定</h2>
+    <p>要判断一个模型好不好，做法是在训练时藏起一部分数据，之后再用这部分被藏起来的数据去考它。这是标准做法。</p>
+    <p>但<em>怎么选</em>要藏哪一部分，会彻底改变结论。最直觉的做法——把所有数据打乱、随机取 30%——在这里是严重错误的。这一点是你的同事最需要理解的。</p>
+
+    <div class="analogy">
+      <span class="tag">可以这样理解</span>
+      <p>设想你要用一场考试来判断一个学生是否真的懂医学。如果你把一家同卵双胞胎拆开——一部分放进复习材料，他们的双胞胎兄弟放进考卷——那么这个学生靠<em>认脸</em>就能考出高分，完全不需要学过任何医学。要考出他真正掌握了什么，就必须用<strong>他从未见过的家族</strong>来考他。</p>
+    </div>
+
+    <p>所以我们按家族划分：同一个序列型的所有基因组，要么全部进入训练集，要么全部进入测试集，绝不同时出现在两边。这样模型只会在它真正从未见过的谱系上接受评判。</p>
+    <p>这会让我们的数字<em>看起来不如</em>大多数已发表的论文——那些论文通常使用随机划分。但这正是重点。我们宁愿报告一个真实的数字，也不要一个好看的数字。我们还写了一个自动检查：只要有任何一个家族同时出现在两边，整个项目的测试就会失败。</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 740 250" role="img" aria-label="两种数据划分方式的对比。随机划分会把家族拦腰切开，使得近乎相同的「双胞胎」同时出现在训练集和测试集中，让模型靠认家族就能得高分。按家族划分则把整个家族留在同一侧，迫使模型去泛化到它从未见过的谱系。">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- LEFT: random split -->
+      <text x="0" y="14" font-size="11.5" font-weight="700" fill="var(--bad)" letter-spacing=".8">随机划分 — 会泄漏</text>
+      <text x="0" y="30" font-size="10" fill="currentColor" opacity=".75">家族被拦腰切开</text>
+
+      <rect x="0" y="42" width="150" height="80" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="75" y="58" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">训练集</text>
+      <circle cx="26" cy="80"  r="9" fill="var(--teal)"/><text x="26" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="52" cy="80"  r="9" fill="var(--teal)"/><text x="52" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="78" cy="80"  r="9" fill="var(--gold)"/><text x="78" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="104" cy="80" r="9" fill="var(--gold)"/><text x="104" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="39" cy="104" r="9" fill="var(--navy)"/><text x="39" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+      <circle cx="65" cy="104" r="9" fill="var(--teal)"/><text x="65" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+
+      <rect x="0" y="136" width="150" height="62" rx="4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="75" y="152" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">测试集</text>
+      <circle cx="39" cy="176" r="9" fill="var(--teal)"/><text x="39" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="65" cy="176" r="9" fill="var(--gold)"/><text x="65" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="91" cy="176" r="9" fill="var(--navy)"/><text x="91" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+
+      <text x="0" y="222" font-size="10.5" fill="var(--bad)" font-weight="650">家族 A、B、C 两边都有。</text>
+      <text x="0" y="238" font-size="10.5" fill="var(--bad)">模型靠认出它们就能取胜。</text>
+
+      <line x1="200" y1="30" x2="200" y2="240" stroke="currentColor" stroke-width="1" opacity=".22"/>
+
+      <!-- RIGHT: lineage split -->
+      <text x="250" y="14" font-size="11.5" font-weight="700" fill="var(--good)" letter-spacing=".8">按家族划分 — 诚实</text>
+      <text x="250" y="30" font-size="10" fill="currentColor" opacity=".75">整个家族留在同一侧</text>
+
+      <rect x="250" y="42" width="150" height="80" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="325" y="58" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">TRAIN</text>
+      <circle cx="276" cy="80"  r="9" fill="var(--teal)"/><text x="276" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="302" cy="80"  r="9" fill="var(--teal)"/><text x="302" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="328" cy="80"  r="9" fill="var(--teal)"/><text x="328" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="354" cy="80"  r="9" fill="var(--gold)"/><text x="354" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="289" cy="104" r="9" fill="var(--gold)"/><text x="289" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="315" cy="104" r="9" fill="var(--gold)"/><text x="315" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+
+      <rect x="250" y="136" width="150" height="62" rx="4" fill="none" stroke="var(--good)" stroke-width="1.8" stroke-dasharray="4 3"/>
+      <text x="325" y="152" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">TEST</text>
+      <circle cx="299" cy="176" r="9" fill="var(--navy)"/><text x="299" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+      <circle cx="325" cy="176" r="9" fill="var(--navy)"/><text x="325" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+      <circle cx="351" cy="176" r="9" fill="var(--navy)"/><text x="351" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+
+      <text x="250" y="222" font-size="10.5" fill="var(--good)" font-weight="650">家族 C 在训练中从未出现。</text>
+      <text x="250" y="238" font-size="10.5" fill="var(--good)">模型必须解释全新的生物学。</text>
+
+      <line x1="440" y1="30" x2="440" y2="240" stroke="currentColor" stroke-width="1" opacity=".22"/>
+
+      <text x="482" y="14" font-size="11.5" font-weight="700" fill="currentColor" letter-spacing=".8">为什么这很重要</text>
+      <rect x="482" y="46" width="250" height="76" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="496" y="68" font-size="11" fill="currentColor">随机划分得分</text>
+      <text x="718" y="68" font-size="12" text-anchor="end" font-weight="700" fill="var(--bad)" font-family="monospace">0.935</text>
+      <text x="496" y="90" font-size="11" fill="currentColor">按家族划分得分</text>
+      <text x="718" y="90" font-size="12" text-anchor="end" font-weight="700" fill="var(--good)" font-family="monospace">0.903</text>
+      <line x1="496" y1="100" x2="718" y2="100" stroke="currentColor" stroke-width="1" opacity=".3"/>
+      <text x="496" y="114" font-size="10.5" fill="currentColor" opacity=".8">差值 = 白送的分数</text>
+      <text x="718" y="114" font-size="11" text-anchor="end" font-weight="700" fill="currentColor" font-family="monospace">0.032</text>
+
+      <text x="482" y="146" font-size="10.5" fill="currentColor" opacity=".85">基于我们自己的头孢西丁</text>
+      <text x="482" y="161" font-size="10.5" fill="currentColor" opacity=".85">模型实测。随机划分把模型</text>
+      <text x="482" y="176" font-size="10.5" fill="currentColor" opacity=".85">没凭本事挣到的分数送给它——</text>
+      <text x="482" y="191" font-size="10.5" fill="currentColor" opacity=".85">所以我们始终报告较低的那个数。</text>
+    </svg>
+  </div>
+  <figcaption>我们不只是断言随机划分会虚高结果——我们把它量了出来。同一个模型用两种方式各跑一遍，随机划分在每种药上得分都更高。这个差距，正是模型没有凭本事挣到的那部分分数。</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">6</div>
+  <div class="step-body">
+    <h2>为每种抗生素各训练一个模型</h2>
+    <p>现在进入真正的「学习」环节。下面用不带术语的话说明「训练一个模型」到底是什么意思。</p>
+    <p>计算机一开始什么都不知道。它逐一查看成千上万个例子——每个例子都是一张基因勾选清单加上实验室的判定——然后逐渐摸索出<strong>哪些勾选组合会对应「耐药」</strong>。这是大规模的找规律，而不是推理。</p>
+    <p>我们采用的具体方法叫做<strong>梯度提升</strong>。它会建立一长串非常简单的「是／否」规则，每一条新规则都专门用来纠正前面那些规则犯过的错。几百次小修小补累加起来，就形成了一个很强的整体判断力。</p>
+
+    <div class="analogy">
+      <span class="tag">可以这样理解</span>
+      <p>一名实习生翻阅成千上万份既往病例。每看完一批，带教老师只指出他判错的那些，实习生就补上一条小规则，好让下次不再犯同样的错。如此重复三百遍。没有人事先写好这些规则；它们全是从错误中学出来的。</p>
+    </div>
+
+    <p>有一个刻意的选择值得一提：我们<strong>没有调参</strong>。模型上确实有一些旋钮，拧一拧能把分数再挤高一点，但一边盯着自己的测试数据一边拧旋钮，是一种隐蔽的作弊。我们固定了一套合理的配置，对每种药、每个菌种都原样使用。</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 700 268" role="img" aria-label="单一抗生素的训练循环：数据按家族分成若干折，模型在训练折上学习并在留出折上检验，随后校准概率并选定安全阈值，最后在从未使用过的家族上做一次最终测试。">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <text x="0" y="14" font-size="11" font-weight="700" fill="var(--teal)" letter-spacing="1.1">训练一种药物的模型</text>
+
+      <rect x="0" y="30" width="150" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="75" y="49" font-size="11.5" text-anchor="middle" fill="currentColor">3,850 张清单</text>
+      <text x="75" y="64" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">+ 实验室判定</text>
+
+      <line x1="150" y1="52" x2="196" y2="52" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+      <text x="173" y="44" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".75">分组</text>
+
+      <rect x="196" y="30" width="150" height="44" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.8"/>
+      <text x="271" y="49" font-size="11.5" font-weight="700" text-anchor="middle" fill="var(--teal)">按家族划分</text>
+      <text x="271" y="64" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".85">513 个序列型</text>
+
+      <line x1="271" y1="74" x2="271" y2="98" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+
+      <rect x="120" y="98" width="302" height="86" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 3"/>
+      <text x="271" y="115" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">轮流留出每一折，反复进行</text>
+
+      <rect x="136" y="124" width="122" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="197" y="141" font-size="11" text-anchor="middle" fill="currentColor">在 3 折上学习</text>
+      <text x="197" y="156" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".7">构建纠错规则</text>
+
+      <line x1="258" y1="145" x2="286" y2="145" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar4)"/>
+
+      <rect x="286" y="124" width="122" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="347" y="141" font-size="11" text-anchor="middle" fill="currentColor">在第 4 折上检验</text>
+      <text x="347" y="156" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".7">未见过的家族</text>
+
+      <line x1="271" y1="184" x2="271" y2="206" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+
+      <rect x="120" y="206" width="145" height="44" rx="4" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
+      <text x="192" y="224" font-size="11" font-weight="650" text-anchor="middle" fill="var(--gold)">校准</text>
+      <text x="192" y="239" font-size="9.5" text-anchor="middle" fill="var(--gold)">让「70%」名副其实</text>
+
+      <line x1="265" y1="228" x2="290" y2="228" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar4)"/>
+
+      <rect x="290" y="206" width="160" height="44" rx="4" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
+      <text x="370" y="224" font-size="11" font-weight="650" text-anchor="middle" fill="var(--gold)">设定安全阈值</text>
+      <text x="370" y="239" font-size="9.5" text-anchor="middle" fill="var(--gold)">漏判耐药 ≤ 3%</text>
+
+      <line x1="450" y1="228" x2="486" y2="228" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+
+      <rect x="486" y="196" width="200" height="64" rx="5" fill="none" stroke="var(--good)" stroke-width="2"/>
+      <text x="586" y="219" font-size="11.5" font-weight="700" text-anchor="middle" fill="var(--good)">最终得分</text>
+      <text x="586" y="235" font-size="10" text-anchor="middle" fill="currentColor" opacity=".85">从未使用过的家族——</text>
+      <text x="586" y="249" font-size="10" text-anchor="middle" fill="currentColor" opacity=".85">只测一次，原样报告</text>
+
+      <text x="486" y="60" font-size="10.5" fill="currentColor" opacity=".85">左侧的一切都只发生在</text>
+      <text x="486" y="76" font-size="10.5" fill="currentColor" opacity=".85">训练数据内部。</text>
+      <text x="486" y="92" font-size="10.5" fill="currentColor" opacity=".85">尤其是阈值的选取，</text>
+      <text x="486" y="108" font-size="10.5" fill="currentColor" opacity=".85">全程都没有看过测试家族——</text>
+      <text x="486" y="124" font-size="10.5" fill="currentColor" opacity=".85">否则最终得分就</text>
+      <text x="486" y="140" font-size="10.5" fill="currentColor" opacity=".85">不诚实了。</text>
+    </svg>
+  </div>
+  <figcaption>整个循环都只在训练数据内部进行。测试家族只在最后被动用一次。正是这份纪律，让报告出来的数字变得可信。</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">7</div>
+  <div class="step-body">
+    <h2>让置信度数字诚实可信，再选定一个安全档位</h2>
+    <p>模型并不只是说「耐药」——它会给出一个 0 到 1 之间的数字，也就是置信度。未经处理的置信度通常是不准的：模型可能声称「有 90% 把握」，而实际上这类判断只有 70% 是对的。</p>
+    <p><strong>校准</strong>就是用来纠正这一点的。我们调整这些数字，使得模型说 70% 时，它确实大约有 70% 是对的。对于一个临床医生将来可能会依赖的工具来说，一个会说谎的置信度，比根本不给置信度更糟糕。</p>
+    <p>接下来我们要决定：把「判为耐药」和「判为敏感」之间的那条线画在哪里。这是一个<em>临床</em>决定，而不是数学决定，因为这两种可能的错误，严重程度并不相同。</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="-26 -4 694 218" role="img" aria-label="预测与真实情况的二乘二矩阵。危险的错误是把耐药株判为敏感，这会让病人用上无效的药；代价高的错误是把敏感株判为耐药，这会浪费一种本可使用的药。">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="currentColor" letter-spacing="1.1">两种错误并不对等</text>
+
+      <text x="196" y="42" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".8">真实：耐药</text>
+      <text x="392" y="42" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".8">真实：敏感</text>
+
+      <text x="88" y="82" font-size="10.5" text-anchor="end" fill="currentColor" opacity=".8">我们判：耐药</text>
+      <text x="88" y="146" font-size="10.5" text-anchor="end" fill="currentColor" opacity=".8">我们判：敏感</text>
+
+      <rect x="98" y="54" width="196" height="52" rx="4" fill="none" stroke="var(--good)" stroke-width="1.5"/>
+      <text x="196" y="85" font-size="12" font-weight="650" text-anchor="middle" fill="var(--good)">正确</text>
+
+      <rect x="294" y="54" width="196" height="52" rx="4" fill="none" stroke="var(--gold)" stroke-width="1.8"/>
+      <text x="392" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="var(--gold)">重大误差 (ME)</text>
+      <text x="392" y="94" font-size="10" text-anchor="middle" fill="var(--gold)">浪费了一种可用的药</text>
+
+      <rect x="98" y="118" width="196" height="52" rx="4" fill="none" stroke="var(--bad)" stroke-width="2.4"/>
+      <text x="196" y="140" font-size="12" font-weight="700" text-anchor="middle" fill="var(--bad)">极重大误差 (VME)</text>
+      <text x="196" y="158" font-size="10" text-anchor="middle" fill="var(--bad)">病人用上了无效的药</text>
+
+      <rect x="294" y="118" width="196" height="52" rx="4" fill="none" stroke="var(--good)" stroke-width="1.5"/>
+      <text x="392" y="149" font-size="12" font-weight="650" text-anchor="middle" fill="var(--good)">correct</text>
+
+      <text x="506" y="132" font-size="10.5" fill="currentColor" opacity=".85">我们调整模型，把红框</text>
+      <text x="506" y="148" font-size="10.5" fill="currentColor" opacity=".85">控制在 3% 以下——</text>
+      <text x="506" y="164" font-size="10.5" fill="currentColor" opacity=".85">代价是接受更多橙框，</text>
+      <text x="506" y="180" font-size="10.5" fill="currentColor" opacity=".85">这是换取安全的代价。</text>
+
+      <text x="0" y="200" font-size="10" fill="currentColor" opacity=".7">这些是标准的临床术语——监管机构用的正是这套词汇。</text>
+    </svg>
+  </div>
+  <figcaption>一个坚决不肯漏掉耐药的工具，必然会把耐药判多。这个取舍是我们刻意做出并公开说明的选择——不是我们藏起来的缺陷。</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">8</div>
+  <div class="step-body">
+    <h2>与那个最显而易见的简单方法作对比</h2>
+    <p>下面这个问题，决定了这个项目到底值不值得做：<strong>相比单纯查一下基因，机器学习究竟多带来了什么？</strong></p>
+    <p>你完全可以跳过全部训练，直接写一条规则：「如果这株细菌携带了该药物的已知耐药基因，就判为耐药。」这就是一次数据库查询，而且对某些药物效果非常好。我们把这个基线做了出来，并把它放在每一个结果旁边一起报告——因为如果我们的模型只是跟它打平，那我们不过是造了一张昂贵的查询表。</p>
+    <p>结果确实有好有坏，我们如实说明：</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>药物</th><th>基因查找</th><th>我们的模型</th><th>结论</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>gentamicin</td><td class="num-cell">0.948</td><td class="num-cell">0.981</td><td>查找本身已经很好——我们几乎没有提升</td></tr>
+          <tr><td>meropenem</td><td class="num-cell">0.933</td><td class="num-cell">0.968</td><td>小幅提升</td></tr>
+          <tr><td>ciprofloxacin</td><td class="num-cell">0.911</td><td class="num-cell">0.983</td><td>明显提升</td></tr>
+          <tr><td>TMP-SMX</td><td class="num-cell">0.885</td><td class="num-cell">0.977</td><td>明显提升</td></tr>
+          <tr><td><strong>cefoxitin</strong></td><td class="num-cell bad">0.500</td><td class="num-cell good">0.905</td><td><strong>头条结果——见下文</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>（1.0 表示完美，0.5 相当于抛硬币。）</p>
+
+    <h3>为什么要把头孢西丁作为头条结果</h3>
+    <p>在头孢西丁上，基因查找是<strong>完全无效的</strong>——0.500，字面意义上就是抛硬币。它漏掉了 <strong>96.6% 的耐药株</strong>（381 株中漏掉 368 株）。</p>
+    <p>其中的生物学原因非常漂亮。这类细菌对头孢西丁的耐药，往往并不是因为<em>获得</em>了某个防御基因，而是因为<em>失去</em>了一道门——一种叫做孔蛋白的表面蛋白，药物本来要从这里进入细胞。把门堵死，药就进不来了。</p>
+    <p>一个只会问「它带了哪些武器？」的查找方法，在结构上就看不见一个<strong>缺失</strong>的特征。而我们的模型学会了这种「缺失」的模式，把分数从 0.500 提升到 0.905。</p>
+
+    <div class="analogy">
+      <span class="tag">讲给同事听的一句话版本</span>
+      <p>「对大多数药物来说，查一下基因清单几乎和我们的模型一样好——这一点我们如实说明。但对头孢西丁，基因清单等同于抛硬币，因为它的耐药来自某种<em>缺失</em>的东西，而不是某种存在的东西——而这正是机器学习真正体现价值的地方。」</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">9</div>
+  <div class="step-body">
+    <h2>让每一次预测都可以解释</h2>
+    <p>一个临床医生无法追问的预测，用处不大。因此对每一次判定，工具都会列出推动这一判定的具体基因，并按各自贡献大小排序——用的是一种标准方法，叫做 <strong>SHAP</strong>。</p>
+    <p>这同时也是我们的科学性自查。当我们问模型「你到底依据了什么」时，它给出的正是微生物学界早已熟知的机制：美罗培南对应 <code>blaKPC</code>，环丙沙星对应 <code>gyrA</code> 和 <code>parC</code> 突变，头孢西丁对应 <code>ompK36</code> 孔蛋白。模型独立地把教科书重新发现了一遍——这有力地说明它学到的是生物学，而不是统计噪声。</p>
+    <p>这里有一点我们格外谨慎：某个基因排名靠前，并不能证明它<em>导致</em>了耐药。耐药基因常常搭乘同一段可移动 DNA 一起传播，所以一个基因可能仅仅因为和真正的元凶「同行」而显得重要。我们公开标注这一点，而不是宣称每个排名靠前的基因都是耐药的根源。</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">10</div>
+  <div class="step-body">
+    <h2>拿完全来自别处的数据来检验它</h2>
+    <p>以上所有验证用的都是同一个来源的数据。有一条批评始终成立：也许这个模型只在<em>那一批</em>数据上有效。</p>
+    <p>因此我们现在正拿完全由其他团队整理的细菌来检验它——而且模型是<strong>冻结</strong>的，也就是说：不调整、不重训、没有第二次机会。</p>
+    <p>找到真正独立的数据，比听上去难得多。那个最显而易见的来源，其实是<em>汇入</em>我们原始数据库的上游，所以简单地拿来对比，等于又拿模型已经学过的细菌重考了一遍。我们必须先识别并剔除这部分重叠——占候选数据的 16%——之后的结果才有意义。</p>
+    <p>而且我们在跑之前就<em>预先承诺</em>了要报告什么：五种药全部报告，无论数字如何，并且额外报告一个更严格的第二队列——其中排除了模型见过的任何细菌家族。如果结果更差，那这就是结论，照样写进报告。</p>
+  </div>
+</div>
+
+<div class="closing">
+  <h2>如果只有两分钟，该怎么讲</h2>
+  <ol>
+    <li><strong>问题：</strong>要弄清哪些抗生素有效，实验室需要两天。而 DNA 几分钟就能读完。我们能不能从 DNA 预测出实验室的答案？</li>
+    <li><strong>我们做了什么：</strong>为每种抗生素各建一个独立的预测器，依据的是从基因组中查出的已知耐药基因清单。</li>
+    <li><strong>难点在哪：</strong>细菌是克隆繁殖的，所以马虎的考法会让模型靠「认家族」而不是靠懂生物学来取胜。我们只在它从未见过的家族上测试——这会拉低我们的数字，而这是刻意为之。</li>
+    <li><strong>诚实的对比：</strong>对大多数药物，单纯查基因几乎一样好，这一点我们如实报告。而对头孢西丁，查找等于抛硬币，我们的模型达到 0.905——因为那种耐药来自一道<em>缺失</em>的门，而不是新增的武器。</li>
+    <li><strong>每一个答案都有解释，</strong>而且它所依据的基因与已知微生物学吻合。</li>
+    <li><strong>它不是医疗器械。</strong>它是决策辅助；实验室药敏试验始终是最终依据。</li>
+  </ol>
+
+  <h3>同事可能会听到我们用的词</h3>
+  <dl class="gloss">
+    <dt>基因组</dt><dd>细菌的全部 DNA——它完整的说明书。</dd>
+    <dt>耐药 / 敏感</dt><dd>药物无效 / 药物有效。</dd>
+    <dt>决定因子</dt><dd>已知会导致对某种特定药物耐药的基因或突变。</dd>
+    <dt>特征</dt><dd>我们交给计算机的那张清单上的一个「有／无」方框。</dd>
+    <dt>序列型（ST）</dt><dd>近乎相同的细菌所属家族的编号，例如 <code>ST258</code>。</dd>
+    <dt>训练</dt><dd>给计算机看成千上万个已知答案的例子，让它自己找出规律。</dd>
+    <dt>校准</dt><dd>让置信度百分比真正名副其实。</dd>
+    <dt>极重大误差（VME）</dt><dd>把耐药株判成敏感。危险的那种错误。</dd>
+    <dt>重大误差（ME）</dt><dd>把敏感株判成耐药。浪费，但不危险。</dd>
+    <dt>ROC-AUC</dt><dd>衡量模型区分两类能力的分数，范围 0.5 到 1.0。0.5 相当于抛硬币。</dd>
+    <dt>基线</dt><dd>那个简单方法——我们必须胜过它，复杂方法才算有存在理由。</dd>
+  </dl>
+
+  <p class="footnote">本页所有数字均来自项目自身的结果文件。第 10 步所述的外部验证在撰写本文时仍在运行中，因此这里未引用任何外部验证的数字。</p>
+</div>
+
+</div>

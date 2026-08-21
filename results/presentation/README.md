@@ -9,6 +9,7 @@ Everything needed to deliver a detailed talk on **Reading Resistance**.
 | **`slides.pdf`** | English deck as a ready PDF (16:9, one slide per page, no speaker notes). | For printing / emailing / projecting without a browser. |
 | **`slides_zh.pdf`** | 中文幻灯片 PDF（16:9，每页一张，不含备注）。 | 便于打印 / 发送 / 投影。 |
 | **`how_it_works.html`** | **Plain-language walkthrough for a non-technical audience** — the ten project steps in order, with five hand-drawn diagrams, analogies, a two-minute summary and a glossary. Assumes no coding or ML knowledge. | Open in any browser. Written to be read aloud or handed to a colleague who needs to understand *what we did* without the maths. |
+| **`how_it_works_zh.html`** | **中文通俗版讲解** — 与英文版结构完全一致（十个步骤、五张图解、两分钟速讲、术语表），面向没有编程与机器学习基础的读者。 | 浏览器打开。可直接读给同事听，或发给需要了解「我们做了什么」但不需要数学细节的同事。 |
 | **`SPEAKER_GUIDE.md`** | The full narrative — every slide's *"what's on screen"* + *"what to say"*, all the numbers, the code behind each step, positives/negatives, and a **Q&A defense** section. | Read once end-to-end to own the story, then present from the deck with this open beside you. (English; the Chinese decks carry per-slide speaker notes inline — press **S**.) |
 
 > **Translation quality.** The Chinese deck was checked by two independent review passes — a
