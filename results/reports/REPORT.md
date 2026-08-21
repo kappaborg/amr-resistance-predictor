@@ -332,7 +332,7 @@ Pinned `environment.yml` (incl. `torch`/`fair-esm`/`biopython`/`scipy` for the E
 seed (42), config-driven runs, `data/manifest.md` (all eight organisms + ESM-2 derived data, sources,
 queries, tool versions), and `docs/decisions.md` (57 logged decisions). Tests (`pytest`) cover the
 data joins, the feature builder, and — most importantly — the **lineage splitter**, asserting zero
-train/test lineage overlap **for every organism** (parametrized over all 8 split CSVs). Makefile
+train/test lineage overlap **for every organism** (parametrized over all 8 split CSVs). A second guard asserts that **every shipped rules baseline actually occurs in 1–99% of its own organism's genomes** — a list that never fires, or fires everywhere, is a broken measurement rather than a weak opponent, and both failure modes produce a deceptive ROC of ~0.5 (decisions #42 and #57). Makefile
 targets regenerate each stage (`make features`, `split`, `train`, `eval`, `organisms ORG=…`,
 `leakage`, `models`, `figures`). Raw data regenerates from the manifest;
 `data/raw/` is git-ignored.
