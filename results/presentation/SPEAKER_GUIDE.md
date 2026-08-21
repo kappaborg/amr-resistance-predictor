@@ -44,7 +44,7 @@ the call. Plus the headline stat.
 **What to say:** "Here's the whole system in one breath. A genome goes in. We annotate the known
 resistance genes and mutations it carries. A per-drug model gives a resistant/susceptible call with a
 calibrated probability. And — unlike a black box — it names the genes that drove the call. The headline
-result: for **cefoxitin**, a simple gene-lookup misses 96.6% of resistant strains, because resistance
+result: for **cefoxitin**, a simple gene-lookup misses 96.3% of resistant strains, because resistance
 there comes from *losing* a porin, not gaining a gene. Our model lifts discrimination from a coin-flip
 (AUC 0.50) to 0.90. That gap *is* the contribution."
 
@@ -329,7 +329,7 @@ demo loads. 8 organisms × their drug panels = **36 deployable models**."
 
 **What to say:** "This is the money slide. Cefoxitin resistance in K. pneumoniae is often driven by
 *losing* a porin — ompK36 — so the drug can't get in. A gene-*lookup* is blind to a *missing* feature,
-so it performs at chance: AUC 0.517, and it misses 96.6% of resistant strains (368 of 381). Our model *learns the
+so it performs at chance: AUC 0.518, and it misses 96.3% of resistant strains (1,469 of 1,525). Our model *learns the
 absence pattern* and lifts AUC to 0.90, a difference that's statistically overwhelming. This is the
 cleanest possible demonstration of what machine learning adds over a database query."
 
@@ -342,7 +342,7 @@ cleanest possible demonstration of what machine learning adds over a database qu
 | TMP-SMX | 0.977 | 0.885 | 2.3% | 18.3% | 9e−51 |
 | meropenem | 0.968 | 0.933 | 1.3% | 55.9% | 5e−24 |
 | gentamicin | 0.981 | 0.948 | 1.6% | 32.4% | 1e−30 |
-| **cefoxitin** | **0.905** | **0.500** | 0.7% | 94.2% | ~0 |
+| **cefoxitin** | **0.905** | **0.518** | 0.7% | 94.2% | ~0 |
 
 **What to say:** "The full panel on unseen lineages. Discrimination is strong everywhere — AUC 0.90 to
 0.98. VME is at or below the 3% clinical bar on every drug. The DeLong test says the model beats the

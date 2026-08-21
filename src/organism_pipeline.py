@@ -99,9 +99,15 @@ RULES = {
 #   - Enterococcus ampicillin resistance = PBP5 mutations, NOT beta-lactamases (blaTEM/SHV absent in
 #     Enterococcus), so the generic beta-lactamase baseline scores ~chance; PBP5 is the fair baseline.
 #   - S. pneumoniae penicillin = PBP1a/2b/2x mosaics only (drop the staph blaZ/mecA noise).
+#   - K. pneumoniae cefoxitin = PLASMID AmpC (blaDHA/CMY/ACT/FOX/MOX). The shared RULES entry for
+#     cefoxitin is the *S. aureus* mecA/mecC screen (cefoxitin is the standard surrogate test for
+#     MRSA), which is meaningless in Klebsiella — mecA/mecC occur in 0 of 3,850 K. pneumoniae
+#     genomes, so it scored a degenerate 0.500 by never firing at all. That is a broken baseline,
+#     not a measurement. The AmpC list below is the one `train_panel.py` has always used.
 ORG_RULES = {
     ("efaecium", "ampicillin"): ["pbp5"],
     ("spneumoniae", "penicillin"): ["pbp1a", "pbp2b", "pbp2x"],
+    ("kpneu", "cefoxitin"): ["blaCMY", "blaDHA", "blaACT", "blaFOX", "blaMOX"],
 }
 
 

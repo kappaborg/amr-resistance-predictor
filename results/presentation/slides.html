@@ -145,7 +145,7 @@
     <div class="card center"><div style="font-size:2.6rem">🧬 → 🧩</div><h3>Genome in → determinant features</h3><p class="muted">Which known resistance genes &amp; mutations does this strain carry?</p></div>
     <div class="card center"><div style="font-size:2.6rem">📊 → 💬</div><h3>Per-drug R/S + the reason</h3><p class="muted">Calibrated probability, and the genes that drove the call.</p></div>
   </div>
-  <p class="lead center" style="max-width:70ch">Headline: for <b class="hl">cefoxitin</b>, a gene-lookup misses <b class="bad">96.6%</b> of resistant strains —
+  <p class="lead center" style="max-width:70ch">Headline: for <b class="hl">cefoxitin</b>, a gene-lookup misses <b class="bad">96.3%</b> of resistant strains —
     resistance comes from <b>losing a porin</b>, not gaining a gene. Our model lifts AUC from <b>0.50 → 0.90</b>. <b class="k">That gap is the contribution.</b></p>
   <div class="notes"><h4>Say</h4>Genome in → annotate the genes it carries → per-drug call with a calibrated probability → and it names the genes behind the call. The cefoxitin gap is the cleanest demonstration of what ML adds over a database query.</div>
 </section>
@@ -476,11 +476,11 @@ make data · features · split · train · eval · figures        <span class="g
 <section class="slide center">
   <p class="kicker">The headline</p><h2 style="border:none;padding:0">Cefoxitin — where the lookup fails</h2>
   <div style="display:flex;align-items:center;gap:2.5rem;justify-content:center;margin:1.5rem 0">
-    <div class="stat" style="color:var(--bad)">0.50<small>gene-lookup AUC (coin flip)</small></div>
+    <div class="stat" style="color:var(--bad)">0.52<small>gene-lookup AUC (coin flip)</small></div>
     <div class="arrow">→</div>
     <div class="stat" style="color:var(--good)">0.90<small>model AUC (DeLong p ≈ 0)</small></div>
   </div>
-  <p class="lead center" style="max-width:70ch">Resistance is driven by <b class="hl">losing the ompK36 porin</b> — the drug can't get in. A gene-<i>lookup</i> is blind to a <b>missing</b> feature (misses 96.6% of resistant strains). The model learns the absence pattern.</p>
+  <p class="lead center" style="max-width:70ch">Resistance is driven by <b class="hl">losing the ompK36 porin</b> — the drug can't get in. A gene-<i>lookup</i> is blind to a <b>missing</b> feature (misses 96.3% of resistant strains). The model learns the absence pattern.</p>
   <p style="margin-top:.8rem"><b class="k">The cleanest possible demonstration of what ML adds over a database query.</b></p>
   <div class="notes"><h4>Say</h4>The money slide. Cefoxitin resistance = porin loss. A lookup can't see a missing feature, so it's at chance. The model learns the absence pattern and reaches 0.90. That gap is the whole contribution.</div>
 </section>
@@ -494,7 +494,7 @@ make data · features · split · train · eval · figures        <span class="g
     <tr><td class="l">TMP-SMX</td><td class="good">0.977</td><td>0.885</td><td>2.3%</td><td>18.3%</td><td>9e−51</td></tr>
     <tr><td class="l">meropenem</td><td class="good">0.968</td><td>0.933</td><td>1.3%</td><td>55.9%</td><td>5e−24</td></tr>
     <tr><td class="l">gentamicin</td><td class="good">0.981</td><td>0.948</td><td>1.6%</td><td>32.4%</td><td>1e−30</td></tr>
-    <tr><td class="l"><b>cefoxitin</b></td><td class="good">0.905</td><td class="bad">0.500</td><td>0.7%</td><td>94.2%</td><td>~0</td></tr>
+    <tr><td class="l"><b>cefoxitin</b></td><td class="good">0.905</td><td class="bad">0.518</td><td>0.7%</td><td>94.2%</td><td>~0</td></tr>
   </table>
   <p class="lead" style="margin-top:1rem">VME <b>point estimates</b> at/below the 3% bar on all five · beats the lookup <b>significantly</b> on all five. Honest caveat: lineage-clustered CIs are wide (meropenem 1.3% [0.3–3.5]) — target met <i>in expectation</i>, not guaranteed at the upper bound. High ME on meropenem/cefoxitin = the VME-first trade-off, shown with flags.</p>
   <div class="notes"><h4>Say</h4>AUC 0.90–0.98 on unseen lineages. Every VME point estimate is under 3%. Be precise if asked: because we bootstrap by lineage, not by genome, the intervals are wide — meropenem's upper bound is 3.5%, so we say the target is met in expectation, not guaranteed. DeLong p-values are astronomically small. High ME on the hard drugs is the deliberate VME-first trade-off, not hidden.</div>

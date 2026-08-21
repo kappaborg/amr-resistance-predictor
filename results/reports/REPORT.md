@@ -20,10 +20,10 @@ and cefoxitin — using interpretable resistance-determinant features. Every mod
 **phylogeny-aware split** (train and test share no MLST sequence type), reports **clinical error
 rates** (very-major / major) alongside ROC-AUC/PR-AUC, and is benchmarked against a transparent
 known-gene rules baseline. On unseen lineages the models achieve **ROC-AUC 0.91–0.98**. The headline
-result is **cefoxitin**, where the gene-lookup baseline is effectively a coin flip (ROC-AUC 0.517;
-it misses **96.6%** of resistant strains — 368 of 381) because resistance is driven by porin loss the
-lookup cannot see, while the model reaches **ROC-AUC 0.906** (0.935 for calibrated XGBoost) and cuts
-the very-major error rate from 96.6% to 1.8% — a concrete demonstration of what machine learning adds
+result is **cefoxitin**, where the gene-lookup baseline is effectively a coin flip (ROC-AUC 0.518;
+it misses **96.3%** of resistant strains — 1,469 of 1,525) because resistance is driven by porin loss the
+lookup cannot see, while the model reaches **ROC-AUC 0.905** and cuts
+the very-major error rate from 96.3% to 0.7% — a concrete demonstration of what machine learning adds
 over a database query.
 
 ## 1. Problem & contribution
@@ -67,6 +67,12 @@ accuracy hides.
   mechanisms.
 
 ## 4. Results (full 3,850-genome set, VME ≤ 3% operating point)
+> **Two evaluations are reported in this document and they are not interchangeable.** This section is
+> the **single held-out split** (one lineage-disjoint train/test partition). §4.3 is the **pooled
+> lineage-grouped cross-validation**, which uses every genome as held-out exactly once and is the
+> more robust estimate. Small differences between them (e.g. cefoxitin rules 0.517 here vs 0.518 in
+> §4.3) are the two estimators disagreeing slightly, not an error.
+
 Per drug, test set = unseen lineages. Logistic regression shown (competitive-or-best on these sparse
 features; XGBoost similar — full tables incl. rules + calibrated XGBoost in
 `results/reports/summary_05_week2_panel.md`). VME = resistant called susceptible (dangerous);
@@ -145,7 +151,7 @@ from full lineage-grouped CV, in FDA/CLSI vocabulary (bars: **VME ≤ 1.5%** / �
 - **The model significantly beats the rules baseline (DeLong paired test) on every drug.** Pooled
   lineage-held-out ROC-AUC, model vs rules: meropenem 0.968 vs 0.933 (p = 5.3×10⁻²⁴), gentamicin
   0.981 vs 0.948 (p = 1.4×10⁻³⁰), ciprofloxacin 0.983 vs 0.911 (p = 6.9×10⁻³⁶), TMP-SMX 0.977 vs
-  0.885 (p = 9.4×10⁻⁵¹), and **cefoxitin 0.905 vs 0.500** (p ≈ 0, below double-precision resolution).
+  0.885 (p = 9.4×10⁻⁵¹), and **cefoxitin 0.905 vs 0.518** (p ≈ 0, below double-precision resolution).
   This is the project's core claim ("what ML adds over a gene lookup") with a significance test behind
   it, not just a gap.
 - **Lineage-clustered bootstrap 95% CIs (2,000 resamples)** on VME/ME/CA/AUC — essential because the
@@ -324,7 +330,7 @@ safeguard: every prediction is auditable via its determinants.
 ## 9. Reproducibility
 Pinned `environment.yml` (incl. `torch`/`fair-esm`/`biopython`/`scipy` for the ESM-2 pipeline), fixed
 seed (42), config-driven runs, `data/manifest.md` (all eight organisms + ESM-2 derived data, sources,
-queries, tool versions), and `docs/decisions.md` (54 logged decisions). Tests (`pytest`) cover the
+queries, tool versions), and `docs/decisions.md` (57 logged decisions). Tests (`pytest`) cover the
 data joins, the feature builder, and — most importantly — the **lineage splitter**, asserting zero
 train/test lineage overlap **for every organism** (parametrized over all 8 split CSVs). Makefile
 targets regenerate each stage (`make features`, `split`, `train`, `eval`, `organisms ORG=…`,

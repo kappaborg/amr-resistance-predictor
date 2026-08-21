@@ -17,7 +17,18 @@ Everything needed to deliver a detailed talk on **Reading Resistance**.
 > applied (e.g. isotonic → 保序, causal genes → 作为耐药根源的). Gene names (`gyrA`, `mecA`,
 > `blaKPC`…) and standard acronyms (ROC-AUC, VME, MIC, SHAP) are intentionally kept in the original.
 
-## Corrections applied (2026-08-22)
+## Corrections applied (2026-08-22, second pass — IMPORTANT)
+A documentation-integrity audit found a **real bug in the shipped cefoxitin baseline**, now fixed.
+The *K. pneumoniae* gene-lookup baseline had been using `mecA`/`mecC` — the ***S. aureus*** methicillin
+genes, because cefoxitin is the standard MRSA surrogate test. Those genes occur in **0 of 3,850**
+*Klebsiella* genomes, so the baseline never fired and scored a degenerate **0.500 by predicting a
+constant**. Corrected to plasmid AmpC (`blaCMY/DHA/ACT/FOX/MOX`), the honest baseline is **0.518**,
+missing **96.3%** of resistant strains (1,469 of 1,525).
+**The headline claim is unchanged and now better supported** — the gene lookup genuinely fails on
+cefoxitin, rather than failing because it was given the wrong organism's genes. Every deck, PDF, the
+poster and both walkthroughs now quote 0.518 / 96.3%. **Use this version.**
+
+## Corrections applied (2026-08-22, first pass)
 A numbers audit against `results/metrics/*.json` found and fixed two stale figures that had been
 carried over from an earlier, smaller run. **If you downloaded an earlier copy of this pack, use this one.**
 - The cefoxitin rules baseline misses **96.6%** of resistant strains (368 of 381), not "~92%". The

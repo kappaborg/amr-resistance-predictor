@@ -1,0 +1,2 @@
+[    1957ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://coach.haoyueke.cn/favicon.ico:0
+[    3905ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://coach.haoyueke.cn/en/login_password.html:0
