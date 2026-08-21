@@ -2,7 +2,7 @@
 # Processed artifacts regenerate from raw + code; data/raw is never a build target.
 # Each target maps to a pipeline phase. Stubs raise until the phase is implemented.
 
-.PHONY: all data features split train eval rigor figures leakage dca riskcov extscope organisms models test clean help
+.PHONY: all data features split train eval rigor figures leakage dca riskcov extscope extfetch extscore organisms models test clean help
 .DEFAULT_GOAL := help
 
 CONFIG := config/config.yaml
@@ -43,6 +43,12 @@ riskcov:  ## Risk-coverage curves + AURC for the defer-to-lab abstention — nee
 
 extscope:  ## External-validation Step 1: scope an independent NCBI PD cohort (metadata only, ~179 MB)
 	$(PY) -m src.evaluation.external_validation
+
+extfetch:  ## External-validation Step 2a: download + AMRFinderPlus + mlst the external cohort (resumable)
+	$(PY) -m src.evaluation.external_fetch_annotate
+
+extscore:  ## External-validation Step 2b: score FROZEN models on the external cohort (ALL + ST-novel)
+	$(PY) -m src.evaluation.external_score
 
 organisms:  ## Annotate + MLST + train one organism (ORG=paeruginosa|senterica|efaecium|...)
 	$(PY) -m src.organism_pipeline --organism $(ORG)

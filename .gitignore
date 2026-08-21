@@ -32,3 +32,6 @@ env/
 
 # local secrets — API keys for the AI narrative layer
 .env
+
+# external-validation working data (regenerates from results/metrics/external_cohort_kpneu.csv)
+logs/
