@@ -1,0 +1,723 @@
+<title>Reading Resistance — How It Works, Step by Step</title>
+
+<style>
+  :root{
+    /* project identity, carried over from the deck and poster */
+    --navy:#12314f; --navy-d:#0c2136; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --good:#1f8a4c; --bad:#b4472e;
+    /* neutrals biased slightly toward the teal so they read as chosen, not default */
+    --ink:#16212a; --muted:#5a6b78; --line:#ccd9e0; --bg:#f5f8f9; --card:#ffffff;
+    --rail:#e8eff2;
+    --serif: "Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --navy:#9fc4e0; --navy-d:#cfe2f0; --teal:#5cc2ca; --teal-l:#12303a; --gold:#e0a955;
+      --good:#5fc98a; --bad:#e8836a;
+      --ink:#e4ecf1; --muted:#9aacb8; --line:#2b3d4a; --bg:#0e1820; --card:#152430;
+      --rail:#152430;
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy:#9fc4e0; --navy-d:#cfe2f0; --teal:#5cc2ca; --teal-l:#12303a; --gold:#e0a955;
+    --good:#5fc98a; --bad:#e8836a;
+    --ink:#e4ecf1; --muted:#9aacb8; --line:#2b3d4a; --bg:#0e1820; --card:#152430;
+    --rail:#152430;
+  }
+  :root[data-theme="light"]{
+    --navy:#12314f; --navy-d:#0c2136; --teal:#0e7c86; --teal-l:#e3f2f3; --gold:#c8892a;
+    --good:#1f8a4c; --bad:#b4472e;
+    --ink:#16212a; --muted:#5a6b78; --line:#ccd9e0; --bg:#f5f8f9; --card:#ffffff;
+    --rail:#e8eff2;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:clamp(2rem,5vw,4.5rem) clamp(1.1rem,4vw,2rem) 6rem;}
+
+  /* ---------- masthead ---------- */
+  .mast{border-bottom:3px solid var(--teal); padding-bottom:1.6rem; margin-bottom:2.6rem;}
+  .eyebrow{font-family:var(--mono); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--teal); margin:0 0 .9rem;}
+  h1{font-family:var(--serif); font-weight:600; font-size:clamp(2.1rem,5.4vw,3.3rem); line-height:1.08;
+     margin:0 0 .7rem; color:var(--navy); letter-spacing:-.01em; text-wrap:balance;}
+  .standfirst{font-family:var(--serif); font-size:clamp(1.05rem,2.4vw,1.28rem); line-height:1.5;
+     color:var(--muted); margin:0; max-width:62ch;}
+
+  /* ---------- reading rhythm ---------- */
+  h2{font-family:var(--serif); font-weight:600; font-size:clamp(1.45rem,3.4vw,1.95rem);
+     color:var(--navy); margin:0 0 .5rem; line-height:1.2; text-wrap:balance; letter-spacing:-.005em;}
+  h3{font-size:1rem; font-weight:700; color:var(--teal); margin:1.9rem 0 .4rem;
+     letter-spacing:.02em;}
+  p{margin:0 0 1rem; max-width:66ch;}
+  ul,ol{max-width:66ch; padding-left:1.15rem; margin:0 0 1rem;}
+  li{margin-bottom:.45rem;}
+  strong{color:var(--navy); font-weight:650;}
+  code{font-family:var(--mono); font-size:.86em; background:var(--rail); color:var(--navy);
+    padding:.1em .35em; border-radius:3px;}
+  a{color:var(--teal);}
+
+  /* ---------- numbered steps: the sequence is real, so it is numbered ---------- */
+  .step{display:grid; grid-template-columns:4.2rem 1fr; gap:0 1.5rem;
+    padding:2.4rem 0; border-top:1px solid var(--line);}
+  .step:first-of-type{border-top:none;}
+  .num{font-family:var(--mono); font-size:.95rem; font-weight:600; color:var(--card);
+    background:var(--navy); width:2.6rem; height:2.6rem; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-top:.15rem;
+    font-variant-numeric:tabular-nums;}
+  .step-body{min-width:0;}
+  @media (max-width:640px){
+    .step{grid-template-columns:1fr; gap:.9rem 0;}
+    .num{width:2.3rem;height:2.3rem;font-size:.85rem;}
+  }
+
+  /* ---------- analogy callout: the whole point of this document ---------- */
+  .analogy{background:var(--teal-l); border-left:4px solid var(--teal);
+    padding:.95rem 1.15rem; margin:1.1rem 0 1.2rem; border-radius:0 5px 5px 0;}
+  .analogy p{margin:0; max-width:60ch;}
+  .analogy .tag{display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--teal); margin-bottom:.35rem; font-weight:600;}
+
+  .warn{border-left:4px solid var(--gold); background:color-mix(in srgb, var(--gold) 9%, transparent);
+    padding:.95rem 1.15rem; margin:1.1rem 0; border-radius:0 5px 5px 0;}
+  .warn p{margin:0;}
+
+  /* ---------- figures ---------- */
+  figure{margin:1.6rem 0 1.4rem; padding:0;}
+  .figbox{background:var(--card); border:1px solid var(--line); border-radius:7px;
+    padding:1.2rem 1rem .8rem; overflow-x:auto;}
+  svg{display:block; max-width:100%; height:auto; margin:0 auto; color:var(--ink);}
+  figcaption{font-size:.87rem; color:var(--muted); margin-top:.7rem; line-height:1.5;
+    max-width:64ch;}
+
+  /* ---------- tables ---------- */
+  .tablewrap{overflow-x:auto; margin:1.2rem 0;}
+  table{border-collapse:collapse; width:100%; font-size:.92rem; min-width:420px;}
+  th,td{text-align:left; padding:.5rem .7rem; border-bottom:1px solid var(--line);
+    vertical-align:top;}
+  th{font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--muted);
+    font-weight:700; border-bottom:2px solid var(--line);}
+  td.num-cell{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .good{color:var(--good); font-weight:650;}
+  .bad{color:var(--bad); font-weight:650;}
+
+  /* ---------- glossary ---------- */
+  .gloss{display:grid; grid-template-columns:minmax(9rem,13rem) 1fr; gap:.55rem 1.4rem;
+    margin:1.2rem 0; font-size:.95rem;}
+  .gloss dt{font-weight:700; color:var(--navy);}
+  .gloss dd{margin:0; color:var(--ink);}
+  @media (max-width:600px){ .gloss{grid-template-columns:1fr; gap:.15rem 0;}
+    .gloss dd{margin-bottom:.75rem; color:var(--muted);} }
+
+  .closing{margin-top:3rem; padding-top:1.8rem; border-top:3px solid var(--teal);}
+  .footnote{font-size:.85rem; color:var(--muted); margin-top:2.5rem; font-style:italic;}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Reading Resistance · plain-language walkthrough</p>
+  <h1>How we taught a computer to read a bacterium's genome and predict which antibiotics will fail</h1>
+  <p class="standfirst">Every step of the project, in order, with no assumed knowledge of
+  programming or machine learning. Written to be explained out loud.</p>
+</header>
+
+<h2>The problem we started from</h2>
+
+<p>When someone has a serious bacterial infection, the doctor needs to know which antibiotics will
+actually kill it. Bacteria are often <strong>resistant</strong> — the drug simply doesn't work on
+them any more. Give a patient a drug the bug is resistant to and you have lost days of treatment
+time on a sick person.</p>
+
+<p>The reliable way to find out is to grow the bacterium in a lab and test drugs against it
+directly. It works, but it takes about <strong>two days</strong>. Meanwhile the doctor has to guess.</p>
+
+<p>Reading a bacterium's DNA is now fast and cheap. So the question behind this whole project is:
+<strong>can we read the DNA and predict the lab result, without waiting for the lab?</strong></p>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 760 210" role="img" aria-label="Two routes from a patient sample to an answer: the laboratory route takes about two days; the genome route takes minutes and also returns the reasons for each call.">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+        <marker id="art" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="var(--teal)"/>
+        </marker>
+      </defs>
+
+      <text x="0" y="16" font-size="11" font-weight="700" fill="currentColor" letter-spacing="1.2">TODAY — THE LABORATORY ROUTE</text>
+      <rect x="0"   y="28" width="112" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="56"  y="53" font-size="12" text-anchor="middle" fill="currentColor">patient sample</text>
+      <line x1="112" y1="49" x2="158" y2="49" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+      <text x="135" y="41" font-size="10" text-anchor="middle" fill="currentColor" opacity=".75">culture</text>
+      <rect x="158" y="28" width="112" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="214" y="47" font-size="12" text-anchor="middle" fill="currentColor">grow colonies</text>
+      <text x="214" y="62" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">~24 h</text>
+      <line x1="270" y1="49" x2="316" y2="49" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+      <rect x="316" y="28" width="130" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="381" y="47" font-size="12" text-anchor="middle" fill="currentColor">test each drug</text>
+      <text x="381" y="62" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">~24 h</text>
+      <line x1="446" y1="49" x2="492" y2="49" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+      <rect x="492" y="28" width="120" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="552" y="53" font-size="12" text-anchor="middle" fill="currentColor">answer</text>
+      <text x="640" y="53" font-size="13" font-weight="700" fill="currentColor">≈ 2 days</text>
+
+      <line x1="0" y1="100" x2="760" y2="100" stroke="currentColor" stroke-width="1" opacity=".25"/>
+
+      <text x="0" y="128" font-size="11" font-weight="700" fill="var(--teal)" letter-spacing="1.2">THIS PROJECT — THE GENOME ROUTE</text>
+      <rect x="0"   y="140" width="112" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.4"/>
+      <text x="56"  y="165" font-size="12" text-anchor="middle" fill="var(--teal)">patient sample</text>
+      <line x1="112" y1="161" x2="158" y2="161" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#art)"/>
+      <text x="135" y="153" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".8">sequence</text>
+      <rect x="158" y="140" width="112" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.4"/>
+      <text x="214" y="165" font-size="12" text-anchor="middle" fill="var(--teal)">read the DNA</text>
+      <line x1="270" y1="161" x2="316" y2="161" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#art)"/>
+      <rect x="316" y="140" width="130" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="2.2"/>
+      <text x="381" y="159" font-size="12" font-weight="700" text-anchor="middle" fill="var(--teal)">our model</text>
+      <text x="381" y="173" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".8">minutes</text>
+      <line x1="446" y1="161" x2="492" y2="161" stroke="var(--teal)" stroke-width="1.4" marker-end="url(#art)"/>
+      <rect x="492" y="140" width="120" height="42" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.4"/>
+      <text x="552" y="158" font-size="12" text-anchor="middle" fill="var(--teal)">answer</text>
+      <text x="552" y="172" font-size="10" text-anchor="middle" fill="var(--teal)">+ the reasons</text>
+      <text x="640" y="165" font-size="13" font-weight="700" fill="var(--teal)">minutes</text>
+    </svg>
+  </div>
+  <figcaption>The lab route is the trusted answer, and we are not replacing it. We are trying to
+  produce the same answer from DNA while the lab is still growing the culture — and, unlike a black
+  box, to say <em>why</em>.</figcaption>
+</figure>
+
+<div class="warn">
+  <p><strong>Say this early and often:</strong> this is a research tool, not a medical device.
+  Nobody treats a patient from our output. It is decision support, and the lab test remains the
+  final word.</p>
+</div>
+
+<h2>The ten steps, in order</h2>
+
+<div class="step">
+  <div class="num">1</div>
+  <div class="step-body">
+    <h2>Collect genomes that already have lab answers</h2>
+    <p>To teach a computer, you need examples where you already know the right answer. We used a
+    free public database called <strong>BV-BRC</strong>, which holds bacterial genomes that
+    laboratories around the world have sequenced <em>and</em> tested against antibiotics.</p>
+    <p>So each example is a pair: <strong>the full DNA of one bacterium</strong>, and
+    <strong>the lab's verdict</strong> — resistant or susceptible — for each drug.</p>
+    <p>One decision here mattered a lot. The database also contains verdicts that were themselves
+    <em>predicted by a computer</em>. We excluded every one of those and kept only genuine
+    laboratory results. Training a computer on another computer's guesses teaches it to copy the
+    guesses, not the biology.</p>
+    <p>We ended up with <strong>3,850 genomes</strong> of <em>Klebsiella pneumoniae</em> — a serious
+    hospital pathogen — and later repeated everything for seven more species.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">2</div>
+  <div class="step-body">
+    <h2>Throw out the bad-quality genomes</h2>
+    <p>DNA sequencing isn't perfect. Some genomes come out incomplete, or contaminated with DNA from
+    a different organism that was in the sample. If we feed those in, we teach the computer nonsense.</p>
+    <p>So we applied a quality checklist that microbiologists already agree on: the genome must be at
+    least 90% complete, no more than 5% contaminated, and roughly the size a
+    <em>Klebsiella</em> genome should be. Anything failing was dropped.</p>
+    <p>This removed about <strong>2%</strong> of the genomes — and importantly, it removed resistant
+    and susceptible ones in equal proportion, so it didn't quietly bias the dataset.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">3</div>
+  <div class="step-body">
+    <h2>Turn each genome into a simple checklist</h2>
+    <p>A genome is millions of DNA letters — far too much raw material to hand a computer directly.
+    We needed to reduce it to something meaningful.</p>
+    <p>Fortunately, scientists have already catalogued the specific genes and mutations that make
+    bacteria resistant to specific drugs. A free tool from the US National Institutes of Health,
+    <strong>AMRFinderPlus</strong>, scans a genome and reports which of those known resistance
+    features it carries.</p>
+
+    <div class="analogy">
+      <span class="tag">The way to picture it</span>
+      <p>Think of each bacterium as a burglar, and the antibiotic as a lock. Scientists have
+      catalogued the burglary tools that open each lock. AMRFinderPlus opens the burglar's bag and
+      ticks off which tools are inside. We don't hand the computer the whole bag — we hand it the
+      checklist.</p>
+    </div>
+
+    <p>Every genome becomes a row of <strong>688 yes/no boxes</strong>: does it carry
+    <code>blaKPC-2</code>? Yes. <code>gyrA_S83I</code>? No. And so on. That grid of ticks is what the
+    computer actually learns from — and because every box has a real biological name, we can always
+    explain a prediction afterwards.</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 760 178" role="img" aria-label="A genome file is scanned by AMRFinderPlus into a 688-column yes or no checklist, which is fed to five separate models, one per antibiotic, each producing a resistant or susceptible call.">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect x="0" y="46" width="96" height="62" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="48" y="72" font-size="12" text-anchor="middle" fill="currentColor">one genome</text>
+      <text x="48" y="88" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">DNA file</text>
+
+      <line x1="96" y1="77" x2="140" y2="77" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+      <text x="118" y="69" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".75">scan</text>
+
+      <rect x="140" y="46" width="124" height="62" rx="4" fill="none" stroke="var(--teal)" stroke-width="2"/>
+      <text x="202" y="70" font-size="12" font-weight="700" text-anchor="middle" fill="var(--teal)">AMRFinderPlus</text>
+      <text x="202" y="87" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".85">finds known genes</text>
+
+      <line x1="264" y1="77" x2="308" y2="77" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="308" y="30" width="128" height="94" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="372" y="24" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".8">688 yes/no boxes</text>
+      <text x="318" y="49" font-size="9.5" font-family="monospace" fill="currentColor">blaKPC-2</text>
+      <text x="424" y="49" font-size="10" text-anchor="end" fill="var(--good)" font-weight="700">✓</text>
+      <text x="318" y="68" font-size="9.5" font-family="monospace" fill="currentColor">gyrA_S83I</text>
+      <text x="424" y="68" font-size="10" text-anchor="end" fill="var(--good)" font-weight="700">✓</text>
+      <text x="318" y="87" font-size="9.5" font-family="monospace" fill="currentColor">ompK36…</text>
+      <text x="424" y="87" font-size="10" text-anchor="end" fill="currentColor" opacity=".45">✗</text>
+      <text x="318" y="108" font-size="9.5" font-family="monospace" fill="currentColor" opacity=".5">… 685 more</text>
+
+      <line x1="436" y1="77" x2="480" y2="77" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="480" y="6"   width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="23"  font-size="10.5" text-anchor="middle" fill="currentColor">model · meropenem</text>
+      <rect x="480" y="36"  width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="53"  font-size="10.5" text-anchor="middle" fill="currentColor">model · gentamicin</text>
+      <rect x="480" y="66"  width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="83"  font-size="10.5" text-anchor="middle" fill="currentColor">model · ciprofloxacin</text>
+      <rect x="480" y="96"  width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="113" font-size="10.5" text-anchor="middle" fill="currentColor">model · TMP-SMX</text>
+      <rect x="480" y="126" width="132" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="546" y="143" font-size="10.5" text-anchor="middle" fill="currentColor">model · cefoxitin</text>
+
+      <line x1="612" y1="19"  x2="650" y2="19"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="49"  x2="650" y2="49"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="79"  x2="650" y2="79"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="109" x2="650" y2="109" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <line x1="612" y1="139" x2="650" y2="139" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+      <text x="656" y="23"  font-size="11" font-weight="700" fill="var(--bad)">Resistant</text>
+      <text x="656" y="53"  font-size="11" font-weight="700" fill="var(--good)">Susceptible</text>
+      <text x="656" y="83"  font-size="11" font-weight="700" fill="var(--bad)">Resistant</text>
+      <text x="656" y="113" font-size="11" font-weight="700" fill="var(--good)">Susceptible</text>
+      <text x="656" y="143" font-size="11" font-weight="700" fill="var(--bad)">Resistant</text>
+    </svg>
+  </div>
+  <figcaption>One genome in, five independent answers out. Note there is a
+  <strong>separate model for each antibiotic</strong> — resistance to one drug is a different
+  biological mechanism from resistance to another, so pooling them would be meaningless.</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">4</div>
+  <div class="step-body">
+    <h2>Work out which bacteria are relatives</h2>
+    <p>This step looks like bookkeeping and is actually the heart of the project.</p>
+    <p>Bacteria reproduce by copying themselves. That means a real-world collection of bacteria isn't
+    3,850 independent individuals — it's a set of <strong>extended families of near-identical
+    twins</strong>. One successful hospital strain can account for hundreds of samples that are
+    essentially the same organism.</p>
+    <p>There's a standard way to work out which family each one belongs to, called
+    <strong>MLST</strong>. It reads seven specific housekeeping genes and assigns a family number —
+    a "sequence type", written <code>ST258</code>, <code>ST307</code> and so on. We ran it on every
+    genome. Our 3,850 genomes turned out to belong to <strong>513 families</strong>.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">5</div>
+  <div class="step-body">
+    <h2>Split the data by family — the single most important decision</h2>
+    <p>To find out whether a model is any good, you hide some data from it during training, then test
+    it on that hidden data. Standard practice.</p>
+    <p>But <em>how</em> you choose what to hide changes everything. The obvious approach — shuffle
+    everything and take a random 30% — is badly wrong here, and this is the point your colleague
+    most needs to understand.</p>
+
+    <div class="analogy">
+      <span class="tag">The way to picture it</span>
+      <p>Imagine testing whether a student understands medicine by giving them an exam. If you split
+      a family of identical twins — some in the study set, their twins in the exam — the student can
+      score brilliantly by <em>recognising faces</em>. They never had to learn any medicine. To find
+      out what they actually understand, you must examine them on <strong>families they have never
+      met</strong>.</p>
+    </div>
+
+    <p>So we split by family: every genome from a given sequence type goes entirely into training or
+    entirely into testing, never both. The model is then judged only on lineages it has genuinely
+    never seen.</p>
+    <p>This makes our numbers <em>look worse</em> than most published papers, which commonly use the
+    random split. That's the point. We would rather report a real number than a flattering one, and
+    we wrote an automated check that fails the whole project if a single family ever appears on both
+    sides.</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 740 250" role="img" aria-label="Comparison of two ways to split the data. A random split cuts through families so near-identical twins appear in both training and testing, letting the model score well by recognising families. A family-based split keeps whole families on one side, forcing the model to generalise to lineages it has never seen.">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- LEFT: random split -->
+      <text x="0" y="14" font-size="11.5" font-weight="700" fill="var(--bad)" letter-spacing=".8">RANDOM SPLIT — LEAKS</text>
+      <text x="0" y="30" font-size="10" fill="currentColor" opacity=".75">families are cut in half</text>
+
+      <rect x="0" y="42" width="150" height="80" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="75" y="58" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">TRAIN</text>
+      <circle cx="26" cy="80"  r="9" fill="var(--teal)"/><text x="26" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="52" cy="80"  r="9" fill="var(--teal)"/><text x="52" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="78" cy="80"  r="9" fill="var(--gold)"/><text x="78" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="104" cy="80" r="9" fill="var(--gold)"/><text x="104" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="39" cy="104" r="9" fill="var(--navy)"/><text x="39" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+      <circle cx="65" cy="104" r="9" fill="var(--teal)"/><text x="65" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+
+      <rect x="0" y="136" width="150" height="62" rx="4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="75" y="152" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">TEST</text>
+      <circle cx="39" cy="176" r="9" fill="var(--teal)"/><text x="39" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="65" cy="176" r="9" fill="var(--gold)"/><text x="65" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="91" cy="176" r="9" fill="var(--navy)"/><text x="91" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+
+      <text x="0" y="222" font-size="10.5" fill="var(--bad)" font-weight="650">Family A, B and C sit on both sides.</text>
+      <text x="0" y="238" font-size="10.5" fill="var(--bad)">The model can win by recognising them.</text>
+
+      <line x1="200" y1="30" x2="200" y2="240" stroke="currentColor" stroke-width="1" opacity=".22"/>
+
+      <!-- RIGHT: lineage split -->
+      <text x="250" y="14" font-size="11.5" font-weight="700" fill="var(--good)" letter-spacing=".8">FAMILY SPLIT — HONEST</text>
+      <text x="250" y="30" font-size="10" fill="currentColor" opacity=".75">whole families stay together</text>
+
+      <rect x="250" y="42" width="150" height="80" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="325" y="58" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">TRAIN</text>
+      <circle cx="276" cy="80"  r="9" fill="var(--teal)"/><text x="276" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="302" cy="80"  r="9" fill="var(--teal)"/><text x="302" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="328" cy="80"  r="9" fill="var(--teal)"/><text x="328" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">A</text>
+      <circle cx="354" cy="80"  r="9" fill="var(--gold)"/><text x="354" y="84" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="289" cy="104" r="9" fill="var(--gold)"/><text x="289" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+      <circle cx="315" cy="104" r="9" fill="var(--gold)"/><text x="315" y="108" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">B</text>
+
+      <rect x="250" y="136" width="150" height="62" rx="4" fill="none" stroke="var(--good)" stroke-width="1.8" stroke-dasharray="4 3"/>
+      <text x="325" y="152" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">TEST</text>
+      <circle cx="299" cy="176" r="9" fill="var(--navy)"/><text x="299" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+      <circle cx="325" cy="176" r="9" fill="var(--navy)"/><text x="325" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+      <circle cx="351" cy="176" r="9" fill="var(--navy)"/><text x="351" y="180" font-size="8.5" text-anchor="middle" fill="var(--card)" font-weight="700">C</text>
+
+      <text x="250" y="222" font-size="10.5" fill="var(--good)" font-weight="650">Family C was never seen in training.</text>
+      <text x="250" y="238" font-size="10.5" fill="var(--good)">The model must explain new biology.</text>
+
+      <line x1="440" y1="30" x2="440" y2="240" stroke="currentColor" stroke-width="1" opacity=".22"/>
+
+      <text x="482" y="14" font-size="11.5" font-weight="700" fill="currentColor" letter-spacing=".8">WHY IT MATTERS</text>
+      <rect x="482" y="46" width="250" height="76" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="496" y="68" font-size="11" fill="currentColor">Random split score</text>
+      <text x="718" y="68" font-size="12" text-anchor="end" font-weight="700" fill="var(--bad)" font-family="monospace">0.935</text>
+      <text x="496" y="90" font-size="11" fill="currentColor">Family split score</text>
+      <text x="718" y="90" font-size="12" text-anchor="end" font-weight="700" fill="var(--good)" font-family="monospace">0.903</text>
+      <line x1="496" y1="100" x2="718" y2="100" stroke="currentColor" stroke-width="1" opacity=".3"/>
+      <text x="496" y="114" font-size="10.5" fill="currentColor" opacity=".8">difference = free credit</text>
+      <text x="718" y="114" font-size="11" text-anchor="end" font-weight="700" fill="currentColor" font-family="monospace">0.032</text>
+
+      <text x="482" y="146" font-size="10.5" fill="currentColor" opacity=".85">Measured on our own cefoxitin</text>
+      <text x="482" y="161" font-size="10.5" fill="currentColor" opacity=".85">model. The random split hands the</text>
+      <text x="482" y="176" font-size="10.5" fill="currentColor" opacity=".85">model marks it did not earn — so</text>
+      <text x="482" y="191" font-size="10.5" fill="currentColor" opacity=".85">we always report the lower number.</text>
+    </svg>
+  </div>
+  <figcaption>We didn't just assert that the random split inflates results — we measured it. Running
+  the identical model both ways, the random split scores higher on every drug. That gap is exactly
+  the credit the model didn't earn.</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">6</div>
+  <div class="step-body">
+    <h2>Train one model per antibiotic</h2>
+    <p>Now the actual learning. Here is what "training a model" really means, without jargon.</p>
+    <p>The computer starts knowing nothing. It looks at thousands of examples — each one a checklist
+    of genes plus the lab's verdict — and gradually works out <strong>which combinations of ticks go
+    with "resistant"</strong>. It is pattern-finding at scale, not reasoning.</p>
+    <p>The specific method we used is called <strong>gradient boosting</strong>. It builds a long
+    series of very simple yes/no rules, where each new rule is aimed at fixing the mistakes the
+    previous ones made. Hundreds of small corrections add up to a strong overall judgement.</p>
+
+    <div class="analogy">
+      <span class="tag">The way to picture it</span>
+      <p>A trainee reviews thousands of past cases. After each batch, a supervisor points out only
+      the ones they got wrong, and the trainee adds a small rule to catch that mistake next time.
+      Repeat three hundred times. Nobody wrote the rules in advance; they were learned from the
+      errors.</p>
+    </div>
+
+    <p>One deliberate choice worth mentioning: we <strong>did not tune the model's settings</strong>.
+    There are knobs you can adjust to squeeze out a slightly better score, but adjusting them while
+    looking at your own test data is a subtle way of cheating. We fixed one sensible configuration
+    and used it identically for every drug and every species.</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="0 0 700 268" role="img" aria-label="The training loop for one antibiotic: data is grouped into folds by family, the model learns from the training folds and is checked on the held-out fold, then probabilities are calibrated and a safety threshold is chosen, before the final model is tested once on families never used.">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <text x="0" y="14" font-size="11" font-weight="700" fill="var(--teal)" letter-spacing="1.1">TRAINING ONE DRUG'S MODEL</text>
+
+      <rect x="0" y="30" width="150" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <text x="75" y="49" font-size="11.5" text-anchor="middle" fill="currentColor">3,850 checklists</text>
+      <text x="75" y="64" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">+ lab verdicts</text>
+
+      <line x1="150" y1="52" x2="196" y2="52" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+      <text x="173" y="44" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".75">group</text>
+
+      <rect x="196" y="30" width="150" height="44" rx="4" fill="none" stroke="var(--teal)" stroke-width="1.8"/>
+      <text x="271" y="49" font-size="11.5" font-weight="700" text-anchor="middle" fill="var(--teal)">split by family</text>
+      <text x="271" y="64" font-size="10" text-anchor="middle" fill="var(--teal)" opacity=".85">513 sequence types</text>
+
+      <line x1="271" y1="74" x2="271" y2="98" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+
+      <rect x="120" y="98" width="302" height="86" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 3"/>
+      <text x="271" y="115" font-size="10" text-anchor="middle" fill="currentColor" opacity=".8">repeat, holding out each fold in turn</text>
+
+      <rect x="136" y="124" width="122" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="197" y="141" font-size="11" text-anchor="middle" fill="currentColor">learn on 3 folds</text>
+      <text x="197" y="156" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".7">build correction rules</text>
+
+      <line x1="258" y1="145" x2="286" y2="145" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar4)"/>
+
+      <rect x="286" y="124" width="122" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="347" y="141" font-size="11" text-anchor="middle" fill="currentColor">check on the 4th</text>
+      <text x="347" y="156" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".7">unseen families</text>
+
+      <line x1="271" y1="184" x2="271" y2="206" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+
+      <rect x="120" y="206" width="145" height="44" rx="4" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
+      <text x="192" y="224" font-size="11" font-weight="650" text-anchor="middle" fill="var(--gold)">calibrate</text>
+      <text x="192" y="239" font-size="9.5" text-anchor="middle" fill="var(--gold)">make "70%" mean 70%</text>
+
+      <line x1="265" y1="228" x2="290" y2="228" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar4)"/>
+
+      <rect x="290" y="206" width="160" height="44" rx="4" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
+      <text x="370" y="224" font-size="11" font-weight="650" text-anchor="middle" fill="var(--gold)">set safety threshold</text>
+      <text x="370" y="239" font-size="9.5" text-anchor="middle" fill="var(--gold)">miss ≤ 3% of resistant</text>
+
+      <line x1="450" y1="228" x2="486" y2="228" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar4)"/>
+
+      <rect x="486" y="196" width="200" height="64" rx="5" fill="none" stroke="var(--good)" stroke-width="2"/>
+      <text x="586" y="219" font-size="11.5" font-weight="700" text-anchor="middle" fill="var(--good)">final score</text>
+      <text x="586" y="235" font-size="10" text-anchor="middle" fill="currentColor" opacity=".85">families never used —</text>
+      <text x="586" y="249" font-size="10" text-anchor="middle" fill="currentColor" opacity=".85">measured once, reported as-is</text>
+
+      <text x="486" y="60" font-size="10.5" fill="currentColor" opacity=".85">Everything on the left happens</text>
+      <text x="486" y="76" font-size="10.5" fill="currentColor" opacity=".85">inside the training data only.</text>
+      <text x="486" y="92" font-size="10.5" fill="currentColor" opacity=".85">The threshold in particular is</text>
+      <text x="486" y="108" font-size="10.5" fill="currentColor" opacity=".85">chosen without ever looking at</text>
+      <text x="486" y="124" font-size="10.5" fill="currentColor" opacity=".85">the test families — otherwise</text>
+      <text x="486" y="140" font-size="10.5" fill="currentColor" opacity=".85">the final score is not honest.</text>
+    </svg>
+  </div>
+  <figcaption>The whole loop runs inside the training data. The test families are touched exactly
+  once, at the end. This discipline is what makes the reported number believable.</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">7</div>
+  <div class="step-body">
+    <h2>Make the confidence numbers honest, then pick a safety setting</h2>
+    <p>The model doesn't just say "resistant" — it produces a number between 0 and 1, its confidence.
+    Raw model confidences are usually miscalibrated: a model might say "90% sure" on cases where it's
+    actually right only 70% of the time.</p>
+    <p><strong>Calibration</strong> fixes this. We adjust the numbers so that when the model says
+    70%, it really is right about 70% of the time. For a tool a clinician might one day lean on, a
+    confidence figure that lies is worse than no figure at all.</p>
+    <p>Then we choose where to draw the line between "call it resistant" and "call it susceptible".
+    This is a <em>clinical</em> choice, not a mathematical one, because the two possible mistakes are
+    not equally bad.</p>
+  </div>
+</div>
+
+<figure>
+  <div class="figbox">
+    <svg viewBox="-26 -4 694 218" role="img" aria-label="A two by two grid of prediction against truth. The dangerous error is calling a resistant strain susceptible, which sends a patient an ineffective drug. The costly error is calling a susceptible strain resistant, which wastes a usable drug.">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="currentColor" letter-spacing="1.1">THE TWO MISTAKES ARE NOT EQUAL</text>
+
+      <text x="196" y="42" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".8">truth: RESISTANT</text>
+      <text x="392" y="42" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".8">truth: SUSCEPTIBLE</text>
+
+      <text x="88" y="82" font-size="10.5" text-anchor="end" fill="currentColor" opacity=".8">we say RESISTANT</text>
+      <text x="88" y="146" font-size="10.5" text-anchor="end" fill="currentColor" opacity=".8">we say SUSCEPTIBLE</text>
+
+      <rect x="98" y="54" width="196" height="52" rx="4" fill="none" stroke="var(--good)" stroke-width="1.5"/>
+      <text x="196" y="85" font-size="12" font-weight="650" text-anchor="middle" fill="var(--good)">correct</text>
+
+      <rect x="294" y="54" width="196" height="52" rx="4" fill="none" stroke="var(--gold)" stroke-width="1.8"/>
+      <text x="392" y="76" font-size="12" font-weight="700" text-anchor="middle" fill="var(--gold)">Major error</text>
+      <text x="392" y="94" font-size="10" text-anchor="middle" fill="var(--gold)">a usable drug is wasted</text>
+
+      <rect x="98" y="118" width="196" height="52" rx="4" fill="none" stroke="var(--bad)" stroke-width="2.4"/>
+      <text x="196" y="140" font-size="12" font-weight="700" text-anchor="middle" fill="var(--bad)">VERY MAJOR ERROR</text>
+      <text x="196" y="158" font-size="10" text-anchor="middle" fill="var(--bad)">patient gets a drug that fails</text>
+
+      <rect x="294" y="118" width="196" height="52" rx="4" fill="none" stroke="var(--good)" stroke-width="1.5"/>
+      <text x="392" y="149" font-size="12" font-weight="650" text-anchor="middle" fill="var(--good)">correct</text>
+
+      <text x="506" y="132" font-size="10.5" fill="currentColor" opacity=".85">We tune the model to keep</text>
+      <text x="506" y="148" font-size="10.5" fill="currentColor" opacity=".85">the red box under 3% —</text>
+      <text x="506" y="164" font-size="10.5" fill="currentColor" opacity=".85">accepting more orange</text>
+      <text x="506" y="180" font-size="10.5" fill="currentColor" opacity=".85">as the price of safety.</text>
+
+      <text x="0" y="200" font-size="10" fill="currentColor" opacity=".7">These are the standard clinical terms — regulators use exactly this vocabulary.</text>
+    </svg>
+  </div>
+  <figcaption>A tool that refuses to miss resistance will necessarily over-call it. That trade-off
+  is a deliberate, stated choice — not a flaw we're hiding.</figcaption>
+</figure>
+
+<div class="step">
+  <div class="num">8</div>
+  <div class="step-body">
+    <h2>Compare against the obvious simple method</h2>
+    <p>Here is the question that decides whether this project was worth doing:
+    <strong>does the machine learning add anything over just looking up the genes?</strong></p>
+    <p>You could skip all the training and write a one-line rule: "if the bacterium carries a known
+    resistance gene for this drug, call it resistant." That's a database lookup, and for some drugs
+    it works very well. We built that baseline and report it beside every result, because if our
+    model merely matches it, we've built an expensive lookup table.</p>
+    <p>The results are genuinely mixed, and we say so:</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Drug</th><th>Gene lookup</th><th>Our model</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>gentamicin</td><td class="num-cell">0.948</td><td class="num-cell">0.981</td><td>lookup is already excellent — we barely improve on it</td></tr>
+          <tr><td>meropenem</td><td class="num-cell">0.933</td><td class="num-cell">0.968</td><td>modest gain</td></tr>
+          <tr><td>ciprofloxacin</td><td class="num-cell">0.911</td><td class="num-cell">0.983</td><td>clear gain</td></tr>
+          <tr><td>TMP-SMX</td><td class="num-cell">0.885</td><td class="num-cell">0.977</td><td>clear gain</td></tr>
+          <tr><td><strong>cefoxitin</strong></td><td class="num-cell bad">0.500</td><td class="num-cell good">0.905</td><td><strong>the headline — see below</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>(A score of 1.0 is perfect and 0.5 is a coin flip.)</p>
+
+    <h3>Why cefoxitin is the result to lead with</h3>
+    <p>For cefoxitin the gene lookup is <strong>useless</strong> — 0.500, literally a coin flip. It
+    misses <strong>96.6% of resistant strains</strong> (368 out of 381).</p>
+    <p>The reason is biologically lovely. Cefoxitin resistance in these bacteria often isn't caused
+    by <em>gaining</em> a defensive gene. It's caused by <em>losing</em> a doorway — a surface protein
+    called a porin that the drug normally enters through. Break the door, and the drug can't get in.</p>
+    <p>A lookup that asks "which weapons is it carrying?" is structurally blind to a
+    <strong>missing</strong> feature. Our model learns the pattern of absence, and lifts the score
+    from 0.500 to 0.905.</p>
+
+    <div class="analogy">
+      <span class="tag">The one-sentence version for your colleague</span>
+      <p>"For most drugs, checking the gene list is nearly as good as our model — and we say so. But
+      for cefoxitin the gene list is a coin flip, because the resistance comes from something
+      <em>missing</em> rather than something present, and that's exactly where machine learning earns
+      its place."</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">9</div>
+  <div class="step-body">
+    <h2>Make every prediction explainable</h2>
+    <p>A prediction a clinician can't interrogate is not much use. So for every call, the tool lists
+    the specific genes that drove it, ranked by how much each contributed — using a standard
+    technique called <strong>SHAP</strong>.</p>
+    <p>This doubles as our scientific sanity check. When we asked the model what it was relying on,
+    it named the mechanisms microbiologists already know: <code>blaKPC</code> for meropenem,
+    <code>gyrA</code> and <code>parC</code> mutations for ciprofloxacin, the <code>ompK36</code>
+    porin for cefoxitin. The model rediscovered the textbook independently — strong evidence it
+    learned biology rather than statistical noise.</p>
+    <p>We're careful about one thing here: a gene ranking highly doesn't prove it <em>causes</em>
+    resistance. Resistance genes often travel together on the same mobile piece of DNA, so a gene can
+    look important simply by keeping company with the real culprit. We flag that openly rather than
+    claiming every top-ranked gene is causal.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">10</div>
+  <div class="step-body">
+    <h2>Test it on data from somewhere else entirely</h2>
+    <p>Everything above was validated on data from one source. A fair criticism remains: perhaps the
+    model only works on <em>that</em> collection.</p>
+    <p>So we're now testing it against bacteria curated by completely different groups — with the
+    models <strong>frozen</strong>, meaning no adjusting, no retraining, no second attempt.</p>
+    <p>Finding genuinely independent data was harder than it sounds. The obvious source turned out to
+    feed <em>into</em> our original database, so a naive comparison would have re-tested bacteria the
+    model had already learned from. We had to identify and remove that overlap — 16% of the
+    candidates — before anything meant anything.</p>
+    <p>And we committed to what we'd report <em>before</em> running it: all five drugs, whatever the
+    numbers, including a stricter second cohort that excludes any bacterial family the model has seen
+    before. If it does worse, that's the finding and it goes in the report.</p>
+  </div>
+</div>
+
+<div class="closing">
+  <h2>What to say if you only have two minutes</h2>
+  <ol>
+    <li><strong>The problem:</strong> finding out which antibiotics work takes two days in a lab. DNA
+    can be read in minutes. Can we predict the lab's answer from the DNA?</li>
+    <li><strong>What we built:</strong> a separate predictor for each antibiotic, working from a
+    checklist of known resistance genes found in the genome.</li>
+    <li><strong>The hard part:</strong> bacteria are clones, so a careless test lets the model win by
+    recognising families instead of understanding biology. We tested only on families it had never
+    seen — which lowers our numbers, deliberately.</li>
+    <li><strong>The honest comparison:</strong> for most drugs, simply looking up the genes is
+    almost as good, and we report that. For cefoxitin the lookup is a coin flip and our model reaches
+    0.905, because that resistance comes from a <em>missing</em> doorway rather than an added weapon.</li>
+    <li><strong>Every answer is explained,</strong> and the genes it relies on match known
+    microbiology.</li>
+    <li><strong>It is not a medical device.</strong> It's decision support; the lab test stays the
+    final word.</li>
+  </ol>
+
+  <h3>Words your colleague may hear us use</h3>
+  <dl class="gloss">
+    <dt>Genome</dt><dd>The bacterium's complete DNA — its full instruction manual.</dd>
+    <dt>Resistant / susceptible</dt><dd>The drug fails / the drug works.</dd>
+    <dt>Determinant</dt><dd>A gene or mutation known to cause resistance to a particular drug.</dd>
+    <dt>Feature</dt><dd>One yes/no box on the checklist we give the computer.</dd>
+    <dt>Sequence type (ST)</dt><dd>A family ID for near-identical bacteria, e.g. <code>ST258</code>.</dd>
+    <dt>Training</dt><dd>Showing the computer thousands of solved examples so it finds the patterns.</dd>
+    <dt>Calibration</dt><dd>Making the confidence percentages mean what they say.</dd>
+    <dt>Very major error</dt><dd>Calling a resistant bug susceptible. The dangerous mistake.</dd>
+    <dt>Major error</dt><dd>Calling a susceptible bug resistant. Wasteful, not dangerous.</dd>
+    <dt>ROC-AUC</dt><dd>A 0.5-to-1.0 score for how well the model separates the two groups. 0.5 is a coin flip.</dd>
+    <dt>Baseline</dt><dd>The simple method we must beat to justify the complicated one.</dd>
+  </dl>
+
+  <p class="footnote">All figures on this page come from the project's own results files. The
+  external-validation step described in section 10 was still running when this was written, and no
+  external numbers are quoted here.</p>
+</div>
+
+</div>

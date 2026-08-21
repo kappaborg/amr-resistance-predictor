@@ -1,0 +1,454 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - paragraph [ref=e4]: Reading Resistance · plain-language walkthrough
+    - heading "How we taught a computer to read a bacterium's genome and predict which antibiotics will fail" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Every step of the project, in order, with no assumed knowledge of programming or machine learning. Written to be explained out loud.
+  - heading "The problem we started from" [level=2] [ref=e7]
+  - paragraph [ref=e8]:
+    - text: When someone has a serious bacterial infection, the doctor needs to know which antibiotics will actually kill it. Bacteria are often
+    - strong [ref=e9]: resistant
+    - text: — the drug simply doesn't work on them any more. Give a patient a drug the bug is resistant to and you have lost days of treatment time on a sick person.
+  - paragraph [ref=e10]:
+    - text: The reliable way to find out is to grow the bacterium in a lab and test drugs against it directly. It works, but it takes about
+    - strong [ref=e11]: two days
+    - text: . Meanwhile the doctor has to guess.
+  - paragraph [ref=e12]:
+    - text: "Reading a bacterium's DNA is now fast and cheap. So the question behind this whole project is:"
+    - strong [ref=e13]: can we read the DNA and predict the lab result, without waiting for the lab?
+  - figure [ref=e14]:
+    - 'img "Two routes from a patient sample to an answer: the laboratory route takes about two days; the genome route takes minutes and also returns the reasons for each call." [ref=e16]':
+      - generic [ref=e17]: TODAY — THE LABORATORY ROUTE
+      - generic [ref=e19]: patient sample
+      - generic [ref=e20]: culture
+      - generic [ref=e22]: grow colonies
+      - generic [ref=e23]: ~24 h
+      - generic [ref=e25]: test each drug
+      - generic [ref=e26]: ~24 h
+      - generic [ref=e28]: answer
+      - generic [ref=e29]: ≈ 2 days
+      - generic [ref=e30]: THIS PROJECT — THE GENOME ROUTE
+      - generic [ref=e32]: patient sample
+      - generic [ref=e33]: sequence
+      - generic [ref=e35]: read the DNA
+      - generic [ref=e37]: our model
+      - generic [ref=e38]: minutes
+      - generic [ref=e40]: answer
+      - generic [ref=e41]: + the reasons
+      - generic [ref=e42]: minutes
+    - generic [ref=e43]:
+      - text: The lab route is the trusted answer, and we are not replacing it. We are trying to produce the same answer from DNA while the lab is still growing the culture — and, unlike a black box, to say
+      - emphasis [ref=e44]: why
+      - text: .
+  - paragraph [ref=e46]:
+    - strong [ref=e47]: "Say this early and often:"
+    - text: this is a research tool, not a medical device. Nobody treats a patient from our output. It is decision support, and the lab test remains the final word.
+  - heading "The ten steps, in order" [level=2] [ref=e48]
+  - generic [ref=e49]:
+    - generic [ref=e50]: "1"
+    - generic [ref=e51]:
+      - heading "Collect genomes that already have lab answers" [level=2] [ref=e52]
+      - paragraph [ref=e53]:
+        - text: To teach a computer, you need examples where you already know the right answer. We used a free public database called
+        - strong [ref=e54]: BV-BRC
+        - text: ", which holds bacterial genomes that laboratories around the world have sequenced"
+        - emphasis [ref=e55]: and
+        - text: tested against antibiotics.
+      - paragraph [ref=e56]:
+        - text: "So each example is a pair:"
+        - strong [ref=e57]: the full DNA of one bacterium
+        - text: ", and"
+        - strong [ref=e58]: the lab's verdict
+        - text: — resistant or susceptible — for each drug.
+      - paragraph [ref=e59]:
+        - text: One decision here mattered a lot. The database also contains verdicts that were themselves
+        - emphasis [ref=e60]: predicted by a computer
+        - text: . We excluded every one of those and kept only genuine laboratory results. Training a computer on another computer's guesses teaches it to copy the guesses, not the biology.
+      - paragraph [ref=e61]:
+        - text: We ended up with
+        - strong [ref=e62]: 3,850 genomes
+        - text: of
+        - emphasis [ref=e63]: Klebsiella pneumoniae
+        - text: — a serious hospital pathogen — and later repeated everything for seven more species.
+  - generic [ref=e64]:
+    - generic [ref=e65]: "2"
+    - generic [ref=e66]:
+      - heading "Throw out the bad-quality genomes" [level=2] [ref=e67]
+      - paragraph [ref=e68]: DNA sequencing isn't perfect. Some genomes come out incomplete, or contaminated with DNA from a different organism that was in the sample. If we feed those in, we teach the computer nonsense.
+      - paragraph [ref=e69]:
+        - text: "So we applied a quality checklist that microbiologists already agree on: the genome must be at least 90% complete, no more than 5% contaminated, and roughly the size a"
+        - emphasis [ref=e70]: Klebsiella
+        - text: genome should be. Anything failing was dropped.
+      - paragraph [ref=e71]:
+        - text: This removed about
+        - strong [ref=e72]: 2%
+        - text: of the genomes — and importantly, it removed resistant and susceptible ones in equal proportion, so it didn't quietly bias the dataset.
+  - generic [ref=e73]:
+    - generic [ref=e74]: "3"
+    - generic [ref=e75]:
+      - heading "Turn each genome into a simple checklist" [level=2] [ref=e76]
+      - paragraph [ref=e77]: A genome is millions of DNA letters — far too much raw material to hand a computer directly. We needed to reduce it to something meaningful.
+      - paragraph [ref=e78]:
+        - text: Fortunately, scientists have already catalogued the specific genes and mutations that make bacteria resistant to specific drugs. A free tool from the US National Institutes of Health,
+        - strong [ref=e79]: AMRFinderPlus
+        - text: ", scans a genome and reports which of those known resistance features it carries."
+      - generic [ref=e80]:
+        - generic [ref=e81]: The way to picture it
+        - paragraph [ref=e82]: Think of each bacterium as a burglar, and the antibiotic as a lock. Scientists have catalogued the burglary tools that open each lock. AMRFinderPlus opens the burglar's bag and ticks off which tools are inside. We don't hand the computer the whole bag — we hand it the checklist.
+      - paragraph [ref=e83]:
+        - text: Every genome becomes a row of
+        - strong [ref=e84]: 688 yes/no boxes
+        - text: ": does it carry"
+        - code [ref=e85]: blaKPC-2
+        - text: "? Yes."
+        - code [ref=e86]: gyrA_S83I
+        - text: "? No. And so on. That grid of ticks is what the computer actually learns from — and because every box has a real biological name, we can always explain a prediction afterwards."
+  - figure [ref=e87]:
+    - img "A genome file is scanned by AMRFinderPlus into a 688-column yes or no checklist, which is fed to five separate models, one per antibiotic, each producing a resistant or susceptible call." [ref=e89]:
+      - generic [ref=e91]: one genome
+      - generic [ref=e92]: DNA file
+      - generic [ref=e93]: scan
+      - generic [ref=e95]: AMRFinderPlus
+      - generic [ref=e96]: finds known genes
+      - generic [ref=e98]: 688 yes/no boxes
+      - generic [ref=e99]: blaKPC-2
+      - generic [ref=e100]: ✓
+      - generic [ref=e101]: gyrA_S83I
+      - generic [ref=e102]: ✓
+      - generic [ref=e103]: ompK36…
+      - generic [ref=e104]: ✗
+      - generic [ref=e105]: … 685 more
+      - generic [ref=e107]: model · meropenem
+      - generic [ref=e109]: model · gentamicin
+      - generic [ref=e111]: model · ciprofloxacin
+      - generic [ref=e113]: model · TMP-SMX
+      - generic [ref=e115]: model · cefoxitin
+      - generic [ref=e116]: Resistant
+      - generic [ref=e117]: Susceptible
+      - generic [ref=e118]: Resistant
+      - generic [ref=e119]: Susceptible
+      - generic [ref=e120]: Resistant
+    - generic [ref=e121]:
+      - text: One genome in, five independent answers out. Note there is a
+      - strong [ref=e122]: separate model for each antibiotic
+      - text: — resistance to one drug is a different biological mechanism from resistance to another, so pooling them would be meaningless.
+  - generic [ref=e123]:
+    - generic [ref=e124]: "4"
+    - generic [ref=e125]:
+      - heading "Work out which bacteria are relatives" [level=2] [ref=e126]
+      - paragraph [ref=e127]: This step looks like bookkeeping and is actually the heart of the project.
+      - paragraph [ref=e128]:
+        - text: Bacteria reproduce by copying themselves. That means a real-world collection of bacteria isn't 3,850 independent individuals — it's a set of
+        - strong [ref=e129]: extended families of near-identical twins
+        - text: . One successful hospital strain can account for hundreds of samples that are essentially the same organism.
+      - paragraph [ref=e130]:
+        - text: There's a standard way to work out which family each one belongs to, called
+        - strong [ref=e131]: MLST
+        - text: . It reads seven specific housekeeping genes and assigns a family number — a "sequence type", written
+        - code [ref=e132]: ST258
+        - text: ","
+        - code [ref=e133]: ST307
+        - text: and so on. We ran it on every genome. Our 3,850 genomes turned out to belong to
+        - strong [ref=e134]: 513 families
+        - text: .
+  - generic [ref=e135]:
+    - generic [ref=e136]: "5"
+    - generic [ref=e137]:
+      - heading "Split the data by family — the single most important decision" [level=2] [ref=e138]
+      - paragraph [ref=e139]: To find out whether a model is any good, you hide some data from it during training, then test it on that hidden data. Standard practice.
+      - paragraph [ref=e140]:
+        - text: But
+        - emphasis [ref=e141]: how
+        - text: you choose what to hide changes everything. The obvious approach — shuffle everything and take a random 30% — is badly wrong here, and this is the point your colleague most needs to understand.
+      - generic [ref=e142]:
+        - generic [ref=e143]: The way to picture it
+        - paragraph [ref=e144]:
+          - text: Imagine testing whether a student understands medicine by giving them an exam. If you split a family of identical twins — some in the study set, their twins in the exam — the student can score brilliantly by
+          - emphasis [ref=e145]: recognising faces
+          - text: . They never had to learn any medicine. To find out what they actually understand, you must examine them on
+          - strong [ref=e146]: families they have never met
+          - text: .
+      - paragraph [ref=e147]: "So we split by family: every genome from a given sequence type goes entirely into training or entirely into testing, never both. The model is then judged only on lineages it has genuinely never seen."
+      - paragraph [ref=e148]:
+        - text: This makes our numbers
+        - emphasis [ref=e149]: look worse
+        - text: than most published papers, which commonly use the random split. That's the point. We would rather report a real number than a flattering one, and we wrote an automated check that fails the whole project if a single family ever appears on both sides.
+  - figure "We didn't just assert that the random split inflates results — we measured it. Running the identical model both ways, the random split scores higher on every drug. That gap is exactly the credit the model didn't earn." [ref=e150]:
+    - img "Comparison of two ways to split the data. A random split cuts through families so near-identical twins appear in both training and testing, letting the model score well by recognising families. A family-based split keeps whole families on one side, forcing the model to generalise to lineages it has never seen." [ref=e152]:
+      - generic [ref=e153]: RANDOM SPLIT — LEAKS
+      - generic [ref=e154]: families are cut in half
+      - generic [ref=e156]: TRAIN
+      - generic [ref=e158]: A
+      - generic [ref=e160]: A
+      - generic [ref=e162]: B
+      - generic [ref=e164]: B
+      - generic [ref=e166]: C
+      - generic [ref=e168]: A
+      - generic [ref=e170]: TEST
+      - generic [ref=e172]: A
+      - generic [ref=e174]: B
+      - generic [ref=e176]: C
+      - generic [ref=e177]: Family A, B and C sit on both sides.
+      - generic [ref=e178]: The model can win by recognising them.
+      - generic [ref=e179]: FAMILY SPLIT — HONEST
+      - generic [ref=e180]: whole families stay together
+      - generic [ref=e182]: TRAIN
+      - generic [ref=e184]: A
+      - generic [ref=e186]: A
+      - generic [ref=e188]: A
+      - generic [ref=e190]: B
+      - generic [ref=e192]: B
+      - generic [ref=e194]: B
+      - generic [ref=e196]: TEST
+      - generic [ref=e198]: C
+      - generic [ref=e200]: C
+      - generic [ref=e202]: C
+      - generic [ref=e203]: Family C was never seen in training.
+      - generic [ref=e204]: The model must explain new biology.
+      - generic [ref=e205]: WHY IT MATTERS
+      - generic [ref=e207]: Random split score
+      - generic [ref=e208]: "0.935"
+      - generic [ref=e209]: Family split score
+      - generic [ref=e210]: "0.903"
+      - generic [ref=e211]: difference = free credit
+      - generic [ref=e212]: "0.032"
+      - generic [ref=e213]: Measured on our own cefoxitin
+      - generic [ref=e214]: model. The random split hands the
+      - generic [ref=e215]: model marks it did not earn — so
+      - generic [ref=e216]: we always report the lower number.
+  - generic [ref=e218]:
+    - generic [ref=e219]: "6"
+    - generic [ref=e220]:
+      - heading "Train one model per antibiotic" [level=2] [ref=e221]
+      - paragraph [ref=e222]: Now the actual learning. Here is what "training a model" really means, without jargon.
+      - paragraph [ref=e223]:
+        - text: The computer starts knowing nothing. It looks at thousands of examples — each one a checklist of genes plus the lab's verdict — and gradually works out
+        - strong [ref=e224]: which combinations of ticks go with "resistant"
+        - text: . It is pattern-finding at scale, not reasoning.
+      - paragraph [ref=e225]:
+        - text: The specific method we used is called
+        - strong [ref=e226]: gradient boosting
+        - text: . It builds a long series of very simple yes/no rules, where each new rule is aimed at fixing the mistakes the previous ones made. Hundreds of small corrections add up to a strong overall judgement.
+      - generic [ref=e227]:
+        - generic [ref=e228]: The way to picture it
+        - paragraph [ref=e229]: A trainee reviews thousands of past cases. After each batch, a supervisor points out only the ones they got wrong, and the trainee adds a small rule to catch that mistake next time. Repeat three hundred times. Nobody wrote the rules in advance; they were learned from the errors.
+      - paragraph [ref=e230]:
+        - text: "One deliberate choice worth mentioning: we"
+        - strong [ref=e231]: did not tune the model's settings
+        - text: . There are knobs you can adjust to squeeze out a slightly better score, but adjusting them while looking at your own test data is a subtle way of cheating. We fixed one sensible configuration and used it identically for every drug and every species.
+  - figure "The whole loop runs inside the training data. The test families are touched exactly once, at the end. This discipline is what makes the reported number believable." [ref=e232]:
+    - 'img "The training loop for one antibiotic: data is grouped into folds by family, the model learns from the training folds and is checked on the held-out fold, then probabilities are calibrated and a safety threshold is chosen, before the final model is tested once on families never used." [ref=e234]':
+      - generic [ref=e235]: TRAINING ONE DRUG'S MODEL
+      - generic [ref=e237]: 3,850 checklists
+      - generic [ref=e238]: + lab verdicts
+      - generic [ref=e239]: group
+      - generic [ref=e241]: split by family
+      - generic [ref=e242]: 513 sequence types
+      - generic [ref=e244]: repeat, holding out each fold in turn
+      - generic [ref=e246]: learn on 3 folds
+      - generic [ref=e247]: build correction rules
+      - generic [ref=e249]: check on the 4th
+      - generic [ref=e250]: unseen families
+      - generic [ref=e252]: calibrate
+      - generic [ref=e253]: make "70%" mean 70%
+      - generic [ref=e255]: set safety threshold
+      - generic [ref=e256]: miss ≤ 3% of resistant
+      - generic [ref=e258]: final score
+      - generic [ref=e259]: families never used —
+      - generic [ref=e260]: measured once, reported as-is
+      - generic [ref=e261]: Everything on the left happens
+      - generic [ref=e262]: inside the training data only.
+      - generic [ref=e263]: The threshold in particular is
+      - generic [ref=e264]: chosen without ever looking at
+      - generic [ref=e265]: the test families — otherwise
+      - generic [ref=e266]: the final score is not honest.
+  - generic [ref=e268]:
+    - generic [ref=e269]: "7"
+    - generic [ref=e270]:
+      - heading "Make the confidence numbers honest, then pick a safety setting" [level=2] [ref=e271]
+      - paragraph [ref=e272]: "The model doesn't just say \"resistant\" — it produces a number between 0 and 1, its confidence. Raw model confidences are usually miscalibrated: a model might say \"90% sure\" on cases where it's actually right only 70% of the time."
+      - paragraph [ref=e273]:
+        - strong [ref=e274]: Calibration
+        - text: fixes this. We adjust the numbers so that when the model says 70%, it really is right about 70% of the time. For a tool a clinician might one day lean on, a confidence figure that lies is worse than no figure at all.
+      - paragraph [ref=e275]:
+        - text: Then we choose where to draw the line between "call it resistant" and "call it susceptible". This is a
+        - emphasis [ref=e276]: clinical
+        - text: choice, not a mathematical one, because the two possible mistakes are not equally bad.
+  - figure "A tool that refuses to miss resistance will necessarily over-call it. That trade-off is a deliberate, stated choice — not a flaw we're hiding." [ref=e277]:
+    - img "A two by two grid of prediction against truth. The dangerous error is calling a resistant strain susceptible, which sends a patient an ineffective drug. The costly error is calling a susceptible strain resistant, which wastes a usable drug." [ref=e279]:
+      - generic [ref=e280]: THE TWO MISTAKES ARE NOT EQUAL
+      - generic [ref=e281]: "truth: RESISTANT"
+      - generic [ref=e282]: "truth: SUSCEPTIBLE"
+      - generic [ref=e283]: we say RESISTANT
+      - generic [ref=e284]: we say SUSCEPTIBLE
+      - generic [ref=e286]: correct
+      - generic [ref=e288]: Major error
+      - generic [ref=e289]: a usable drug is wasted
+      - generic [ref=e291]: VERY MAJOR ERROR
+      - generic [ref=e292]: patient gets a drug that fails
+      - generic [ref=e294]: correct
+      - generic [ref=e295]: We tune the model to keep
+      - generic [ref=e296]: the red box under 3% —
+      - generic [ref=e297]: accepting more orange
+      - generic [ref=e298]: as the price of safety.
+      - generic [ref=e299]: These are the standard clinical terms — regulators use exactly this vocabulary.
+  - generic [ref=e301]:
+    - generic [ref=e302]: "8"
+    - generic [ref=e303]:
+      - heading "Compare against the obvious simple method" [level=2] [ref=e304]
+      - paragraph [ref=e305]:
+        - text: "Here is the question that decides whether this project was worth doing:"
+        - strong [ref=e306]: does the machine learning add anything over just looking up the genes?
+      - paragraph [ref=e307]: "You could skip all the training and write a one-line rule: \"if the bacterium carries a known resistance gene for this drug, call it resistant.\" That's a database lookup, and for some drugs it works very well. We built that baseline and report it beside every result, because if our model merely matches it, we've built an expensive lookup table."
+      - paragraph [ref=e308]: "The results are genuinely mixed, and we say so:"
+      - table [ref=e310]:
+        - rowgroup [ref=e311]:
+          - row [ref=e312]:
+            - columnheader "Drug" [ref=e313]
+            - columnheader "Gene lookup" [ref=e314]
+            - columnheader "Our model" [ref=e315]
+            - columnheader "Verdict" [ref=e316]
+        - rowgroup [ref=e317]:
+          - row [ref=e318]:
+            - cell "gentamicin" [ref=e319]
+            - cell "0.948" [ref=e320]
+            - cell "0.981" [ref=e321]
+            - cell "lookup is already excellent — we barely improve on it" [ref=e322]
+          - row [ref=e323]:
+            - cell "meropenem" [ref=e324]
+            - cell "0.933" [ref=e325]
+            - cell "0.968" [ref=e326]
+            - cell "modest gain" [ref=e327]
+          - row [ref=e328]:
+            - cell "ciprofloxacin" [ref=e329]
+            - cell "0.911" [ref=e330]
+            - cell "0.983" [ref=e331]
+            - cell "clear gain" [ref=e332]
+          - row [ref=e333]:
+            - cell "TMP-SMX" [ref=e334]
+            - cell "0.885" [ref=e335]
+            - cell "0.977" [ref=e336]
+            - cell "clear gain" [ref=e337]
+          - row [ref=e338]:
+            - cell [ref=e339]:
+              - strong [ref=e340]: cefoxitin
+            - cell "0.500" [ref=e341]
+            - cell "0.905" [ref=e342]
+            - cell [ref=e343]:
+              - strong [ref=e344]: the headline — see below
+      - paragraph [ref=e345]: (A score of 1.0 is perfect and 0.5 is a coin flip.)
+      - heading "Why cefoxitin is the result to lead with" [level=3] [ref=e346]
+      - paragraph [ref=e347]:
+        - text: For cefoxitin the gene lookup is
+        - strong [ref=e348]: useless
+        - text: — 0.500, literally a coin flip. It misses
+        - strong [ref=e349]: 96.6% of resistant strains
+        - text: (368 out of 381).
+      - paragraph [ref=e350]:
+        - text: The reason is biologically lovely. Cefoxitin resistance in these bacteria often isn't caused by
+        - emphasis [ref=e351]: gaining
+        - text: a defensive gene. It's caused by
+        - emphasis [ref=e352]: losing
+        - text: a doorway — a surface protein called a porin that the drug normally enters through. Break the door, and the drug can't get in.
+      - paragraph [ref=e353]:
+        - text: A lookup that asks "which weapons is it carrying?" is structurally blind to a
+        - strong [ref=e354]: missing
+        - text: feature. Our model learns the pattern of absence, and lifts the score from 0.500 to 0.905.
+      - generic [ref=e355]:
+        - generic [ref=e356]: The one-sentence version for your colleague
+        - paragraph [ref=e357]:
+          - text: "\"For most drugs, checking the gene list is nearly as good as our model — and we say so. But for cefoxitin the gene list is a coin flip, because the resistance comes from something"
+          - emphasis [ref=e358]: missing
+          - text: rather than something present, and that's exactly where machine learning earns its place."
+  - generic [ref=e359]:
+    - generic [ref=e360]: "9"
+    - generic [ref=e361]:
+      - heading "Make every prediction explainable" [level=2] [ref=e362]
+      - paragraph [ref=e363]:
+        - text: A prediction a clinician can't interrogate is not much use. So for every call, the tool lists the specific genes that drove it, ranked by how much each contributed — using a standard technique called
+        - strong [ref=e364]: SHAP
+        - text: .
+      - paragraph [ref=e365]:
+        - text: "This doubles as our scientific sanity check. When we asked the model what it was relying on, it named the mechanisms microbiologists already know:"
+        - code [ref=e366]: blaKPC
+        - text: for meropenem,
+        - code [ref=e367]: gyrA
+        - text: and
+        - code [ref=e368]: parC
+        - text: mutations for ciprofloxacin, the
+        - code [ref=e369]: ompK36
+        - text: porin for cefoxitin. The model rediscovered the textbook independently — strong evidence it learned biology rather than statistical noise.
+      - paragraph [ref=e370]:
+        - text: "We're careful about one thing here: a gene ranking highly doesn't prove it"
+        - emphasis [ref=e371]: causes
+        - text: resistance. Resistance genes often travel together on the same mobile piece of DNA, so a gene can look important simply by keeping company with the real culprit. We flag that openly rather than claiming every top-ranked gene is causal.
+  - generic [ref=e372]:
+    - generic [ref=e373]: "10"
+    - generic [ref=e374]:
+      - heading "Test it on data from somewhere else entirely" [level=2] [ref=e375]
+      - paragraph [ref=e376]:
+        - text: "Everything above was validated on data from one source. A fair criticism remains: perhaps the model only works on"
+        - emphasis [ref=e377]: that
+        - text: collection.
+      - paragraph [ref=e378]:
+        - text: So we're now testing it against bacteria curated by completely different groups — with the models
+        - strong [ref=e379]: frozen
+        - text: ", meaning no adjusting, no retraining, no second attempt."
+      - paragraph [ref=e380]:
+        - text: Finding genuinely independent data was harder than it sounds. The obvious source turned out to feed
+        - emphasis [ref=e381]: into
+        - text: our original database, so a naive comparison would have re-tested bacteria the model had already learned from. We had to identify and remove that overlap — 16% of the candidates — before anything meant anything.
+      - paragraph [ref=e382]:
+        - text: And we committed to what we'd report
+        - emphasis [ref=e383]: before
+        - text: "running it: all five drugs, whatever the numbers, including a stricter second cohort that excludes any bacterial family the model has seen before. If it does worse, that's the finding and it goes in the report."
+  - generic [ref=e384]:
+    - heading "What to say if you only have two minutes" [level=2] [ref=e385]
+    - list [ref=e386]:
+      - listitem [ref=e387]:
+        - strong [ref=e388]: "The problem:"
+        - text: finding out which antibiotics work takes two days in a lab. DNA can be read in minutes. Can we predict the lab's answer from the DNA?
+      - listitem [ref=e389]:
+        - strong [ref=e390]: "What we built:"
+        - text: a separate predictor for each antibiotic, working from a checklist of known resistance genes found in the genome.
+      - listitem [ref=e391]:
+        - strong [ref=e392]: "The hard part:"
+        - text: bacteria are clones, so a careless test lets the model win by recognising families instead of understanding biology. We tested only on families it had never seen — which lowers our numbers, deliberately.
+      - listitem [ref=e393]:
+        - strong [ref=e394]: "The honest comparison:"
+        - text: for most drugs, simply looking up the genes is almost as good, and we report that. For cefoxitin the lookup is a coin flip and our model reaches 0.905, because that resistance comes from a
+        - emphasis [ref=e395]: missing
+        - text: doorway rather than an added weapon.
+      - listitem [ref=e396]:
+        - strong [ref=e397]: Every answer is explained,
+        - text: and the genes it relies on match known microbiology.
+      - listitem [ref=e398]:
+        - strong [ref=e399]: It is not a medical device.
+        - text: It's decision support; the lab test stays the final word.
+    - heading "Words your colleague may hear us use" [level=3] [ref=e400]
+    - generic [ref=e401]:
+      - term [ref=e402]: Genome
+      - definition [ref=e403]: The bacterium's complete DNA — its full instruction manual.
+      - term [ref=e404]: Resistant / susceptible
+      - definition [ref=e405]: The drug fails / the drug works.
+      - term [ref=e406]: Determinant
+      - definition [ref=e407]: A gene or mutation known to cause resistance to a particular drug.
+      - term [ref=e408]: Feature
+      - definition [ref=e409]: One yes/no box on the checklist we give the computer.
+      - term [ref=e410]: Sequence type (ST)
+      - definition [ref=e411]:
+        - text: A family ID for near-identical bacteria, e.g.
+        - code [ref=e412]: ST258
+        - text: .
+      - term [ref=e413]: Training
+      - definition [ref=e414]: Showing the computer thousands of solved examples so it finds the patterns.
+      - term [ref=e415]: Calibration
+      - definition [ref=e416]: Making the confidence percentages mean what they say.
+      - term [ref=e417]: Very major error
+      - definition [ref=e418]: Calling a resistant bug susceptible. The dangerous mistake.
+      - term [ref=e419]: Major error
+      - definition [ref=e420]: Calling a susceptible bug resistant. Wasteful, not dangerous.
+      - term [ref=e421]: ROC-AUC
+      - definition [ref=e422]: A 0.5-to-1.0 score for how well the model separates the two groups. 0.5 is a coin flip.
+      - term [ref=e423]: Baseline
+      - definition [ref=e424]: The simple method we must beat to justify the complicated one.
+    - paragraph [ref=e425]: All figures on this page come from the project's own results files. The external-validation step described in section 10 was still running when this was written, and no external numbers are quoted here.

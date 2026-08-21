@@ -1,0 +1,26 @@
+{
+ "meta": {
+  "n_isolates": 3,
+  "n_typed": 3,
+  "n_st_novel": 1,
+  "n_training_sts": 513,
+  "missing_annotation": 1141,
+  "top_sts": [
+   [
+    "258",
+    2
+   ],
+   [
+    "1272",
+    1
+   ]
+  ]
+ },
+ "drugs": {
+  "meropenem": {},
+  "gentamicin": {},
+  "ciprofloxacin": {},
+  "trimethoprim_sulfamethoxazole": {},
+  "cefoxitin": {}
+ }
+}
