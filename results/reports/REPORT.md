@@ -480,7 +480,7 @@ with the reason given. Several others are honestly marked ❌ or ⚠️ — most
 | 27b | User interaction and expertise required | ✅ | §6, `README.md` — genome in, per-drug call + calibrated probability + determinants out; intended for users who can interpret an AST result |
 | 27c | Next steps, applicability, generalizability | ✅ | §7 and **Appendix B** |
 
-**Self-assessed tally (52 rows):** ✅ 30 · ⚠️ 9 · ❌ 1 · ➖ 12.
+**Self-assessed tally (52 rows):** ✅ 30 reported · ⚠️ 10 partial · ❌ 1 not done · ➖ 11 not applicable.
 
 The single ❌ (item 10, sample size justification) and the concentration of ➖ in the evaluation track
 are both real and both point the same direction: this is a **development-and-internal-validation**
