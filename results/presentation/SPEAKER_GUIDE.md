@@ -364,13 +364,13 @@ mechanism — we label it as such rather than dress it up as an ML win. This hon
 apology."
 
 ### Slide 29 — Generalization: 8 WHO-priority pathogens
-**On screen:** the `generalization_heatmap.png` — 8 organisms × up-to-18 drugs, ROC 0.84–0.998. Gram−:
+**On screen:** the `generalization_heatmap.png` — 8 organisms × up-to-18 drugs, ROC 0.84–0.998 (single split; 0.751–0.998 under pooled CV — quote the lower one if pressed). Gram−:
 K. pneumoniae, E. coli, A. baumannii, P. aeruginosa, Salmonella. Gram+: S. aureus, E. faecium,
 S. pneumoniae.
 
 **What to say:** "The identical pipeline — only the taxon, the AMRFinderPlus organism string, and the
 MLST scheme change — runs on **eight** priority pathogens, spanning the Gram divide and four
-phylogenetic classes. Every organism-drug reaches AUC 0.84 to 0.998 on unseen lineages. And the model
+phylogenetic classes. Every organism-drug reaches AUC 0.84 to 0.998 on unseen lineages in the single split; under pooled cross-validation the floor is 0.751 (P. aeruginosa ceftazidime). Quote the lower number if challenged. And the model
 earns its keep exactly where the biology is combinatorial: S. aureus cefoxitin, A. baumannii amikacin
 (+0.32 over rules), E. faecium ampicillin capturing pbp5 (+0.35), S. pneumoniae penicillin capturing the
 PBP mosaic. It matches the lookup on direct single-gene calls — mecA, van, carbapenemases — as it should."

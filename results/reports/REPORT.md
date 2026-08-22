@@ -123,8 +123,11 @@ The identical pipeline runs on **eight WHO-priority pathogens** spanning the Gra
 runner; only taxon / AMRFinderPlus organism / MLST scheme change) — **Enterobacterales:** *K. pneumoniae*,
 *E. coli*, *Salmonella enterica*; **Gram-negative non-fermenters (WHO critical):** *A. baumannii*,
 *P. aeruginosa*; **Gram-positives:** *S. aureus*, *E. faecium* (VRE), *S. pneumoniae*.
-Every organism × drug reaches ROC-AUC **0.84–0.998**
-on unseen lineages (`summary_18`, `#26–29`). ML clearly beats the gene-lookup where resistance is
+Every organism × drug reaches ROC-AUC **0.84–0.998** on unseen lineages in the **single held-out
+split** (`summary_18`, `#26–29`). Under the stricter **pooled lineage-grouped CV** the same 36
+models span **0.751–0.998** (`clinical_rigor.json`; the floor is *P. aeruginosa* ceftazidime, where
+resistance is regulatory rather than gene-encoded). Both are reported; the pooled figure is the
+conservative one. ML clearly beats the gene-lookup where resistance is
 combinatorial or regulatory (S. aureus cefoxitin 0.93 vs 0.80; A. baumannii amikacin 0.90 vs 0.54;
 P. aeruginosa ceftazidime 0.87 vs 0.70; E. faecium ampicillin captures *pbp5*; S. pneumoniae penicillin
 captures the *pbp1a/2b/2x* mosaic) and matches it on direct single-gene calls (mecA, van, carbapenemases).
@@ -376,7 +379,7 @@ safeguard: every prediction is auditable via its determinants.
 ## 9. Reproducibility
 Pinned `environment.yml` (incl. `torch`/`fair-esm`/`biopython`/`scipy` for the ESM-2 pipeline), fixed
 seed (42), config-driven runs, `data/manifest.md` (all eight organisms + ESM-2 derived data, sources,
-queries, tool versions), and `docs/decisions.md` (58 logged decisions). Tests (`pytest`) cover the
+queries, tool versions), and `docs/decisions.md` (59 logged decisions). Tests (`pytest`) cover the
 data joins, the feature builder, and — most importantly — the **lineage splitter**, asserting zero
 train/test lineage overlap **for every organism** (parametrized over all 8 split CSVs). A second guard asserts that **every shipped rules baseline actually occurs in 1–99% of its own organism's genomes** — a list that never fires, or fires everywhere, is a broken measurement rather than a weak opponent, and both failure modes produce a deceptive ROC of ~0.5 (decisions #42 and #57). Makefile
 targets regenerate each stage (`make features`, `split`, `train`, `eval`, `organisms ORG=…`,

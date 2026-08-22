@@ -517,7 +517,7 @@ make data · features · split · train · eval · figures        <span class="g
 <section class="slide">
   <p class="kicker">Generalization</p><h2>8 WHO-priority pathogens · one pipeline</h2>
   <figure><img src="../figures/generalization_heatmap.png" alt="Generalization heatmap: 8 organisms × drugs, unseen-lineage ROC-AUC">
-    <figcaption>Unseen-lineage ROC-AUC, 8 organisms × up to 18 drugs (36 calibrated models). ROC 0.84–0.998.</figcaption></figure>
+    <figcaption>Unseen-lineage ROC-AUC, 8 organisms × up to 18 drugs (36 calibrated models). ROC 0.84–0.998 (single split; 0.751–0.998 under pooled CV).</figcaption></figure>
   <div class="notes"><h4>Say</h4>Identical pipeline — only taxon, AMRFinderPlus string, and MLST scheme change — across 8 pathogens spanning the Gram divide. ML earns its keep where biology is combinatorial: S. aureus cefoxitin, A. baumannii amikacin (+0.32), E. faecium pbp5 (+0.35), S. pneumoniae PBP mosaic. Note: E. cloacae and C. jejuni excluded for insufficient data — honest selection.</div>
 </section>
 

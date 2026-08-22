@@ -87,7 +87,7 @@ and REPORT §4.4. **Every internal number below should be read as internal valid
   S. aureus, P. aeruginosa, Salmonella enterica, E. faecium, S. pneumoniae), per-drug calibrated
   models (VME≤3% operating point), SHAP + biological validation, interactive demo, ESM-2 allele MIC
   extension, honest GNN rejection. See `results/reports/REPORT.md` and `summary_*.md`.
-- Discrimination ROC-AUC **0.84–0.998** on **unseen lineages**; ML beats the gene-lookup where
+- Discrimination ROC-AUC **0.84–0.998** on **unseen lineages** (single held-out split; **0.751–0.998** under pooled lineage-grouped CV); ML beats the gene-lookup where
   resistance is combinatorial/regulatory (cefoxitin porin loss, P. aeruginosa ceftazidime, E. faecium
   pbp5, S. pneumoniae pbp mosaics) and matches it on direct single-gene calls (mecA, van, carbapenemases).
 - Regulator-grade evaluation (VME/ME/CA + Brier calibration + lineage-clustered CIs + DeLong vs an

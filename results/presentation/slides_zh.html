@@ -539,7 +539,7 @@ make data · features · split · train · eval · figures        <span class="g
 <section class="slide">
   <p class="kicker">泛化能力</p><h2>8 种 WHO 重点病原体 · 同一流程</h2>
   <figure><img src="../figures/generalization_heatmap.png" alt="泛化热图：8 种菌 × 药物，未见谱系 ROC-AUC">
-    <figcaption>未见谱系 ROC-AUC，8 种菌 × 至多 18 种药（36 个校准模型）。ROC 0.84–0.998。</figcaption></figure>
+    <figcaption>未见谱系 ROC-AUC，8 种菌 × 至多 18 种药（36 个校准模型）。ROC 0.84–0.998（单次划分；按谱系分组交叉验证为 0.751–0.998）。</figcaption></figure>
   <div class="notes"><h4>讲</h4>同一流程——只改动 taxon、AMRFinderPlus 字符串与 MLST 方案——跑通了 8 种跨越革兰氏分界的病原体。机器学习在生物学呈组合性之处最见价值：金黄色葡萄球菌头孢西丁、鲍曼不动杆菌阿米卡星（+0.32）、屎肠球菌 pbp5（+0.35）、肺炎链球菌 PBP 镶嵌型。注意：阴沟肠杆菌与空肠弯曲菌因数据不足被排除——诚实的选择。</div>
 </section>
 
