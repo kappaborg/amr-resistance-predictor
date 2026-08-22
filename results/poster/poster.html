@@ -114,10 +114,22 @@
         <p style="margin-top:3mm"><span class="pill">DeLong paired test</span> The model beats the gene-lookup baseline on <b>every drug</b> — significant, not just numerically larger.</p>
       </div>
       <div class="card big">
-        <h2>The headline: cefoxitin</h2>
-        <p>Resistance is driven by <b>porin loss</b> a gene-lookup cannot see. The baseline is near-useless — it misses 96.3% of resistant strains (1,469 of 1,525):</p>
-        <p style="text-align:center;margin:4mm 0"><span class="num">0.52 <small>→</small> 0.91</span></p>
-        <p style="text-align:center">rules ROC-AUC → model ROC-AUC. This is <b>what machine learning adds over a database query</b>, made concrete.</p>
+        <h2>The headline: we tested externally, and it got worse</h2>
+        <p><b>1,143 isolates curated by other groups.</b> Models frozen — no retraining, no re-thresholding. Analysis plan <b>registered before any genome was downloaded</b>.</p>
+        <table style="margin:2mm 0">
+          <tr><th class="l">Drug</th><th>internal</th><th>external</th><th>vs lookup</th></tr>
+          <tr><td class="l">meropenem</td><td>0.968</td><td class="bad">0.795</td><td>+0.027</td></tr>
+          <tr><td class="l">gentamicin</td><td>0.981</td><td class="bad">0.826</td><td>+0.030</td></tr>
+          <tr><td class="l">ciprofloxacin</td><td>0.983</td><td class="bad">0.835</td><td>+0.065</td></tr>
+          <tr><td class="l">TMP-SMX</td><td>0.977</td><td class="bad">0.806</td><td>+0.092</td></tr>
+          <tr><td class="l"><b>cefoxitin</b></td><td>0.905</td><td class="bad"><b>0.596</b></td><td>+0.027</td></tr>
+        </table>
+        <p><b>Survives:</b> beats the gene-lookup on 4/5 drugs externally. <b>Does not:</b> the cefoxitin gap is internal-only, and the VME≤3% operating point does not transfer.</p>
+      </div>
+      <div class="card">
+        <h2>Cefoxitin — the internal result, and why it fell</h2>
+        <p>Internally, resistance is driven by <b>porin loss</b> a gene-lookup cannot see: the AmpC baseline misses 96.3% of resistant strains (1,469 of 1,525), and the model lifts <b>0.52 → 0.91</b>.</p>
+        <p>Externally it drops to <b>0.596</b> — the drug that leaned most on <b>co-carried</b> MDR markers, while the <b>mechanistic</b> AmpC lookup barely moved (0.518 → 0.569). <b>A mechanism travels; a population-specific correlation does not.</b> We flagged this as a limitation in writing before the test.</p>
       </div>
       <div class="card">
         <figure>

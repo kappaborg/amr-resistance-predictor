@@ -72,7 +72,17 @@ Keys: `ANTHROPIC_API_KEY` (claude-opus-4-8) · `DEEPSEEK_API_KEY` (deepseek-chat
 `GEMINI_MODEL`). Gemini uses Google's native API; DeepSeek uses its OpenAI-compatible endpoint.
 With **no key set the demo still works fully** — it prints a deterministic templated report instead.
 
-## Status — 8 WHO-priority pathogens
+## Status — externally validated, and the result is honest
+
+**External validation is complete and the models degraded.** On **1,143 *K. pneumoniae* isolates
+curated by other groups** — frozen models, no retraining, analysis plan registered *before* any genome
+was downloaded — ROC-AUC falls from 0.905–0.983 internally to **0.795–0.835**, and cefoxitin to
+**0.596**. The model still beats the known-gene lookup on **4 of 5** drugs (+0.027 to +0.092), but the
+VME ≤ 3% operating point does not transfer. A feature-extraction artifact was ruled out first
+(14.4 determinants/genome external vs 15.1 training). See `results/reports/summary_33_external_validation.md`
+and REPORT §4.4. **Every internal number below should be read as internal validation under a strict split.**
+
+## Internal results — 8 WHO-priority pathogens
 - **Delivered:** end-to-end pipeline across **8 organisms** (K. pneumoniae, E. coli, A. baumannii,
   S. aureus, P. aeruginosa, Salmonella enterica, E. faecium, S. pneumoniae), per-drug calibrated
   models (VME≤3% operating point), SHAP + biological validation, interactive demo, ESM-2 allele MIC

@@ -140,7 +140,7 @@
     <div class="card center"><div style="font-size:2.6rem">🧬 → 🧩</div><h3>基因组输入 → 决定因子特征</h3><p class="muted">这个菌株携带哪些已知的耐药基因与突变？</p></div>
     <div class="card center"><div style="font-size:2.6rem">📊 → 💬</div><h3>逐药「耐药/敏感」+ 依据</h3><p class="muted">校准后的概率，以及驱动该判定的基因。</p></div>
   </div>
-  <p class="lead center" style="max-width:64ch">头条结果：对于<b class="hl">头孢西丁</b>，基因查找会漏掉 <b class="bad">96.3%</b> 的耐药株——
+  <p class="lead center" style="max-width:64ch">内部最大增益：对于<b class="hl">头孢西丁</b>，基因查找会漏掉 <b class="bad">96.3%</b> 的耐药株——
     因为其耐药来自<b>孔蛋白缺失</b>，而非获得某个基因。我们的模型把 AUC 从 <b>0.50 提升到 0.90</b>。<b class="k">这个差距就是贡献所在。</b></p>
   <div class="notes"><h4>讲</h4>基因组输入 → 注释它携带的基因 → 逐药给出判定与校准概率 → 并说明判定背后的基因。头孢西丁的差距是「机器学习相对数据库查询能带来什么」最干净的证明。</div>
 </section>
@@ -474,7 +474,7 @@ make data · features · split · train · eval · figures        <span class="g
     <div class="arrow">→</div>
     <div class="stat" style="color:var(--good)">0.90<small>模型 AUC（DeLong p ≈ 0）</small></div>
   </div>
-  <p class="lead center" style="max-width:72ch">其耐药由<b class="hl">ompK36 孔蛋白缺失</b>驱动——药物进不来。基因<i>查找</i>对<b>缺失</b>的特征是盲的（漏掉 96.3% 的耐药株）。模型学会了这种「缺失」的模式。</p>
+  <p class="lead center" style="max-width:72ch">其耐药由<b class="hl">ompK36 孔蛋白缺失</b>驱动——药物进不来。基因<i>查找</i>对<b>缺失</b>的特征是盲的（漏掉 96.3% 的耐药株）。模型学会了这种「缺失」的模式。<b class="k">但这只在内部成立：在外部菌株上，它正是下降最严重的一种药（0.905 → 0.596）。</b></p>
   <p style="margin-top:.8rem"><b class="k">这是「机器学习相对数据库查询能带来什么」最干净的证明。</b></p>
   <div class="notes"><h4>讲</h4>关键的一页。头孢西丁耐药 = 孔蛋白缺失。查找看不到缺失的特征，所以只是随机水平。模型学会了缺失模式，达到 0.90。这个差距就是全部贡献。</div>
 </section>
@@ -492,6 +492,35 @@ make data · features · split · train · eval · figures        <span class="g
   </table>
   <p class="lead" style="margin-top:1rem;max-width:76ch">五种药的 VME <b>点估计</b>均满足 ≤3% 标准 · 在全部五种药上都<b>显著</b>胜过查找。诚实说明：按谱系聚类的自助置信区间较宽（美罗培南 1.3%［0.3–3.5］），因此该目标是<i>在期望意义上</i>达成，而非在置信上界得到保证。美罗培南/头孢西丁的高 ME 是 VME 优先的权衡，已用标记呈现。</p>
   <div class="notes"><h4>讲</h4>在未见谱系上 AUC 0.90–0.98。每种药的 VME 点估计都低于 3%。若被追问请讲清楚：我们是按谱系（而非按基因组）做自助重采样，所以区间较宽——美罗培南的上界为 3.5%，因此我们说该目标是在期望意义上达成，而非得到保证。DeLong p 值极小。难判药上的高 ME 是刻意的 VME 优先权衡，并未隐藏。</div>
+</section>
+
+<!-- 29b 外部验证 -->
+<section class="slide">
+  <p class="kicker">外部验证 · 本可以不做的那一步</p>
+  <h2>我们拿别人的菌株跑了一遍，结果变差了。</h2>
+  <table>
+    <tr><th class="l">药物</th><th>内部</th><th>外部</th><th>训练中未见的 ST</th><th>相对基因查找</th></tr>
+    <tr><td class="l">美罗培南</td><td>0.968</td><td class="bad">0.795</td><td>0.685</td><td class="good">+0.027</td></tr>
+    <tr><td class="l">庆大霉素</td><td>0.981</td><td class="bad">0.826</td><td>0.869</td><td class="good">+0.030</td></tr>
+    <tr><td class="l">环丙沙星</td><td>0.983</td><td class="bad">0.835</td><td>0.821</td><td class="good">+0.065</td></tr>
+    <tr><td class="l">复方磺胺甲噁唑</td><td>0.977</td><td class="bad">0.806</td><td>0.774</td><td class="good">+0.092</td></tr>
+    <tr><td class="l"><b>头孢西丁</b></td><td>0.905</td><td class="bad"><b>0.596</b></td><td class="bad">0.592</td><td class="bad">+0.027 · <b>未见谱系上查找反而更好</b></td></tr>
+  </table>
+  <p class="lead" style="margin-top:1rem;max-width:78ch"><b>1,143 株由其他团队整理的菌株。模型全程冻结——不重训、不重调阈值，只跑一次。</b>分析方案在<b class="k">下载任何一个基因组之前就已预先登记</b>，因此这个结果无法被悄悄丢掉。</p>
+  <div class="notes"><h4>讲（不要弱化）</h4>这是大多数团队没有的一页。我们把冻结的模型拿到 1,143 株由其他团队整理的菌株上跑，性能下降了——从 0.97 降到 0.80，头孢西丁从 0.905 降到 0.596。我们在下载任何数据之前就预先登记了分析方案，正是为了让坏结果也必须被报告。仍然成立的是：在五种药中的四种上，我们依然胜过基因查找。不成立的是：头孢西丁的头条结果只在内部成立；在模型从未见过的谱系上，简单查找反而胜过我们。请坦率地讲出来——被评委自己发现要糟糕得多。</div>
+</section>
+
+<!-- 29c 为什么会下降 -->
+<section class="slide">
+  <p class="kicker">外部验证 · 诊断，而非辩解</p>
+  <h2>为什么会下降——以及它证明了什么</h2>
+  <div class="cols3">
+    <div class="card"><h3>不是流程出错 ✓</h3><p>先排查了这一点，因为程序有 bug 时表现完全相同。外部基因组平均携带 <b>14.4</b> 个决定因子，训练集为 <b>15.1</b>；<b>没有任何一个</b>外部基因组是空的。下降是<b class="k">真实的</b>。</p></div>
+    <div class="card"><h3>耐药率发生了偏移</h3><p>环丙沙星 <b class="bad">−24 个百分点</b>、头孢西丁 <b class="bad">−27 个百分点</b>——其中一部分是<i>我们自己</i>造成的：训练集刻意富集了耐药株。这解释了过度判定，但<b>无法</b>解释 AUC 的下降。</p></div>
+    <div class="card"><h3>共选择无法迁移</h3><p>头孢西丁最依赖<b>共同携带</b>的多重耐药标记——它也正是崩掉的那个。而基于<b class="k">机制</b>的 AmpC 查找几乎没变（0.518→0.569）。</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.2rem;max-width:80ch">真正的机制可以迁移，特定人群中的相关性不能。<b>我们在做这个测试之前就把这一点写成了局限性</b>——外部队列把一条注意事项变成了一个测量结果。</p>
+  <div class="notes"><h4>讲</h4>三点。第一：我们先排除了特征提取的 bug，因为程序出错时表现完全一样——外部基因组携带的决定因子数量与训练集基本相同。第二：耐药率最多下降了 27 个百分点，部分原因是我们自己在训练集中富集了耐药株；这解释了过度判定，但解释不了与阈值无关的 AUC。第三，也是真正的发现：头孢西丁最依赖共同携带的标记而非机制本身，它也正是崩掉的那一个，而基于机制的 AmpC 查找稳住了。这就是共选择无法迁移——而我们事先就用文字预测到了。</div>
 </section>
 
 <!-- 26 诚实解读 -->
@@ -726,7 +755,7 @@ python -m streamlit run src/app/streamlit_app.py</pre></div>
   <h1>诚实测得</h1>
   <p class="sub">不是「全面最优」——而是<b>可信</b></p>
   <div class="two" style="max-width:60rem;margin:1.6rem auto 0;color:#fff">
-    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">0.50→0.90<small style="color:#bcdbe0">头孢西丁：查找 → 模型</small></div></div>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">1,143<small style="color:#bcdbe0">外部菌株 · 冻结模型 · 预先登记</small></div></div>
     <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">8 · 36<small style="color:#bcdbe0">病原体 · 可部署模型</small></div></div>
   </div>
   <div class="meta">我们做的最重要的一件事：由测试强制执行的谱系感知划分。下游的一切之所以可信，全靠它。</div>

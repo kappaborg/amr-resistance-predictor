@@ -327,7 +327,7 @@ demo loads. 8 organisms × their drug panels = **36 deployable models**."
 **On screen:** cefoxitin rules AUC **0.50** (coin flip) → model **0.90** (pooled CV; DeLong p≈0). Driver:
 **ompK36 porin loss**.
 
-**What to say:** "This is the money slide. Cefoxitin resistance in K. pneumoniae is often driven by
+**What to say:** "This is the strongest *internal* result — and you must pair it with the external one on slide 30, or a judge will pair it for you. Cefoxitin resistance in K. pneumoniae is often driven by
 *losing* a porin — ompK36 — so the drug can't get in. A gene-*lookup* is blind to a *missing* feature,
 so it performs at chance: AUC 0.518, and it misses 96.3% of resistant strains (1,469 of 1,525). Our model *learns the
 absence pattern* and lifts AUC to 0.90, a difference that's statistically overwhelming. This is the
@@ -589,6 +589,39 @@ run. This is designed to be *rebuilt and checked*, not taken on trust."
 
 ## PART 12 — Defense Q&A Prep (reference — not slides)
 
+### ⚑ "Your external results are much worse. Doesn't that sink the project?"
+**The question you will definitely get. Answer head-on — do not hedge.**
+"It would, if we'd hidden it. We registered the analysis plan before downloading a single genome,
+precisely so a bad result would still get published. Three things matter. First, we ruled out our own
+bug before concluding — external genomes carry **14.4** resistance determinants on average against
+**15.1** in training, so the features are sound and the drop is real. Second, the core claim survives:
+we still beat the gene-lookup on **four of five** drugs externally. Third, and most useful, we now have
+a *measured* generalization gap for determinant-based AMR prediction, which almost nobody reports. The
+honest conclusion is that these models are not ready to be pointed at isolates from an arbitrary
+source — and our report says exactly that."
+
+### ⚑ "Why did cefoxitin fail hardest — wasn't that your best result?"
+"Yes, and that's the most scientifically interesting part. Cefoxitin was the drug most dependent on
+**co-carried** markers rather than the causal mechanism — we flagged that in writing *before* running
+the test. Externally the model collapses to **0.596**, while the mechanistic AmpC lookup barely moves
+(0.518 → 0.569). A real mechanism travels; a population-specific correlation doesn't. The external
+cohort turned a caveat into a measurement."
+
+### ⚑ "Isn't the drop just noisier external labels?"
+"Partly, and we say so — NCBI explicitly does not vet submitted AST methods, so external label noise is
+plausibly higher and biases our number *downward*. But we can't separate that from genuine
+generalization failure, so we don't offer it as an excuse. There's also a real prevalence shift, up to
+**27 points** fewer resistant isolates, partly self-inflicted because we enriched training for
+resistance — that explains the over-calling but not the AUC drop, which is threshold-free."
+
+### ⚑ "How do we know your external cohort wasn't in your training data?"
+"Two layers. The EBI AMR Portal carries a provenance column, so we dropped every row PATRIC/BV-BRC had
+touched *by construction*. Then we anti-joined on BioSample and assembly accessions, which removed a
+further **16.1%**. The residual risk is stated: **129** training genomes (3.4%) carry no accession and
+couldn't be matched, bounding undetected overlap at ≤11.3% — and that would make our external number
+*optimistic*, not pessimistic."
+
+
 Anticipated questions and crisp answers:
 
 **Q: Isn't this just a database lookup?**
@@ -631,7 +664,14 @@ co-selection still inflates some co-carried plasmid markers, so we read per-stra
 
 - **3,850** QC-passed K. pneumoniae genomes · **688** determinants · **5** drugs (deep-dive)
 - **8** WHO-priority pathogens · **36** deployable models · ROC-AUC **0.84–0.998** on unseen lineages
-- Cefoxitin: rules **0.50** → model **0.90** (the headline)
+- Cefoxitin: rules **0.518** → model **0.905** — *internal only*
+- **External validation (1,143 isolates, frozen models):** ROC **0.795 / 0.826 / 0.835 / 0.806 / 0.596**
+  (meropenem / gentamicin / cipro / TMP-SMX / cefoxitin) vs internal 0.968–0.983
+- Still beats the gene-lookup externally on **4 of 5** drugs (+0.027 to +0.092)
+- On ST-novel cefoxitin the **rules baseline wins** (0.620 vs 0.592)
+- External VME **5.2–15.9%** — the VME≤3% operating point does **not** transfer
+- Feature sanity: **14.4** determinants/genome external vs **15.1** training (not a pipeline bug)
+- Prevalence shift: cipro **−24 pts**, cefoxitin **−27 pts** resistant
 - E. faecium ampicillin: rules 0.69 → model 0.99 (+0.35, captures pbp5)
 - Leakage inflation from a random split: mean **+0.010**, max **+0.032**
 - MIC Essential Agreement (K. pneumoniae): cipro **92.7%**, gentamicin 85.1%, cefoxitin 79.9%, mero 75.4%

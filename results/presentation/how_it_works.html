@@ -125,7 +125,8 @@
   <p class="eyebrow">Reading Resistance · plain-language walkthrough</p>
   <h1>How we taught a computer to read a bacterium's genome and predict which antibiotics will fail</h1>
   <p class="standfirst">Every step of the project, in order, with no assumed knowledge of
-  programming or machine learning. Written to be explained out loud.</p>
+  programming or machine learning — including the final test, where the models did worse than we
+  hoped and we published it anyway. Written to be explained out loud.</p>
 </header>
 
 <h2>The problem we started from</h2>
@@ -666,19 +667,59 @@ directly. It works, but it takes about <strong>two days</strong>. Meanwhile the 
 <div class="step">
   <div class="num">10</div>
   <div class="step-body">
-    <h2>Test it on data from somewhere else entirely</h2>
+    <h2>Test it on data from somewhere else entirely — and report what happened</h2>
     <p>Everything above was validated on data from one source. A fair criticism remains: perhaps the
-    model only works on <em>that</em> collection.</p>
-    <p>So we're now testing it against bacteria curated by completely different groups — with the
-    models <strong>frozen</strong>, meaning no adjusting, no retraining, no second attempt.</p>
+    model only works on <em>that</em> collection. So we tested the finished models on
+    <strong>1,143 bacteria curated by completely different groups</strong>, with the models
+    <strong>frozen</strong> — no adjusting, no retraining, no second attempt.</p>
+
     <p>Finding genuinely independent data was harder than it sounds. The obvious source turned out to
     feed <em>into</em> our original database, so a naive comparison would have re-tested bacteria the
-    model had already learned from. We had to identify and remove that overlap — 16% of the
-    candidates — before anything meant anything.</p>
-    <p>And we committed to what we'd report <em>before</em> running it: all five drugs, whatever the
-    numbers, including a stricter second cohort that excludes any bacterial family the model has seen
-    before. If it does worse, that's the finding and it goes in the report.</p>
-  </div>
+    model had already learned from. We removed that overlap — 16% of the candidates — first. And we
+    wrote down exactly what we would report <em>before</em> downloading anything, so that a bad result
+    could not quietly disappear.</p>
+
+    <h3>It did worse. That is the finding.</h3>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Drug</th><th>On our data</th><th>On theirs</th><th>Still beats gene lookup?</th></tr></thead>
+        <tbody>
+          <tr><td>meropenem</td><td class="num-cell">0.968</td><td class="num-cell bad">0.795</td><td class="good">yes</td></tr>
+          <tr><td>gentamicin</td><td class="num-cell">0.981</td><td class="num-cell bad">0.826</td><td class="good">yes</td></tr>
+          <tr><td>ciprofloxacin</td><td class="num-cell">0.983</td><td class="num-cell bad">0.835</td><td class="good">yes</td></tr>
+          <tr><td>TMP-SMX</td><td class="num-cell">0.977</td><td class="num-cell bad">0.806</td><td class="good">yes</td></tr>
+          <tr><td><strong>cefoxitin</strong></td><td class="num-cell">0.905</td><td class="num-cell bad"><strong>0.596</strong></td><td class="bad">barely — and on unseen families the lookup wins</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>So the honest summary has two halves. <strong>What survives:</strong> the model still beats the
+    simple gene lookup on four of the five drugs, so the core idea holds outside our own data.
+    <strong>What doesn't:</strong> the cefoxitin result — our best internal story — is an
+    <em>internal</em> result only. On bacteria from elsewhere the advantage nearly vanishes, and on
+    families the model has never seen, the simple lookup is actually better.</p>
+
+    <h3>Why it dropped — we checked rather than guessed</h3>
+    <p>Our first suspicion was our own code, because a broken pipeline looks exactly like this. It
+    wasn't: the external genomes carry <strong>14.4</strong> resistance genes on average against
+    <strong>15.1</strong> in our training data, and not one came back empty. The drop is real.</p>
+    <p>Two things explain it. The external bacteria are simply <strong>less resistant overall</strong>
+    — up to 27 percentage points fewer resistant strains — partly because we had deliberately
+    collected extra resistant ones for training. And more interestingly,
+    <strong>guilt-by-association doesn't travel</strong>: resistance genes ride together on the same
+    mobile pieces of DNA, so a model can learn "this gene tends to accompany resistance" in one
+    population and be wrong in another. Cefoxitin leaned on that the most — and it is exactly the drug
+    that collapsed, while the direct mechanism-based lookup held up.</p>
+
+    <div class="analogy">
+      <span class="tag">Why we are pleased to report a worse number</span>
+      <p>We committed in writing to publishing this result before we knew what it was. Almost no
+      comparable study tests on outside data at all — so "we measured how far it travels, and here is
+      the honest answer" is a stronger contribution than one more flattering number from our own
+      dataset.</p>
+    </div>
+</div>
 </div>
 
 <div class="closing">
@@ -692,8 +733,13 @@ directly. It works, but it takes about <strong>two days</strong>. Meanwhile the 
     recognising families instead of understanding biology. We tested only on families it had never
     seen — which lowers our numbers, deliberately.</li>
     <li><strong>The honest comparison:</strong> for most drugs, simply looking up the genes is
-    almost as good, and we report that. For cefoxitin the lookup is a coin flip and our model reaches
-    0.905, because that resistance comes from a <em>missing</em> doorway rather than an added weapon.</li>
+    almost as good, and we report that. For cefoxitin the lookup is near a coin flip and our model
+    reaches 0.905, because that resistance comes from a <em>missing</em> doorway rather than an added
+    weapon.</li>
+    <li><strong>Then we tested it on 1,143 bacteria from other groups, and it got worse</strong> —
+    down to 0.80–0.84, and cefoxitin all the way to 0.596. We had committed in writing to publishing
+    that result before we knew it. The model still beats the gene lookup on four of five drugs, but
+    it is not ready to be pointed at isolates from just anywhere, and we say so.</li>
     <li><strong>Every answer is explained,</strong> and the genes it relies on match known
     microbiology.</li>
     <li><strong>It is not a medical device.</strong> It's decision support; the lab test stays the
@@ -715,9 +761,8 @@ directly. It works, but it takes about <strong>two days</strong>. Meanwhile the 
     <dt>Baseline</dt><dd>The simple method we must beat to justify the complicated one.</dd>
   </dl>
 
-  <p class="footnote">All figures on this page come from the project's own results files. The
-  external-validation step described in section 10 was still running when this was written, and no
-  external numbers are quoted here.</p>
+  <p class="footnote">All figures on this page come from the project's own results files, including the
+  external-validation results in section 10, which completed on 22 August 2026.</p>
 </div>
 
 </div>

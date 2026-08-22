@@ -17,7 +17,16 @@ Everything needed to deliver a detailed talk on **Reading Resistance**.
 > applied (e.g. isotonic → 保序, causal genes → 作为耐药根源的). Gene names (`gyrA`, `mecA`,
 > `blaKPC`…) and standard acronyms (ROC-AUC, VME, MIC, SHAP) are intentionally kept in the original.
 
-## Corrections applied (2026-08-22, second pass — IMPORTANT)
+## Updated with external validation (2026-08-22, third pass — READ THIS)
+**The external-validation result is now in every deliverable, and it is not flattering.** On 1,143
+isolates curated by other groups, with the models frozen, ROC-AUC falls from 0.905–0.983 internally to
+**0.795–0.835**, and cefoxitin to **0.596**. The model still beats the gene-lookup on 4 of 5 drugs, but
+the cefoxitin headline is now **internal-only** and the VME≤3% operating point does not transfer.
+Both decks gain **two new slides (29b, 29c)** — the result, and the diagnosis — and the speaker guide
+gains four Q&A entries for the questions this will provoke. Decks are now **53 pages**.
+**Present the external slide yourself; do not let a judge find it first.**
+
+## Corrections applied (2026-08-22, second pass)
 A documentation-integrity audit found a **real bug in the shipped cefoxitin baseline**, now fixed.
 The *K. pneumoniae* gene-lookup baseline had been using `mecA`/`mecC` — the ***S. aureus*** methicillin
 genes, because cefoxitin is the standard MRSA surrogate test. Those genes occur in **0 of 3,850**

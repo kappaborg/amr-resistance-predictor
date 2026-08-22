@@ -145,9 +145,10 @@
     <div class="card center"><div style="font-size:2.6rem">🧬 → 🧩</div><h3>Genome in → determinant features</h3><p class="muted">Which known resistance genes &amp; mutations does this strain carry?</p></div>
     <div class="card center"><div style="font-size:2.6rem">📊 → 💬</div><h3>Per-drug R/S + the reason</h3><p class="muted">Calibrated probability, and the genes that drove the call.</p></div>
   </div>
-  <p class="lead center" style="max-width:70ch">Headline: for <b class="hl">cefoxitin</b>, a gene-lookup misses <b class="bad">96.3%</b> of resistant strains —
-    resistance comes from <b>losing a porin</b>, not gaining a gene. Our model lifts AUC from <b>0.50 → 0.90</b>. <b class="k">That gap is the contribution.</b></p>
-  <div class="notes"><h4>Say</h4>Genome in → annotate the genes it carries → per-drug call with a calibrated probability → and it names the genes behind the call. The cefoxitin gap is the cleanest demonstration of what ML adds over a database query.</div>
+  <p class="lead center" style="max-width:70ch">Largest <i>internal</i> gain: for <b class="hl">cefoxitin</b>, a gene-lookup misses <b class="bad">96.3%</b> of resistant strains —
+    resistance comes from <b>losing a porin</b>, not gaining a gene. Our model lifts AUC from <b>0.52 → 0.90</b>.
+    <b class="k">On external isolates this gap does not hold (slide 30) — the contribution we can defend is the measured generalization gap.</b></p>
+  <div class="notes"><h4>Say</h4>Genome in → annotate the genes it carries → per-drug call with a calibrated probability → and it names the genes behind the call. Cefoxitin is the cleanest internal demonstration of what ML adds over a database query. Flag now that it does NOT survive external validation — you cover that on slide 30 — so nobody feels misled later.</div>
 </section>
 
 <!-- DIVIDER: PROBLEM -->
@@ -481,8 +482,8 @@ make data · features · split · train · eval · figures        <span class="g
     <div class="stat" style="color:var(--good)">0.90<small>model AUC (DeLong p ≈ 0)</small></div>
   </div>
   <p class="lead center" style="max-width:70ch">Resistance is driven by <b class="hl">losing the ompK36 porin</b> — the drug can't get in. A gene-<i>lookup</i> is blind to a <b>missing</b> feature (misses 96.3% of resistant strains). The model learns the absence pattern.</p>
-  <p style="margin-top:.8rem"><b class="k">The cleanest possible demonstration of what ML adds over a database query.</b></p>
-  <div class="notes"><h4>Say</h4>The money slide. Cefoxitin resistance = porin loss. A lookup can't see a missing feature, so it's at chance. The model learns the absence pattern and reaches 0.90. That gap is the whole contribution.</div>
+  <p style="margin-top:.8rem"><b class="k">The cleanest <i>internal</i> demonstration of what ML adds over a database query</b> — and, on external isolates, the drug that fails hardest (0.905 → 0.596). Both facts belong to the same slide.</p>
+  <div class="notes"><h4>Say</h4>Cefoxitin resistance = porin loss. A lookup can't see a missing feature, so it sits near chance. The model learns the absence pattern and reaches 0.90 internally. Then say the hard part out loud: this is the drug that collapses externally, to 0.596, because it leaned on co-carried markers rather than pure mechanism. Saying it yourself is far stronger than being caught.</div>
 </section>
 
 <!-- 25 PANEL TABLE -->
@@ -543,6 +544,35 @@ make data · features · split · train · eval · figures        <span class="g
   </div>
   <p class="lead" style="margin-top:1.4rem">Our AUCs sit in/above the <b>published band</b> — but under a <b class="k">stricter</b> lineage split, with interpretability + clinical errors most studies omit. Claim: <b>honestly measured</b>, not state-of-the-art.</p>
   <div class="notes"><h4>Say</h4>The core claim is backed by DeLong significance, not just a visible gap. CIs resample whole lineages. We place our numbers in the published band under a stricter split.</div>
+</section>
+
+<!-- 29b EXTERNAL VALIDATION -->
+<section class="slide">
+  <p class="kicker">External validation · the test we could have skipped</p>
+  <h2>We ran it on someone else's isolates. It got worse.</h2>
+  <table>
+    <tr><th class="l">Drug</th><th>Internal</th><th>External</th><th>ST never seen</th><th>vs gene-lookup</th></tr>
+    <tr><td class="l">meropenem</td><td>0.968</td><td class="bad">0.795</td><td>0.685</td><td class="good">+0.027</td></tr>
+    <tr><td class="l">gentamicin</td><td>0.981</td><td class="bad">0.826</td><td>0.869</td><td class="good">+0.030</td></tr>
+    <tr><td class="l">ciprofloxacin</td><td>0.983</td><td class="bad">0.835</td><td>0.821</td><td class="good">+0.065</td></tr>
+    <tr><td class="l">TMP-SMX</td><td>0.977</td><td class="bad">0.806</td><td>0.774</td><td class="good">+0.092</td></tr>
+    <tr><td class="l"><b>cefoxitin</b></td><td>0.905</td><td class="bad"><b>0.596</b></td><td class="bad">0.592</td><td class="bad">+0.027 · <b>rules win on ST-novel</b></td></tr>
+  </table>
+  <p class="lead" style="margin-top:1rem"><b>1,143 isolates curated by other groups. Models frozen — no retraining, no re-thresholding, one pass.</b> The analysis plan was <b class="k">registered before a single genome was downloaded</b>, so this result could not be quietly dropped.</p>
+  <div class="notes"><h4>Say (do not soften this)</h4>This is the slide most teams don't have. We took the frozen models, ran them on 1,143 isolates that other groups curated, and performance dropped — 0.97 down to 0.80, and cefoxitin from 0.905 to 0.596. We pre-registered the analysis before downloading anything, precisely so a bad result would still get reported. What survives: we still beat the gene-lookup on four of five drugs. What doesn't: our cefoxitin headline is internal-only, and on lineages it has never seen the simple lookup actually beats us there. Say that plainly — a judge who finds it themselves is much worse.</div>
+</section>
+
+<!-- 29c WHY IT DROPPED -->
+<section class="slide">
+  <p class="kicker">External validation · diagnosed, not excused</p>
+  <h2>Why it dropped — and what it proves</h2>
+  <div class="cols3">
+    <div class="card"><h3>Not a broken pipeline ✓</h3><p>Checked first, because a bug looks exactly like this. External genomes carry <b>14.4</b> determinants vs <b>15.1</b> in training; <b>zero</b> came back empty. The drop is <b class="k">real</b>.</p></div>
+    <div class="card"><h3>Prevalence shifted</h3><p>Cipro <b class="bad">−24 pts</b>, cefoxitin <b class="bad">−27 pts</b> resistant — partly <i>our</i> doing: we enriched training for resistance. Explains the over-calling, <b>not</b> the AUC drop.</p></div>
+    <div class="card"><h3>Co-selection doesn't travel</h3><p>Cefoxitin leaned most on <b>co-carried</b> MDR markers — and collapses. The <b class="k">mechanistic</b> AmpC lookup barely moves (0.518→0.569).</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.2rem">A real mechanism travels. A population-specific correlation does not. <b>We wrote this down as a limitation before we ran the test</b> — the external cohort turned a caveat into a measurement.</p>
+  <div class="notes"><h4>Say</h4>Three things. One: we ruled out a feature-extraction bug first, because a broken pipeline produces this exact pattern — external genomes carry essentially the same number of determinants as training ones. Two: resistance prevalence dropped by up to 27 points, partly because we ourselves enriched the training set for resistant strains; that explains the over-calling but not the AUC, which is threshold-free. Three, and this is the real finding: cefoxitin was the drug most dependent on co-carried markers rather than mechanism, and it's the one that collapsed, while the mechanistic AmpC lookup held. That's co-selection failing to transfer — and we predicted it in writing beforehand.</div>
 </section>
 
 <!-- DIVIDER: ADVANCED -->
@@ -732,7 +762,7 @@ python -m streamlit run src/app/streamlit_app.py</pre></div>
   <h1>Honestly measured</h1>
   <p class="sub">not "state-of-the-art" — <b>trustworthy</b></p>
   <div class="two" style="max-width:60rem;margin:1.6rem auto 0;color:#fff">
-    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">0.50→0.90<small style="color:#bcdbe0">cefoxitin: lookup → model</small></div></div>
+    <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">1,143<small style="color:#bcdbe0">external isolates · frozen models · pre-registered</small></div></div>
     <div class="card" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff"><div class="stat" style="color:#fff;font-size:3.2rem">8 · 36<small style="color:#bcdbe0">pathogens · deployable models</small></div></div>
   </div>
   <div class="meta">The single most important thing we did: the lineage-aware split, enforced by a test. Everything downstream is trustworthy because of it.</div>
