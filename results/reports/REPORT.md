@@ -8,8 +8,9 @@ developed on* Klebsiella pneumoniae *and generalized across eight WHO-priority p
 > seven further WHO-priority pathogens (§4.2). Statistical rigor (DeLong, bootstrap CIs, quantified
 > leakage) in §4.3; protein-language-model extension in §5.3. Reporting is mapped to the **TRIPOD+AI**
 > checklist in Appendix A. Sections marked ⚕ carry claims that are the microbiologist's call and are
-> flagged for sign-off. **Known open limitation:** all data derive from a single aggregator (BV-BRC),
-> so no *externally-sourced* validation cohort has been run — see §7.
+> flagged for sign-off. **External validation is complete (§4.4):** on 1,143 independently-curated
+> isolates the models degrade substantially (ROC 0.80–0.84, cefoxitin 0.60), which is reported as the
+> project's central honest finding rather than a footnote.
 
 ---
 
@@ -19,12 +20,20 @@ to each of five antibiotics — meropenem, gentamicin, ciprofloxacin, trimethopr
 and cefoxitin — using interpretable resistance-determinant features. Every model is validated under a
 **phylogeny-aware split** (train and test share no MLST sequence type), reports **clinical error
 rates** (very-major / major) alongside ROC-AUC/PR-AUC, and is benchmarked against a transparent
-known-gene rules baseline. On unseen lineages the models achieve **ROC-AUC 0.91–0.98**. The headline
-result is **cefoxitin**, where the gene-lookup baseline is effectively a coin flip (ROC-AUC 0.518;
-it misses **96.3%** of resistant strains — 1,469 of 1,525) because resistance is driven by porin loss the
-lookup cannot see, while the model reaches **ROC-AUC 0.905** and cuts
-the very-major error rate from 96.3% to 0.7% — a concrete demonstration of what machine learning adds
-over a database query.
+known-gene rules baseline. On unseen lineages **within our corpus** the models achieve ROC-AUC
+0.91–0.98, and the largest internal gain is **cefoxitin**, where the gene-lookup baseline is barely
+better than a coin flip (ROC-AUC 0.518, missing 96.3% of resistant strains) because resistance is
+driven by porin loss the lookup cannot see, while the model reaches 0.905.
+
+**We then tested the frozen models on 1,143 isolates curated by other groups, under an analysis plan
+registered before the data were downloaded — and report the result as the paper's main finding:
+performance degrades substantially.** External ROC-AUC falls to **0.80–0.84** on four drugs and to
+**0.596** on cefoxitin, the very drug that looked strongest internally. The model still beats the
+gene lookup externally on 4 of 5 drugs (+0.03 to +0.09), but the VME ≤ 3% operating point does not
+transfer at all. Diagnostics rule out feature-extraction failure and point instead at a
+resistance-prevalence shift and at co-selection structure that is specific to our corpus. The
+contribution is therefore not a headline accuracy number but a **measured generalization gap** for
+determinant-based AMR prediction — something almost no comparable study reports.
 
 ## 1. Problem & contribution
 Genome-based resistance prediction is fast but two pitfalls separate a credible result from a naive
@@ -170,7 +179,51 @@ from full lineage-grouped CV, in FDA/CLSI vocabulary (bars: **VME ≤ 1.5%** / �
   models that lose 0.1–0.2 AUC on a lineage split. The small ΔAUC is itself evidence the model learned
   biology; we still report the honest lineage-held-out column everywhere.
 
-### 4.4 Figure index
+### 4.4 External validation — the frozen models on independently-curated isolates
+The evaluation this project most needed, run last and reported whatever it said (`summary_33`;
+plan pre-registered in `summary_32` **before any genome was downloaded**).
+
+**Cohort.** 1,143 *K. pneumoniae* isolates from the EBI AMR Portal (PATRIC-provenance rows excluded
+by construction) and NCBI Pathogen Detection, anti-joined against our training accessions. Features
+were **recomputed with our own AMRFinderPlus 4.2.7 / DB 2026-05-15.1**, not reused from either source.
+Models were applied **exactly as shipped** — no retraining, no re-tuning, no threshold re-selection.
+
+| Drug | Internal (§4.3) | External — all | External — ST absent from training |
+|---|---|---|---|
+| meropenem | 0.968 | **0.795** [0.74–0.84] | 0.685 [0.49–0.88] |
+| gentamicin | 0.981 | **0.826** [0.77–0.88] | 0.869 [0.77–0.95] |
+| ciprofloxacin | 0.983 | **0.835** [0.79–0.88] | 0.821 [0.70–0.92] |
+| TMP-SMX | 0.977 | **0.806** [0.75–0.86] | 0.774 [0.61–0.92] |
+| **cefoxitin** | 0.905 | **0.596** [0.53–0.66] | 0.592 [0.40–0.78] |
+
+**Performance degrades substantially, and that is the finding.** Two claims must now be separated:
+
+- **What survives:** the model still beats the known-gene lookup externally on **4 of 5 drugs**, in
+  both cohorts (+0.027 to +0.092). The central contribution — that ML adds something over a database
+  query — holds outside our corpus, at a smaller margin.
+- **What does not:** the **cefoxitin headline is internal-only**. Externally the gap over the lookup
+  is +0.027, and on lineages absent from training the **rules baseline is better than the model**
+  (0.620 vs 0.592). Likewise the **VME ≤ 3% operating point does not transfer** — external VME is
+  5.2–15.9%. Both are now labelled as internal-validation results everywhere they appear.
+
+**Why (diagnosed, not assumed).** A feature-extraction failure would produce this exact pattern, so it
+was ruled out first: external genomes carry **14.4 determinants on average vs 15.1 in training**, and
+**no external genome has zero known determinants**. Two real causes remain. (i) A large
+**resistance-prevalence shift** — ciprofloxacin −24 pts, cefoxitin −27 pts — partly self-inflicted,
+since our Phase-2b top-up deliberately enriched for resistant strains (§2); this explains the inflated
+major-error rates but not the AUC drop, which is threshold-free. (ii) **Co-selection does not
+transfer.** Cefoxitin was the drug most dependent on co-carried MDR markers (§5.1), and it is the drug
+that collapses, while the mechanistic AmpC lookup barely moves (0.518 → 0.569). That is the clearest
+evidence in the project that co-selection was inflating an internal number — and it was written down
+as a limitation *before* this test was run.
+
+**Honest limits on the external result itself.** This is *independent-source*, not
+*independent-population* validation. NCBI does not vet submitted AST methods, so external label noise
+is plausibly higher and biases the result **downward** by an unknown amount. 129 training genomes
+(3.4%) carry no accession and could not be anti-joined, bounding undetected overlap at ≤11.3% — which
+would make the external number *optimistic*. ST-novel intervals are wide (n = 85–155).
+
+### 4.5 Figure index
 All figures live in `results/figures/` and regenerate with `make figures`.
 
 | Figure | Shows | Section |
@@ -184,6 +237,7 @@ All figures live in `results/figures/` and regenerate with `make figures`.
 | `conformal.png` | class-conditional conformal coverage / abstention | §5.4 |
 | `risk_coverage.png` | risk–coverage curves + AURC for the abstention layer | §5.5 |
 | `decision_curve.png` | standardized net benefit vs threshold probability | §5.6 |
+| *(no figure)* | external validation is reported as a table in §4.4 | §4.4 |
 
 ## 5. Interpretability & biological validation ⚕
 
@@ -303,20 +357,12 @@ none). CLI equivalent: `python -m src.app.predict --organism saureus --genome <f
 - **A. baumannii meropenem MIC gain is borderline** (p = 0.051) — honestly under-powered at n=449.
 - **Published comparison is band-level, not a re-run head-to-head** (§4.1) — we place our numbers
   within the published range under a stricter split rather than re-executing prior pipelines.
-- **No externally-sourced validation cohort (the principal open limitation).** Training *and* testing
-  draw on a single aggregator, BV-BRC. The lineage-held-out split makes the evaluation honest *within*
-  that corpus, and §4.3 quantifies the population-structure inflation we avoid — but it cannot answer
-  whether performance holds on isolates curated by someone else, under different laboratory AST
-  practice and a different geographic/temporal sampling frame. A temporal split (`summary_12`) is a
-  partial proxy only. Until a genuinely independent cohort is scored, all reported numbers should be
-  read as **internal validation under a strict split**, not as external validation.
-  *In progress (`summary_32`):* an independent cohort has been **scoped but not yet scored**. Note
-  that BV-BRC ingests AMR phenotypes *from* NCBI BioSample/Antibiogram records, so NCBI Pathogen
-  Detection is **upstream** of our corpus and a naive comparison would re-test training isolates;
-  after a provenance filter (EBI AMR Portal) plus a BioSample/assembly anti-join, **1,144 unseen
-  K. pneumoniae isolates** remain (506–944 usable R/S per drug). The Step-2 analysis plan is
-  **pre-registered** in `summary_32` — frozen models, no re-tuning, all five drugs reported whatever
-  the result. No external number exists in this report yet.
+- **Generalization beyond our corpus is limited, and now measured (§4.4).** On 1,143
+  independently-curated isolates the frozen models fall from ROC 0.91–0.98 to **0.80–0.84**, and
+  cefoxitin falls to **0.596**. The VME ≤ 3% operating point does not transfer (external VME
+  5.2–15.9%). Every internal number in this report should be read as *internal validation under a
+  strict split*; §4.4 is what the models do on someone else's isolates. Contributing causes are
+  diagnosed there (prevalence shift, co-selection), and feature-extraction failure was excluded.
 - **Cross-species transfer degrades outside a family** (§4.2) — zero-shot transfer is strong within
   Enterobacterales but unreliable to non-fermenters and absent across the Gram divide; the models are
   organism-specific tools, not a universal predictor.
@@ -330,7 +376,7 @@ safeguard: every prediction is auditable via its determinants.
 ## 9. Reproducibility
 Pinned `environment.yml` (incl. `torch`/`fair-esm`/`biopython`/`scipy` for the ESM-2 pipeline), fixed
 seed (42), config-driven runs, `data/manifest.md` (all eight organisms + ESM-2 derived data, sources,
-queries, tool versions), and `docs/decisions.md` (57 logged decisions). Tests (`pytest`) cover the
+queries, tool versions), and `docs/decisions.md` (58 logged decisions). Tests (`pytest`) cover the
 data joins, the feature builder, and — most importantly — the **lineage splitter**, asserting zero
 train/test lineage overlap **for every organism** (parametrized over all 8 split CSVs). A second guard asserts that **every shipped rules baseline actually occurs in 1–99% of its own organism's genomes** — a list that never fires, or fires everywhere, is a broken measurement rather than a weak opponent, and both failure modes produce a deceptive ROC of ~0.5 (decisions #42 and #57). Makefile
 targets regenerate each stage (`make features`, `split`, `train`, `eval`, `organisms ORG=…`,
@@ -465,12 +511,12 @@ with the reason given. Several others are honestly marked ❌ or ⚠️ — most
 | 12c | Model type, rationale, model-building, hyperparameter tuning, internal validation | ✅ | §3 — includes the explicit **"untuned defaults, tuned threshold"** disclosure |
 | 12d | Heterogeneity across clusters | ✅ | §4.3 — **lineage-clustered** bootstrap (effective n = lineages); §4.2 — per-organism results |
 | 12e | Performance measures & rationale | ✅ | §3, §4 — VME/ME first, plus ROC-AUC, PR-AUC, MCC, Brier, Essential Agreement, net benefit, AURC |
-| 12f | Model updating from evaluation | ➖ | N/A — no external evaluation performed |
+| 12f | Model updating from evaluation | ✅ | **No updating was performed, deliberately** — §4.4 scored the frozen models once; recalibrating to the external cohort would have destroyed the pre-registered test |
 | 12g | How predictions are computed | ✅ | §6; `src/app/predict.py`; 36 serialised `.joblib` models in `results/models/` |
 | 13 | Class imbalance methods | ✅ | §3 (`scale_pos_weight`), §5.7 (imbalance-robust metrics). Synthetic oversampling (SMOTE) was **considered and rejected** — interpolating binary determinant vectors invents biologically meaningless genomes (`summary_23`) |
 | 14 | Fairness approaches | ⚠️ | No sociodemographic fairness analysis is possible (no patient-level data). The domain analogue — geographic/database representation bias — is disclosed in §7 but **not quantified**; a genuine gap |
 | 15 | Model output & threshold derivation | ✅ | §3 — isotonic-calibrated P(resistant); threshold set on **out-of-fold training** predictions to cap VME ≤3%, never on test |
-| 16 | Differences between development and evaluation data | ➖ | N/A — no separate evaluation dataset exists. **This is the study's principal reporting gap** (§7) |
+| 16 | Differences between development and evaluation data | ✅ | §4.4, `summary_33` — differences in curation source, resistance prevalence (up to −27 pts) and AST vetting are quantified and used to interpret the drop |
 | 17 | Ethical approval / informed consent | ➖ | N/A — public, de-identified bacterial genomic data; no human participants. See §8 |
 | 18a | Funding | ⚠️ | To be completed at submission |
 | 18b | Conflicts of interest | ⚠️ | To be completed at submission |
@@ -481,33 +527,31 @@ with the reason given. Several others are honestly marked ❌ or ⚠️ — most
 | 19 | Patient & public involvement | ➖ | N/A — no patient or public involvement; no human participants |
 | 20a | Flow of participants through the study | ⚠️ | Counts reported at each stage (acquired → QC-passed → per-drug labelled) in §2 and the per-organism summaries; **no flow diagram** is drawn |
 | 20b | Characteristics of the data | ⚠️ | Per-drug R/S counts and lineage counts reported (§4); richer isolate metadata (source, country, year) is incomplete upstream |
-| 20c | Comparison of predictor distributions, development vs evaluation | ➖ | N/A — no external evaluation cohort |
+| 20c | Comparison of predictor distributions, development vs evaluation | ✅ | §4.4 — determinants per genome (14.4 external vs 15.1 training), in-vocabulary coverage and per-drug resistance prevalence compared directly |
 | 21 | Number of participants and events per analysis | ✅ | §4 table; `results/metrics/clinical_rigor.json` reports n and n_R per drug |
 | 22 | Full model specification | ✅ | 36 trained models shipped in the repository + complete training code — third parties can reproduce or re-evaluate directly |
 | 23a | Performance with confidence intervals | ✅ | §4.3 — lineage-clustered bootstrap 95% CIs on VME/ME/CA/AUC, including the intervals that **cross** the clinical bar |
 | 23b | Heterogeneity in performance across clusters | ✅ | §4.2 (8 organisms × 18 drugs), §4.3, `generalization_heatmap.png` |
-| 24 | Results of model updating | ➖ | N/A — no external evaluation performed |
+| 24 | Results of model updating | ➖ | N/A — no updating was performed (see 12f) |
 | 25 | Overall interpretation | ✅ | §4 "Honest reading", §5, §4.1 |
 | 26 | Limitations | ✅ | §7 — including the absence of external validation as the principal limitation |
 | 27a | Handling poor-quality or unavailable input data | ✅ | §6 — MLST + intrinsic-marker species check withholds predictions on wrong-species uploads; zero-determinant guard; conformal **abstention** defers low-confidence isolates to phenotypic testing (§5.4–5.5) |
 | 27b | User interaction and expertise required | ✅ | §6, `README.md` — genome in, per-drug call + calibrated probability + determinants out; intended for users who can interpret an AST result |
 | 27c | Next steps, applicability, generalizability | ✅ | §7 and **Appendix B** |
 
-**Self-assessed tally (52 rows):** ✅ 30 reported · ⚠️ 10 partial · ❌ 1 not done · ➖ 11 not applicable.
+**Self-assessed tally (52 rows):** ✅ 33 reported · ⚠️ 10 partial · ❌ 1 not done · ➖ 8 not applicable.
+*(Three evaluation-track items moved from N/A to reported once the external validation in §4.4 was run.)*
 
-The single ❌ (item 10, sample size justification) and the concentration of ➖ in the evaluation track
-are both real and both point the same direction: this is a **development-and-internal-validation**
-study. Presenting it as anything else would be the overclaim the project exists to avoid.
+The single ❌ (item 10, sample size justification) remains. With §4.4 complete the study is now
+**development, internal validation, and an external evaluation that the models substantially failed** —
+which is reported as the headline rather than buried.
 
 ## Appendix B — Next steps
 
-1. **External validation (highest priority — Step 1 complete).** Score the frozen models, unchanged,
-   on a cohort assembled independently of BV-BRC, and report the result whatever it is. This is the
-   one claim the study currently cannot make (§7, item 16 above). **Step 1 is done** (`summary_32`):
-   1,144 genuinely unseen *K. pneumoniae* isolates from the EBI AMR Portal (provenance-filtered) and
-   NCBI Pathogen Detection, with the analysis plan pre-registered. **Step 2** — download ~1.8 GB of
-   assemblies, annotate, run `mlst`, and score the frozen models both overall and restricted to
-   sequence types absent from training — is the next action.
+1. ✅ **External validation — done** (§4.4, `summary_33`). The models degraded substantially. The
+   follow-on question is now *why*, and specifically whether **recalibrating the operating point to a
+   target population** recovers usable clinical error rates without retraining — the prevalence shift
+   (§4.4) suggests it might, and that is a cheap, honest next experiment.
 2. **Resolve the `Intermediate` decision** (⚕) and, if `I` is folded into `R`, re-run the full panel.
 3. **Quantify representation bias** (item 14) — stratify performance by isolate collection region and
    year where metadata permit, rather than only disclosing the bias narratively.
