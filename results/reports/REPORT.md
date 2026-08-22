@@ -106,17 +106,34 @@ where resistance is hard to call precisely (cefoxitin ME 0.85, meropenem ME 0.29
 that refuses to miss resistance necessarily over-calls it; the operating threshold is a clinical
 choice (⚕), and ROC/PR-AUC (threshold-free) show the underlying separation is good.
 
-### 4.1 Comparison to published methods
-Published genome-based AMR-ML for *K. pneumoniae* reports strong numbers — meropenem ROC-AUC ≈ 0.93,
-gentamicin accuracy ≈ 0.91, ciprofloxacin accuracy ≈ 0.96, and large multi-drug studies AUC > 0.9
-with ~96% agreement (Nguyen et al. 2018, the *K. pneumoniae* in-silico MIC panel [ref 7]; and
-Nguyen-style pipelines more broadly [ref 8]). **But most use random
-train/test splits**, which leak population structure and inflate metrics. Our ROC-AUC (0.91–0.98) sits
-in or above that published band **while measured under a stricter phylogeny-aware split** — i.e.,
-comparable discrimination on a harder, honest evaluation, plus interpretability and clinical-error
-reporting that most studies omit. The claim is not "state of the art"; it is "honestly measured, here
-is what the model adds over a gene lookup." See `results/figures/benchmark_summary.png` (published band
-shown in gold).
+### 4.1 Relationship to published methods — why we do *not* claim a numerical comparison
+An earlier draft of this section compared our ROC-AUC against numbers taken from Nguyen et al. 2018
+[ref 7] as though they were a "published ROC-AUC band". **That comparison was invalid and has been
+withdrawn** (decision #60). Two things were wrong with it:
+
+- **The metrics are not the same quantity.** Nguyen et al. 2018 report *MIC essential agreement*
+  (prediction within ±1 two-fold dilution) — their Table 1 — and report **no ROC-AUC anywhere**.
+  Placing our ROC-AUC "in or above" their numbers compared a discrimination statistic to a regression
+  agreement rate. The coincidence that their meropenem figure (0.93) resembles an AUC is precisely
+  what made the error easy to miss.
+- **Two of the three quoted values were simply wrong.** Their Table 1 gives meropenem **0.93**,
+  gentamicin **0.95**, ciprofloxacin **0.98** — the draft said 0.93, 0.91 and 0.96. It also
+  attributed "AUC > 0.9" to Nguyen et al. 2019 [ref 8], which likewise reports no AUC (its figures are
+  ~95% essential agreement, VME 2.7%, ME 0.1%).
+
+**What can honestly be said.** Prior genome-based AMR-ML for *K. pneumoniae* performs well on its own
+terms, and **most of it is evaluated under random train/test splits** — Nguyen 2018 and 2019 use
+label-balanced *k*-fold CV without phylogenetic control; AMR-GNN [ref 21] uses repeated random
+stratified splits. Moradigaravand et al. 2018 [ref 9] is a partial exception, reporting an explicit
+ST131 held-out analysis in which random-split accuracy exceeded held-out accuracy by ~0.28 on average
+— the clearest published evidence for the effect our §4.3 quantifies.
+
+**We therefore make no cross-study numerical claim.** Different metrics, cohorts, drug panels and
+split protocols make a like-for-like comparison unavailable, and manufacturing one would be exactly
+the overclaim this project exists to avoid. The defensible statement is internal: *under a
+lineage-held-out split, and again on an external cohort (§4.4), here is what the model adds over a
+transparent gene lookup.* `results/figures/benchmark_summary.png` accordingly no longer plots a
+"published band".
 
 ### 4.2 Generalization across eight organisms
 The identical pipeline runs on **eight WHO-priority pathogens** spanning the Gram divide (organism-agnostic
@@ -179,7 +196,11 @@ from full lineage-grouped CV, in FDA/CLSI vocabulary (bars: **VME ≤ 1.5%** / �
   vs temporal splits. Random-split AUC is inflated on every drug (mean **+0.010**, up to +0.032 for
   cefoxitin). Notably the inflation is *small* — because determinant features encode **mechanism, not
   ancestry** (a genome resists because it carries blaKPC, not because of its clade), unlike k-mer
-  models that lose 0.1–0.2 AUC on a lineage split. The small ΔAUC is itself evidence the model learned
+  models, whose features partly encode lineage. We previously attached a specific figure ("0.1–0.2 AUC")
+  to that contrast; **it had no source and has been withdrawn** (decision #60). The citable comparison is
+  Moradigaravand et al. 2018 [ref 9], whose *E. coli* random-split accuracy exceeded ST131-held-out
+  accuracy by ~0.28 on average — a different metric and organism, so treat it as directional only.
+  The small ΔAUC is itself evidence the model learned
   biology; we still report the honest lineage-held-out column everywhere.
 
 ### 4.4 External validation — the frozen models on independently-curated isolates
@@ -265,9 +286,23 @@ genuine novel-gene discovery would require pan-genome/k-mer features (out of sco
 Beyond binary R/S, the model predicts continuous **MIC** (minimum inhibitory concentration — the
 clinical gold standard) per drug from the same determinant features, under the phylogeny-aware split
 (`src/models/mic_regression.py`, `summary_19`). Evaluated by **Essential Agreement (EA)** — the
-CLSI/FDA criterion of prediction within ±1 two-fold dilution: **ciprofloxacin 88.9% EA** (at the ~90%
-clinical expectation), cefoxitin 83.6%, gentamicin 81.6%, meropenem 59.4% (harder — wide MIC range and
-panel censoring; reported honestly). Pearson r 0.75–0.85. This is a richer, quantitative output scored
+CLSI/FDA criterion of prediction within ±1 two-fold dilution: **gentamicin 71.9%**, ciprofloxacin
+66.0%, meropenem 62.7%, cefoxitin 62.2%. Pearson r 0.714–0.840.
+
+> **No drug reaches the CLSI/FDA ≥90% EA bar, and we no longer claim one does.** An audit
+> (decision #60) found that the censoring parser collapsed **strict `>`** into **non-strict `>=`**
+> and scored both with the `>=` rule. On a doubling panel `>2` means the true MIC is at least *4*,
+> so agreement requires a prediction ≥ 2, not ≥ 1 — the code allowed one full dilution too much.
+> Strict `>` is the **largest single category** in this corpus (40.5% of ciprofloxacin measurements),
+> so the effect was large: EA fell **12.6–26.7 points** on correction, and ciprofloxacin — previously
+> the only drug above 90% — fell from 92.7% to 66.0%. The figures above are the corrected ones.
+
+**Censoring caveat, stated because it is large:** 74–86% of MIC values here are off-scale. Even the
+corrected EA is a *consistency* bound (does the prediction contradict the recorded bound?), which is
+more permissive than strict CLSI practice, where off-scale values are usually required to fall in the
+same off-scale bin or are excluded outright. **RMSE and Pearson r are computed treating each bound as
+a point value** and are therefore optimistic; they should be read as indicative only. MIC regression
+is best presented as an exploratory secondary output, not as a regulator-grade result. This is a richer, quantitative output scored
 by the metric regulators actually use — the model predicts not just *whether* but *how strongly* a
 strain resists.
 
@@ -278,6 +313,18 @@ resistance-gene protein per genome (AMRFinderPlus coordinates → translate), em
 (`esm2_t30_150M_UR50D`) so different alleles get different vectors, and add these to the MIC regressor
 (`src/models/esm2_mic.py`, `summary_21`). On the hardest drugs this gives a **real, significant gain**,
 confirmed by 30 paired lineage-grouped folds:
+> **⚠ These ESM-2 figures are under re-verification and should not be quoted (decision #60).** The
+> audit found that **no Wilcoxon test exists anywhere in the codebase** — the only `scipy` import in
+> `esm2_mic.py` was `pearsonr`, the script ran **5** folds (not the "30 paired folds" claimed), and it
+> retained no per-fold arrays, so the reported p-values (0.0004, 0.0001, 0.051, 0.68) **could not have
+> been produced by it** and cannot be reproduced. The saved `esm2_mic_metrics.json` also disagrees with
+> the prose below (it holds meropenem 68.6% → 72.4%, Δ +3.8, not 68.4% → 73.2%, Δ +4.8). The script has
+> been rewritten to run 6×5 = 30 genuinely paired folds and compute a real Wilcoxon signed-rank test on
+> identical folds; this section will be restated from that output. Treat the direction (ESM-2 helps on
+> carbapenems, is neutral elsewhere) as provisional and the magnitudes and p-values as **withdrawn**.
+> Note also that `esm2_mic.py` scores EA **without** censoring handling, unlike the corrected
+> censor-aware scorer in §5.3 — so its EA values are not comparable to the ones above.
+
 - *K. pneumoniae* **meropenem**: Essential Agreement **68.4% → 73.2%** (+4.8 pts, Wilcoxon p = 0.0004),
   and fold variance nearly halved.
 - *A. baumannii* **imipenem**: **53.8% → 60.5%** (+6.7 pts, p = 0.0001); meropenem +3.6 (p = 0.051,
@@ -293,7 +340,10 @@ similarity — the architecture whose published gains target hard drugs; `summar
 lineage-grouped folds it was **worse than a plain MLP** on the same features for all five drugs (robust
 across graph density), because our curated-determinant features already saturate the mechanistic signal
 that a population-structure graph would otherwise supply. Reported as an honest negative — "we
-implemented the SOTA graph model and it did not win, for a reason we can explain." Net: ESM-2 (allele
+implemented an AMR-GNN-*style* isolate-similarity GCN and it did not win, for a reason we can explain."
+To be precise about scope: AMR-GNN [ref 21] is a multi-representation architecture (two similarity graphs,
+low-rank fusion, MLST edge-decoupling) over unitig features. What we tested is a 2-layer GCN on a single
+kNN graph over our determinant features — the same core idea, not a reimplementation of that paper."" Net: ESM-2 (allele
 resolution) helps where variant identity matters; GNN does not — a principled, tested model-selection
 story rather than an assumed one.
 
@@ -312,10 +362,14 @@ validated** under distribution shift — stricter than standard random-split con
 ### 5.5 Risk–coverage & AURC — evaluating the abstention (Summary #31)
 Beyond *having* an abstain option, we *evaluate* it: ranking calls by confidence and deferring the
 least-confident strains to the lab gives a **risk–coverage curve** (`results/figures/risk_coverage.png`).
-Deferring the least-confident **~30%** roughly halves both error and the clinically-critical **VME**
-(meropenem VME 8.7%→3.5%, cefoxitin 19.4%→9.2% at 70% coverage); AURC (area under the error curve,
-lower better) is 0.013–0.024 for the well-powered drugs and 0.056 for cefoxitin — the model knows when
-it doesn't know.
+Deferring the least-confident **~30%** reduces both overall error and the clinically-critical **VME**
+(e.g. ciprofloxacin VME 6.0%→3.8%, TMP-SMX 3.7%→1.5%, meropenem 1.4%→1.0% at 70% coverage); AURC
+(area under the error curve, lower better) is **0.019–0.039** for the well-powered drugs and
+**0.128–0.154** for cefoxitin and meropenem, where the VME-first threshold drives heavy over-calling.
+*Corrected in decision #60:* this module previously scored at a hardcoded 0.5 rather than the
+project's VME-capped operating threshold, which made its VME column disagree with §4.3 by up to ~28×
+for cefoxitin. It now uses the shipped operating point; residual differences from §4.3 come from the
+threshold being taken from the deployment bundle while these scores come from nested CV.
 
 ### 5.6 Decision-curve analysis — clinical net benefit (Summary #30)
 The clinical-utility axis most AMR-ML omits: standardized **net benefit** vs the clinician's threshold
@@ -379,7 +433,7 @@ safeguard: every prediction is auditable via its determinants.
 ## 9. Reproducibility
 Pinned `environment.yml` (incl. `torch`/`fair-esm`/`biopython`/`scipy` for the ESM-2 pipeline), fixed
 seed (42), config-driven runs, `data/manifest.md` (all eight organisms + ESM-2 derived data, sources,
-queries, tool versions), and `docs/decisions.md` (59 logged decisions). Tests (`pytest`) cover the
+queries, tool versions), and `docs/decisions.md` (60 logged decisions). Tests (`pytest`) cover the
 data joins, the feature builder, and — most importantly — the **lineage splitter**, asserting zero
 train/test lineage overlap **for every organism** (parametrized over all 8 split CSVs). A second guard asserts that **every shipped rules baseline actually occurs in 1–99% of its own organism's genomes** — a list that never fires, or fires everywhere, is a broken measurement rather than a weak opponent, and both failure modes produce a deceptive ROC of ~0.5 (decisions #42 and #57). Makefile
 targets regenerate each stage (`make features`, `split`, `train`, `eval`, `organisms ORG=…`,

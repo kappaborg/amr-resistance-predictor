@@ -42,9 +42,10 @@ LINEAGES = REPO / "data/processed/thin_slice_cipro_lineages.csv"
 PANEL = REPO / "data/processed/panel_labels.csv"
 FIGS = REPO / "results/figures"
 DRUGS = list(RULES)
-# Published K. pneumoniae genome AMR-ML performance is typically ROC/accuracy ~0.85-0.96,
-# but usually under RANDOM splits (population-structure leakage). Shown as context, not a target.
-PUBLISHED_BAND = (0.85, 0.96)
+# NOTE (decision #60): a "published band" of 0.85-0.96 used to be shaded on the ROC-AUC axis here.
+# It was withdrawn: it carried no citation, and the published numbers it was loosely based on
+# (Nguyen et al. 2018) are MIC essential-agreement rates, not ROC-AUC. Shading one metric's range
+# on another metric's axis invited a false cross-study comparison. See REPORT.md section 4.1.
 
 
 def drug_scores(drug, feats, lineage, labels, seed, test_frac):
@@ -70,7 +71,15 @@ def drug_scores(drug, feats, lineage, labels, seed, test_frac):
     iso = IsotonicRegression(out_of_bounds="clip").fit(oof, y[tr])
     xgb_s = iso.transform(base.predict_proba(X[te])[:, 1])
     rule_s = rules_predict(cols, X[te], RULES[drug]).astype(float)
-    return {"y": y[te], "rules": rule_s, "logreg": lr_s, "xgb": xgb_s}
+    # Operating threshold from TRAIN out-of-fold predictions only. Previously the threshold was
+    # picked on the test fold and then scored on that same fold, which made the plotted VME bars
+    # satisfy the 3% target by construction (audit, decision #60).
+    lr_oof = cross_val_predict(
+        LogisticRegression(max_iter=2000, class_weight="balanced", random_state=seed),
+        X[tr], y[tr], groups=groups[tr],
+        cv=StratifiedGroupKFold(4, shuffle=True, random_state=seed),
+        method="predict_proba")[:, 1]
+    return {"y": y[te], "rules": rule_s, "logreg": lr_s, "xgb": xgb_s, "lr_oof": lr_oof, "y_tr": y[tr]}
 
 
 def main() -> int:
@@ -92,7 +101,6 @@ def main() -> int:
     x = np.arange(len(DRUGS))
     ml_auc = [roc_auc_score(S[d]["y"], S[d]["logreg"]) for d in DRUGS]
     rule_auc = [roc_auc_score(S[d]["y"], S[d]["rules"]) for d in DRUGS]
-    ax1.axhspan(*PUBLISHED_BAND, color="gold", alpha=0.25, label="published range (random split)")
     ax1.bar(x - 0.2, ml_auc, 0.4, label="ML (logreg, lineage split)", color="#2c7fb8")
     ax1.bar(x + 0.2, rule_auc, 0.4, label="known-gene rules baseline", color="#c0c0c0")
     ax1.set_xticks(x); ax1.set_xticklabels(names, rotation=25, ha="right")
@@ -101,7 +109,9 @@ def main() -> int:
     for xi, a in zip(x - 0.2, ml_auc):
         ax1.text(xi, a + 0.01, f"{a:.2f}", ha="center", fontsize=8)
 
-    thr = {d: pick_threshold(S[d]["y"], S[d]["logreg"], cfg["evaluation"]["vme_target"]) for d in DRUGS}
+    # honest: threshold from held-out TRAIN predictions, never from the test fold
+    thr = {d: pick_threshold(S[d]["y_tr"], S[d]["lr_oof"], cfg["evaluation"]["vme_target"])
+           for d in DRUGS}
     vme = [((S[d]["y"] == 1) & (S[d]["logreg"] < thr[d])).sum() / max((S[d]["y"] == 1).sum(), 1)
            for d in DRUGS]
     me = [((S[d]["y"] == 0) & (S[d]["logreg"] >= thr[d])).sum() / max((S[d]["y"] == 0).sum(), 1)
@@ -110,7 +120,7 @@ def main() -> int:
     ax2.bar(x + 0.2, me, 0.4, label="major error (false R)", color="#fdae61")
     ax2.axhline(cfg["evaluation"]["vme_target"], ls="--", color="k", lw=1, label="VME target 3%")
     ax2.set_xticks(x); ax2.set_xticklabels(names, rotation=25, ha="right")
-    ax2.set_ylabel("error rate"); ax2.set_title("Clinical errors at VME≤3% operating point")
+    ax2.set_ylabel("error rate"); ax2.set_title("Clinical errors — threshold set on TRAIN, measured on unseen lineages")
     ax2.legend(fontsize=8)
     fig.suptitle("Reading Resistance — honest benchmark (K. pneumoniae, 3,850 genomes)", fontweight="bold")
     fig.tight_layout()

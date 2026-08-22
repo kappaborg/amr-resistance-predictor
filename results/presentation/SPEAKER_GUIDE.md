@@ -248,7 +248,8 @@ build fails. This one design choice is what makes every number afterwards trustw
 split vs our lineage split, the random split inflates AUC by +0.010 on average, up to +0.032 for
 cefoxitin. Now — that's a *small* inflation, and that's actually a beautiful result: it means our features
 encode **mechanism, not ancestry**. A genome resists meropenem because it carries blaKPC, not because of
-its family tree. K-mer models, which secretly encode lineage, lose 0.1–0.2 AUC on this same test. The
+its family tree. K-mer models, which secretly encode lineage, degrade more on this same test — but do NOT
+quote a number: we had one, it was uncited, and we withdrew it (decision #60). The
 small gap is *evidence we learned biology*. But we still report the honest lineage-held-out number
 everywhere — never the inflated one."
 
@@ -635,7 +636,7 @@ also *quantified* the leakage: a random split inflates AUC by only +0.010 on ave
 encode mechanism, not ancestry.
 
 **Q: Why only determinant features? Wouldn't k-mers do better?**
-A: On a random split they look better — and then lose 0.1–0.2 AUC on a lineage split because they encode
+A: On a random split they look better — and then degrade on a lineage split because they encode
 lineage. We chose interpretable, mechanism-based features on purpose. We also tested a graph model that
 would exploit structure; it lost.
 

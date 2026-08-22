@@ -389,10 +389,10 @@ python -m src.app.predict --organism saureus --genome-id 1280.10000</pre>
     <div><p>Same model, scored under a naive <b>random</b> split vs our <b>lineage</b> split:</p>
       <div class="card center" style="margin:1rem 0"><div class="stat" style="font-size:3rem">+0.010<small>mean AUC inflation from a random split (max +0.032, cefoxitin)</small></div></div>
       <p class="lead">The inflation is <b class="k">small</b> — because our features encode <b>mechanism, not ancestry</b>. A genome resists because it carries blaKPC, not because of its clade.</p></div>
-    <div class="card"><h3>Contrast</h3><p>K-mer models — which secretly encode lineage — lose <b class="bad">0.1–0.2 AUC</b> on this same test.</p>
+    <div class="card"><h3>Contrast</h3><p>K-mer models — which secretly encode lineage — degrade on this same test. <b>(We previously quoted a specific figure here; it had no source and was withdrawn.)</b></p>
       <p>Our small gap is itself <b class="k">evidence we learned biology</b>. We still report the honest lineage number everywhere.</p></div>
   </div>
-  <div class="notes"><h4>Say</h4>A beautiful result: the random split only inflates us by +0.010 because our features are mechanistic. K-mer models lose 0.1–0.2. The small gap proves we learned biology, not lineage.</div>
+  <div class="notes"><h4>Say</h4>A beautiful result: the random split only inflates us by +0.010 because our features are mechanistic. K-mer models degrade more, because their features partly encode lineage — but do NOT quote a number for that, we withdrew ours as uncited. The small gap is evidence we learned biology, not lineage.</div>
 </section>
 
 <!-- 19 MODELS -->
@@ -613,7 +613,7 @@ make data · features · split · train · eval · figures        <span class="g
 
 <!-- 32 GNN NEGATIVE -->
 <section class="slide">
-  <p class="kicker">Honest negative — a defense highlight</p><h2>We implemented the SOTA graph model. It lost.</h2>
+  <p class="kicker">Honest negative — a defense highlight</p><h2>We implemented an AMR-GNN-style graph model. It lost.</h2>
   <div class="two wide-r">
     <div class="card" style="border-top:5px solid var(--bad)"><h3>Isolate-similarity GNN</h3><p>Each genome a node, edges by similarity (AMR-GNN style). On identical lineage-grouped folds it was <b class="bad">worse than a plain MLP on all 5 drugs.</b></p></div>
     <div><h3>Why — and we can explain it</h3><p>Our curated determinant features already capture the mechanistic signal cleanly. A population-structure graph only re-adds the <b>lineage information we deliberately avoid</b>, and its smoothing blurs sharp gene→phenotype boundaries.</p>

@@ -29,11 +29,17 @@ OUT_FIG = REPO / "results/figures/risk_coverage.png"
 ORG = "kpneu"
 
 
-def risk_coverage(y, score):
+def risk_coverage(y, score, thr=0.5):
     """Return (coverage grid, overall-error, VME-among-non-deferred) as least-confident strains are
-    progressively deferred. Confidence = |calibrated prob − 0.5|; point call = prob ≥ 0.5."""
-    y = np.asarray(y); pred = (score >= 0.5).astype(int)
-    conf = np.abs(score - 0.5)
+    progressively deferred.
+
+    `thr` is the project's VME-capped operating threshold, NOT 0.5. Using 0.5 here (as this module
+    previously did) described an operating point the project never uses, and produced a VME at full
+    coverage that contradicted the headline table by up to ~28x for cefoxitin (audit, decision #60).
+    Confidence is distance from the decision boundary actually in use.
+    """
+    y = np.asarray(y); pred = (score >= thr).astype(int)
+    conf = np.abs(score - thr)
     order = np.argsort(-conf)                              # most confident first
     yo, po = y[order], pred[order]
     n = len(y)
@@ -65,7 +71,16 @@ def main() -> int:
           "|---|---|---|---|---|---|"]
     for k, d in enumerate(drugs):
         rec = store[(ORG, d)]
-        cov, err, vme = risk_coverage(rec["y"], rec["score"])
+        # Use the project's ACTUAL operating threshold (the VME<=3% point shipped in the model
+        # bundle), not 0.5. Caveat: the bundle threshold was chosen on all-data OOF while these
+        # pooled scores come from nested CV, so the two are close but not identical -- still far
+        # closer than 0.5, which described an operating point the project never uses.
+        try:
+            import joblib
+            thr = float(joblib.load(REPO / f"results/models/{ORG}/{d}.joblib")["threshold"])
+        except Exception:
+            thr = 0.5
+        cov, err, vme = risk_coverage(rec["y"], rec["score"], thr)
         aurc = float(np.sum(np.diff(cov) * (err[:-1] + err[1:]) / 2) / (cov[-1] - cov[0]))  # trapezoid
         i70 = int(np.argmin(np.abs(cov - 0.7)))
         ax = axes[k // ncol][k % ncol]

@@ -40,6 +40,8 @@ os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 import numpy as np
 import pandas as pd
 
+REPEATS = 6   # 6 seeds x 5 folds = 30 paired folds
+
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 GENOMES = REPO / "data/raw/genomes"
@@ -246,18 +248,26 @@ def stage_compare(proteins: dict, emb: dict, model_key: str = "150M", org_key: s
     lin = pd.read_csv(REPO / org["lineages"], dtype={"genome_id": str}
                       ).set_index("genome_id")["lineage"].to_dict()
 
-    def ea_cv(X, y, groups):
+    def ea_cv(X, y, groups, repeats=REPEATS):
+        """Repeated lineage-grouped CV. Returns (mean EA, std EA, mean r, per-fold EA array).
+
+        The per-fold array is retained so that two feature sets evaluated on IDENTICAL folds can be
+        compared with a PAIRED test. Previously only the mean/std were kept, which made the reported
+        Wilcoxon p-values impossible to reproduce (audit, decision #60).
+        """
         eas, rs = [], []
-        skf = StratifiedGroupKFold(5, shuffle=True, random_state=seed)
         yb = (y >= np.median(y)).astype(int)
-        for tr, te in skf.split(X, yb, groups):
-            m = XGBRegressor(n_estimators=400, max_depth=4, learning_rate=0.08, subsample=0.9,
-                             colsample_bytree=0.8, random_state=seed, n_jobs=4).fit(X[tr], y[tr])
-            p = m.predict(X[te])
-            eas.append(np.mean(np.abs(p - y[te]) <= 1.0))
-            if len(set(y[te])) > 1:
-                rs.append(pearsonr(p, y[te])[0])
-        return float(np.mean(eas)), float(np.std(eas)), float(np.mean(rs)) if rs else float("nan")
+        for rep in range(repeats):
+            skf = StratifiedGroupKFold(5, shuffle=True, random_state=seed + rep)
+            for tr, te in skf.split(X, yb, groups):
+                m = XGBRegressor(n_estimators=400, max_depth=4, learning_rate=0.08, subsample=0.9,
+                                 colsample_bytree=0.8, random_state=seed, n_jobs=4).fit(X[tr], y[tr])
+                p = m.predict(X[te])
+                eas.append(float(np.mean(np.abs(p - y[te]) <= 1.0)))
+                if len(set(y[te])) > 1:
+                    rs.append(pearsonr(p, y[te])[0])
+        return (float(np.mean(eas)), float(np.std(eas)),
+                float(np.mean(rs)) if rs else float("nan"), np.array(eas))
 
     results = {}
     print(f"\n[{org['name']}]  {'drug':13s}{'n':>6}  {'determ':>16}{'PLM':>16}{'determ+PLM':>16}")
@@ -275,12 +285,24 @@ def stage_compare(proteins: dict, emb: dict, model_key: str = "150M", org_key: s
         base = ea_cv(Xd, y, groups)
         plm = ea_cv(Xp, y, groups)
         both = ea_cv(np.hstack([Xd, Xp]), y, groups)
-        results[drug] = {"n": len(g), "determ_ea": base[0], "determ_ea_std": base[1],
+        # paired Wilcoxon signed-rank on identical folds — the claim the report makes must be
+        # computed here, or it cannot be made at all.
+        try:
+            from scipy.stats import wilcoxon
+            wstat, pval = wilcoxon(both[3], base[3])
+            pval = float(pval)
+        except Exception:
+            pval = float("nan")
+        results[drug] = {"n": len(g), "n_folds": int(len(base[3])),
+                         "determ_ea": base[0], "determ_ea_std": base[1],
                          "plm_ea": plm[0], "plm_ea_std": plm[1],
                          "both_ea": both[0], "both_ea_std": both[1],
-                         "delta_both_minus_determ": both[0] - base[0]}
+                         "delta_both_minus_determ": both[0] - base[0],
+                         "wilcoxon_p_both_vs_determ": pval,
+                         "fold_ea_determ": base[3].tolist(),
+                         "fold_ea_both": both[3].tolist()}
         print(f"{drug:13s}{len(g):>6}  {base[0]:>7.1%}±{base[1]:<6.1%}{plm[0]:>7.1%}±{plm[1]:<6.1%}"
-              f"{both[0]:>7.1%}±{both[1]:<6.1%}")
+              f"{both[0]:>7.1%}±{both[1]:<6.1%}  Δ={both[0]-base[0]:+.1%} p={pval:.4f}")
 
     name, _, dim = MODELS[model_key]
     md = [f"# Summary #21 — ESM-2 {model_key} for MIC Prediction · {org['name']}\n",

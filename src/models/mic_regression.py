@@ -43,7 +43,21 @@ def _parse_mic(m) -> tuple[float, str] | None:
     """(log2 MIC, censor) from a BV-BRC measurement string. censor: 'right' (>, MIC is a lower bound),
     'left' (<, MIC is an upper bound), or 'exact'."""
     s = str(m).strip()
-    censor = "right" if s.startswith(">") else ("left" if s.startswith("<") else "exact")
+    # STRICT vs NON-STRICT matters and must not be collapsed (audit, decision #60):
+    #   ">=V"  -> true >= V      -> agreement needs pred >= V-1
+    #   ">V"   -> true >= V+1    -> agreement needs pred >= V      (one dilution stricter)
+    # Treating ">" with the ">=" rule scored 40.5% of ciprofloxacin measurements one full
+    # doubling dilution too leniently, inflating Essential Agreement.
+    if s.startswith(">="):
+        censor = "right"
+    elif s.startswith(">"):
+        censor = "right_strict"
+    elif s.startswith("<="):
+        censor = "left"
+    elif s.startswith("<"):
+        censor = "left_strict"
+    else:
+        censor = "exact"
     try:
         v = float(re.sub(r"[<>=]", "", s).strip())
     except ValueError:
@@ -91,10 +105,15 @@ def essential_agreement(pred, true, censor) -> float:
     left-censored (true ≤ V): agrees if pred ≤ V+1."""
     pred, true = np.asarray(pred), np.asarray(true)
     agree = np.abs(pred - true) <= 1.0
-    right = np.array([c == "right" for c in censor])
-    left = np.array([c == "left" for c in censor])
-    agree = np.where(right, pred >= true - 1.0, agree)
-    agree = np.where(left, pred <= true + 1.0, agree)
+    c = np.asarray([str(x) for x in censor])
+    #   >=V : true >= V     -> pred >= V-1
+    #   >V  : true >= V+1   -> pred >= V
+    #   <=V : true <= V     -> pred <= V+1
+    #   <V  : true <= V-1   -> pred <= V
+    agree = np.where(c == "right",        pred >= true - 1.0, agree)
+    agree = np.where(c == "right_strict", pred >= true,       agree)
+    agree = np.where(c == "left",         pred <= true + 1.0, agree)
+    agree = np.where(c == "left_strict",  pred <= true,       agree)
     return float(np.mean(agree))
 
 

@@ -3,7 +3,7 @@
     "n": 3529,
     "auc_random": 0.9780120644602498,
     "auc_lineage": 0.9679854071638649,
-    "auc_temporal": 0.9619264918438984,
+    "auc_temporal": 0.9483006400991122,
     "delta_inflation": 0.010026657296384855,
     "n_lineages": 526
   },
@@ -11,7 +11,7 @@
     "n": 3713,
     "auc_random": 0.9834769758011092,
     "auc_lineage": 0.9812098085003691,
-    "auc_temporal": 0.976939548674024,
+    "auc_temporal": 0.9727034440282742,
     "delta_inflation": 0.0022671673007400583,
     "n_lineages": 543
   },
@@ -19,7 +19,7 @@
     "n": 3176,
     "auc_random": 0.9892636770568772,
     "auc_lineage": 0.9828944276639783,
-    "auc_temporal": 0.9856311044327574,
+    "auc_temporal": 0.9818154985510357,
     "delta_inflation": 0.006369249392898957,
     "n_lineages": 508
   },
@@ -27,7 +27,7 @@
     "n": 2966,
     "auc_random": 0.978304514943473,
     "auc_lineage": 0.9773482695863168,
-    "auc_temporal": 0.9727511535474439,
+    "auc_temporal": 0.9719356754534241,
     "delta_inflation": 0.0009562453571562157,
     "n_lineages": 460
   },
@@ -35,7 +35,7 @@
     "n": 2537,
     "auc_random": 0.9351357480723125,
     "auc_lineage": 0.9034027732780406,
-    "auc_temporal": 0.8987452432376839,
+    "auc_temporal": 0.8960318468640156,
     "delta_inflation": 0.03173297479427184,
     "n_lineages": 337
   }

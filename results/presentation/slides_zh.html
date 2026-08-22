@@ -382,7 +382,7 @@ python -m src.app.predict --organism saureus --genome-id 1280.10000</pre>
     <div><p>同一模型，在朴素<b>随机</b>划分与我们的<b>谱系</b>划分下分别评分：</p>
       <div class="card center" style="margin:1rem 0"><div class="stat" style="font-size:3rem">+0.010<small>随机划分带来的 AUC 平均虚高（最大 +0.032，头孢西丁）</small></div></div>
       <p class="lead" style="max-width:40ch">虚高很<b class="k">小</b>——因为我们的特征编码的是<b>机制，而非血统</b>。一个基因组耐药，是因为它携带 blaKPC，而不是因为它的进化枝。</p></div>
-    <div class="card"><h3>对照</h3><p>k-mer 模型——暗中编码谱系——在同一测试上会损失 <b class="bad">0.1–0.2 AUC</b>。</p>
+    <div class="card"><h3>对照</h3><p>k-mer 模型——暗中编码谱系——在同一测试上会明显退化。<b>（此处原先引用过一个具体数值，因无出处已撤回。）</b></p>
       <p>我们这么小的差距本身就是<b class="k">学到生物学</b>的证据。我们仍处处报告诚实的谱系数字。</p></div>
   </div>
   <div class="notes"><h4>讲</h4>一个漂亮的结果：随机划分只让我们虚高 +0.010，因为我们的特征是机制性的。k-mer 模型会损失 0.1–0.2。这小差距证明我们学到的是生物学，而非谱系。</div>

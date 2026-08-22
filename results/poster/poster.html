@@ -150,7 +150,7 @@
           <tr><td class="l">meropenem</td><td>0.978</td><td>0.968</td><td>+0.010</td></tr>
           <tr><td class="l">ciprofloxacin</td><td>0.989</td><td>0.983</td><td>+0.006</td></tr>
         </table>
-        <p style="margin-top:3mm">Random splits inflate AUC on every drug. The inflation is <b>small because determinant features encode mechanism, not ancestry</b> — unlike k-mer models that lose 0.1–0.2 AUC. The small gap is itself evidence the model learned biology.</p>
+        <p style="margin-top:3mm">Random splits inflate AUC on every drug. The inflation is <b>small because determinant features encode mechanism, not ancestry</b> — unlike k-mer models, whose features partly encode lineage. The small gap is itself evidence the model learned biology.</p>
         <p><span class="pill">FDA/CLSI</span> Bootstrap 95% CIs on VME/ME; benchmarked to VME ≤ 1.5%, ME ≤ 3%, CA ≥ 90%, EA ≥ 90%.</p>
       </div>
       <div class="card">

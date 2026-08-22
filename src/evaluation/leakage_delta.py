@@ -86,7 +86,11 @@ def main() -> int:
         X = feats.loc[g].values.astype(int)
         y = (sub[drug].values == "Resistant").astype(int)
         groups = np.array([lineage[x] for x in g])
-        yr = np.array([years.get(x, -1) for x in g])
+        # Undated genomes must NOT be encoded as -1: that silently places every one of them in the
+        # "past" training arm (they made up 39-56% of it), so the temporal AUC was not a clean
+        # prospective test. Mark them NaN and exclude them from the temporal arm (decision #60);
+        # src/evaluation/temporal_split.py already does this correctly.
+        yr = np.array([years.get(x, np.nan) for x in g], dtype=float)
 
         a_rand = cv_auc(X, y, groups, seed, grouped=False)
         a_lin = cv_auc(X, y, groups, seed, grouped=True)
